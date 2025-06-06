@@ -147,8 +147,8 @@ namespace Epsilon
         }
         void GenArray1DAddrData(NodeStmtAssignArray array, string reg_addr, string reg_data)
         {
-            GenExpr_(array.index1, null);
-            GenExpr_(array.expr, null);
+            GenExpr(array.index1, null);
+            GenExpr(array.expr, null);
             GenPop(reg_data);
             GenPop(reg_addr);
             int relative_location = m_StackSize - VariableLocation(array.ident.Value);
@@ -161,9 +161,9 @@ namespace Epsilon
                 throw new Exception("array is not a 2D array");
 
             string index2 = "$2";
-            GenExpr_(array.index2.Value, null);
-            GenExpr_(array.index1, null);
-            GenExpr_(array.expr, null);
+            GenExpr(array.index2.Value, null);
+            GenExpr(array.index1, null);
+            GenExpr(array.expr, null);
             GenPop(reg_data);
             GenPop(reg_addr);
             GenPop(index2);
@@ -225,8 +225,8 @@ namespace Epsilon
                         string index2 = "$2";
 
                         m_outputcode.Append($"# begin index\n");
-                        GenExpr_(ident.index2.Value, null);
-                        GenExpr_(ident.index1.Value, null);
+                        GenExpr(ident.index2.Value, null);
+                        GenExpr(ident.index1.Value, null);
                         GenPop(reg_addr);
                         GenPop(index2);
                         if (ident.dim2.HasValue)
@@ -257,7 +257,7 @@ namespace Epsilon
                         string reg_addr = "$1";
                         string reg_data = "$2";
                         m_outputcode.Append($"# begin index\n");
-                        GenExpr_(ident.index1.Value, reg_addr);
+                        GenExpr(ident.index1.Value, reg_addr);
                         int relative_location = m_StackSize - VariableLocation(ident.ident.Value);
                         m_outputcode.Append($"# end index\n");
                         m_outputcode.Append($"# begin data\n");
@@ -281,7 +281,7 @@ namespace Epsilon
             }
             else if (term.type == NodeTerm.NodeTermType.paren)
             {
-                GenExpr_(term.paren.expr, DestinationRegister);
+                GenExpr(term.paren.expr, DestinationRegister);
             }
         }
         void GenBinExpr(NodeBinExpr binExpr, string? DestinationRegister)
@@ -290,8 +290,8 @@ namespace Epsilon
             if (binExpr.type == NodeBinExpr.NodeBinExprType.add)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
-                GenExpr_(binExpr.rhs, null);
-                GenExpr_(binExpr.lhs, null);
+                GenExpr(binExpr.rhs, null);
+                GenExpr(binExpr.lhs, null);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
                 m_outputcode.Append($"ADD {source_reg1}, {source_reg1}, {source_reg2}\n");
@@ -301,8 +301,8 @@ namespace Epsilon
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.sub)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
-                GenExpr_(binExpr.rhs, null);
-                GenExpr_(binExpr.lhs, null);
+                GenExpr(binExpr.rhs, null);
+                GenExpr(binExpr.lhs, null);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
                 m_outputcode.Append($"SUB {source_reg1}, {source_reg1}, {source_reg2}\n");
@@ -313,16 +313,11 @@ namespace Epsilon
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.sll)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
-                GenExpr_(binExpr.rhs, null);
-                GenExpr_(binExpr.lhs, null);
+                GenExpr(binExpr.rhs, null);
+                GenExpr(binExpr.lhs, null);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
 
-                string? immed = GenImmedExpr(binExpr.rhs);
-                if (immed != null)
-                    source_reg2 = immed;
-                else
-                    Error("expected immediate", -1);
                 m_outputcode.Append($"SLL {source_reg1}, {source_reg1}, {source_reg2}\n");
                 if (DestinationRegister == null) { GenPush(source_reg1); }
                 else { m_outputcode.Append($"ADDI {DestinationRegister}, {source_reg1}, 0\n"); }
@@ -330,16 +325,11 @@ namespace Epsilon
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.srl)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
-                GenExpr_(binExpr.rhs, null);
-                GenExpr_(binExpr.lhs, null);
+                GenExpr(binExpr.rhs, null);
+                GenExpr(binExpr.lhs, null);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
 
-                string? immed = GenImmedExpr(binExpr.rhs);
-                if (immed != null)
-                    source_reg2 = immed;
-                else
-                    Error("expected immediate", -1);
                 m_outputcode.Append($"SRL {source_reg1}, {source_reg1}, {source_reg2}\n");
                 if (DestinationRegister == null) { GenPush(source_reg1); }
                 else { m_outputcode.Append($"ADDI {DestinationRegister}, {source_reg1}, 0\n"); }
@@ -347,8 +337,8 @@ namespace Epsilon
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.equalequal)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
-                GenExpr_(binExpr.rhs, null);
-                GenExpr_(binExpr.lhs, null);
+                GenExpr(binExpr.rhs, null);
+                GenExpr(binExpr.lhs, null);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
                 string new_label_start = $"TEMP_LABEL{m_labels_count++}_START";
@@ -369,8 +359,8 @@ namespace Epsilon
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.notequal)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
-                GenExpr_(binExpr.rhs, null);
-                GenExpr_(binExpr.lhs, null);
+                GenExpr(binExpr.rhs, null);
+                GenExpr(binExpr.lhs, null);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
                 string new_label_start = $"TEMP_LABEL{m_labels_count++}_START";
@@ -391,8 +381,8 @@ namespace Epsilon
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.lessthan)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
-                GenExpr_(binExpr.rhs, null);
-                GenExpr_(binExpr.lhs, null);
+                GenExpr(binExpr.rhs, null);
+                GenExpr(binExpr.lhs, null);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
                 m_outputcode.Append($"SLT {source_reg1}, {source_reg1}, {source_reg2}\n");
@@ -402,8 +392,8 @@ namespace Epsilon
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.greaterthan)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
-                GenExpr_(binExpr.rhs, null);
-                GenExpr_(binExpr.lhs, null);
+                GenExpr(binExpr.rhs, null);
+                GenExpr(binExpr.lhs, null);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
                 m_outputcode.Append($"SGT {source_reg1}, {source_reg1}, {source_reg2}\n");
@@ -413,8 +403,8 @@ namespace Epsilon
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.and)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
-                GenExpr_(binExpr.rhs, null);
-                GenExpr_(binExpr.lhs, null);
+                GenExpr(binExpr.rhs, null);
+                GenExpr(binExpr.lhs, null);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
                 m_outputcode.Append($"AND {source_reg1}, {source_reg1}, {source_reg2}\n");
@@ -424,8 +414,8 @@ namespace Epsilon
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.or)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
-                GenExpr_(binExpr.rhs, null);
-                GenExpr_(binExpr.lhs, null);
+                GenExpr(binExpr.rhs, null);
+                GenExpr(binExpr.lhs, null);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
                 m_outputcode.Append($"OR {source_reg1}, {source_reg1}, {source_reg2}\n");
@@ -435,8 +425,8 @@ namespace Epsilon
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.xor)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
-                GenExpr_(binExpr.rhs, null);
-                GenExpr_(binExpr.lhs, null);
+                GenExpr(binExpr.rhs, null);
+                GenExpr(binExpr.lhs, null);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
                 m_outputcode.Append($"XOR {source_reg1}, {source_reg1}, {source_reg2}\n");
@@ -448,7 +438,7 @@ namespace Epsilon
                 Error("expected binary operator", -1);
             }
         }
-        void GenExpr_(NodeExpr expr, string? DestinationRegister)
+        void GenExpr(NodeExpr expr, string? DestinationRegister)
         {
             if (expr.type == NodeExpr.NodeExprType.term)
             {
@@ -502,7 +492,7 @@ namespace Epsilon
         {
             for (int i = 0; i < init.Count; i++)
             {
-                GenExpr_(init[i], null);
+                GenExpr(init[i], null);
             }
         }
         void GenArrayInit2D(List<List<NodeExpr>> init)
@@ -523,7 +513,7 @@ namespace Epsilon
                 }
                 else
                 {
-                    GenExpr_(declare.singlevar.expr, null);
+                    GenExpr(declare.singlevar.expr, null);
                     vars.m_vars.Add(new(ident.Value, 1));
                 }
             }
@@ -610,7 +600,7 @@ namespace Epsilon
                 {
                     Error($"variable {ident.Value} is not declared", ident.Line);
                 }
-                GenExpr_(assign.singlevar.expr, reg);
+                GenExpr(assign.singlevar.expr, reg);
                 int relative_location = m_StackSize - VariableLocation(ident.Value);
                 m_outputcode.Append($"SW {reg}, {relative_location}($sp)\n");
             }
@@ -635,7 +625,7 @@ namespace Epsilon
             {
                 string reg = "$1";
                 string label = $"LABEL{m_labels_count++}_elifs";
-                GenExpr_(elifs.elif.pred.cond, reg);
+                GenExpr(elifs.elif.pred.cond, reg);
                 m_outputcode.Append($"BEQ $1, $zero, {label}\n");
                 GenScope(elifs.elif.pred.scope);
                 m_outputcode.Append($"J {label_end}\n");
@@ -667,7 +657,7 @@ namespace Epsilon
             string label = $"LABEL{m_labels_count++}_elifs";
 
             m_outputcode.Append($"{label_start}:\n");
-            GenExpr_(iff.pred.cond, reg);
+            GenExpr(iff.pred.cond, reg);
             m_outputcode.Append($"BEQ $1, $zero, {label}\n");
             GenScope(iff.pred.scope);
             if (iff.elifs.HasValue)
@@ -705,7 +695,7 @@ namespace Epsilon
 
                 m_outputcode.Append($"{label_start}:\n");
                 string reg = "$1";
-                GenExpr_(forr.pred.cond.Value.cond, reg);
+                GenExpr(forr.pred.cond.Value.cond, reg);
                 m_outputcode.Append($"BEQ $1, $zero, {label_end}\n");
                 m_outputcode.Append("# end condition\n");
                 m_scopestart.Push(label_update);
@@ -775,7 +765,7 @@ namespace Epsilon
 
             m_outputcode.Append($"{label_start}:\n");
             string reg = "$1";
-            GenExpr_(whilee.cond, reg);
+            GenExpr(whilee.cond, reg);
             m_outputcode.Append($"BEQ $1, $zero, {label_end}\n");
             m_outputcode.Append("# end condition\n");
             m_scopestart.Push(label_start);
@@ -802,7 +792,7 @@ namespace Epsilon
         }
         void GenStmtExit(NodeStmtExit exit)
         {
-            GenExpr_(exit.expr, "$1");
+            GenExpr(exit.expr, "$1");
             m_outputcode.Append("HLT\n");
         }
         void GenStmtCleanStack(NodeStmtCleanStack CleanStack)
