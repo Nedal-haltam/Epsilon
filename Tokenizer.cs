@@ -81,17 +81,26 @@ namespace Epsilon
             }
             return null;
         }
+        bool Peek(string type, int offset = 0)
+        {
+            for (int i = 0; i < type.Length; i++)
+            {
+                if (!Peek(type[i], offset + i).HasValue)
+                    return false;
+            }
+            return true;
+        }
         char Consume()
         {
             return m_thecode.ElementAt(m_curr_index++);
         }
         bool IsComment()
         {
-            return Peek('/').HasValue && Peek('/', 1).HasValue;
+            return Peek("//");
         }
         bool IsMacro()
         {
-            if (Peek('#', 0).HasValue && Peek('d', 1).HasValue && Peek('e', 2).HasValue && Peek('f', 3).HasValue && Peek('i', 4).HasValue && Peek('n', 5).HasValue && Peek('e', 6).HasValue)
+            if (Peek("#define"))
             {
                 Consume();
                 Consume();
@@ -196,15 +205,17 @@ namespace Epsilon
                     }
                 }
 
-                // multi-token operators
-                else if (Peek('/').HasValue && Peek('*', 1).HasValue)
+                // multi-characters tokens
+                else if (Peek("/*"))
                 {
                     Consume();
                     Consume();
                     while (Peek().HasValue)
                     {
-                        if (Peek('*').HasValue && Peek('/', 1).HasValue)
+                        if (Peek("*/"))
                         {
+                            Consume();
+                            Consume();
                             break;
                         }
                         if (Peek('\n').HasValue)
@@ -213,40 +224,32 @@ namespace Epsilon
                         }
                         Consume();
                     }
-                    if (Peek().HasValue)
-                    {
-                        Consume();
-                    }
-                    if (Peek().HasValue)
-                    {
-                        Consume();
-                    }
                 }
-                else if ((Peek('<').HasValue && Peek('<', 1).HasValue))
+                else if (Peek("<<"))
                 {
                     buffer.Append(Consume());
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Sll, Line = line });
                 }
-                else if ((Peek('>').HasValue && Peek('>', 1).HasValue))
+                else if (Peek(">>"))
                 {
                     buffer.Append(Consume());
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Srl, Line = line });
                 }
-                else if (Peek('=').HasValue && Peek('=', 1).HasValue)
+                else if (Peek("=="))
                 {
                     buffer.Append(Consume());
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.EqualEqual, Line = line });
                 }
-                else if (Peek('!').HasValue && Peek('=', 1).HasValue)
+                else if (Peek("!="))
                 {
                     buffer.Append(Consume());
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.NotEqual, Line = line });
                 }
-                
+                // single-character tokens
                 else if (tokens.TryGetValue(curr_token.ToString(), out TokenType tt))
                 {
                     buffer.Append(Consume());
@@ -331,7 +334,6 @@ namespace Epsilon
             m_curr_index = 0;
             return m_tokens;
         }
-
     }
 }
 
