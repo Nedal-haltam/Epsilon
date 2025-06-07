@@ -30,7 +30,7 @@ namespace Epsilon
     }
     class Generator
     {
-        public readonly int STACK_CAPACITY = 100;
+        public readonly int STACK_CAPACITY = 500;
         public NodeProg m_prog;
         public readonly StringBuilder m_outputcode = new();
         public Vars vars = new();
@@ -200,6 +200,7 @@ namespace Epsilon
         }
         void GenArrayAddr(List<NodeExpr> indexes, Token ident)
         {
+            m_outputcode.AppendLine($"# begin array address");
             string reg_addr = "$1";
             List<NodeTermIntLit> dims = m_Arraydims[ident.Value];
             Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal\n");
@@ -215,6 +216,7 @@ namespace Epsilon
             m_outputcode.Append($"ADDI {reg_addr}, {reg_addr}, {relative_location}\n");
             m_outputcode.Append($"ADD {reg_addr}, {reg_addr}, $sp\n");
             GenPush(reg_addr);
+            m_outputcode.AppendLine($"# end array address");
         }
         void GenTerm(NodeTerm term)
         {
