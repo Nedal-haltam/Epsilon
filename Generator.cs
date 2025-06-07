@@ -269,7 +269,6 @@ namespace Epsilon
         }
         void GenBinExpr(NodeBinExpr binExpr)
         {
-            // TODO: add an instruction to ISA to enable us to evaluate (`==`, `!=`), like for example (seq, sneq) -> (set if equal, set if not equal)
             if (binExpr.type == NodeBinExpr.NodeBinExprType.add)
             {
                 string source_reg1 = "$1", source_reg2 = "$2";
@@ -298,7 +297,6 @@ namespace Epsilon
                 GenExpr(binExpr.lhs);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
-
                 m_outputcode.Append($"SLL {source_reg1}, {source_reg1}, {source_reg2}\n");
                 GenPush(source_reg1);
             }
@@ -309,7 +307,6 @@ namespace Epsilon
                 GenExpr(binExpr.lhs);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
-
                 m_outputcode.Append($"SRL {source_reg1}, {source_reg1}, {source_reg2}\n");
                 GenPush(source_reg1);
             }
@@ -320,18 +317,7 @@ namespace Epsilon
                 GenExpr(binExpr.lhs);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
-                string new_label_start = $"TEMP_LABEL{m_labels_count++}_START";
-                string new_label_else = $"TEMP_LABEL{m_labels_count++}_ELSE";
-                string new_label_end = $"TEMP_LABEL{m_labels_count++}_END";
-                // TODO: optimize the comparison by adding seq, sneq instructions
-                m_outputcode.Append($"{new_label_start}:\n");
-                m_outputcode.Append($"SUB {source_reg1}, {source_reg1}, {source_reg2}\n");
-                m_outputcode.Append($"BEQ {source_reg1}, $zero, {new_label_else}\n");
-                m_outputcode.Append($"ADDI {source_reg1}, $zero, 0\n");
-                m_outputcode.Append($"J {new_label_end}\n");
-                m_outputcode.Append($"{new_label_else}:\n");
-                m_outputcode.Append($"ADDI {source_reg1}, $zero, 1\n");
-                m_outputcode.Append($"{new_label_end}:\n");
+                m_outputcode.Append($"SEQ {source_reg1}, {source_reg1}, {source_reg2}\n");
                 GenPush(source_reg1);
             }
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.notequal)
@@ -341,18 +327,7 @@ namespace Epsilon
                 GenExpr(binExpr.lhs);
                 GenPop(source_reg1);
                 GenPop(source_reg2);
-                string new_label_start = $"TEMP_LABEL{m_labels_count++}_START";
-                string new_label_else = $"TEMP_LABEL{m_labels_count++}_ELSE";
-                string new_label_end = $"TEMP_LABEL{m_labels_count++}_END";
-                // TODO: optimize the comparison by adding seq, sneq instructions
-                m_outputcode.Append($"{new_label_start}:\n");
-                m_outputcode.Append($"SUB {source_reg1}, {source_reg1}, {source_reg2}\n");
-                m_outputcode.Append($"BEQ {source_reg1}, $zero, {new_label_else}\n");
-                m_outputcode.Append($"ADDI {source_reg1}, $zero, 1\n");
-                m_outputcode.Append($"J {new_label_end}\n");
-                m_outputcode.Append($"{new_label_else}:\n");
-                m_outputcode.Append($"ADDI {source_reg1}, $zero, 0\n");
-                m_outputcode.Append($"{new_label_end}:\n");
+                m_outputcode.Append($"SNE {source_reg1}, {source_reg1}, {source_reg2}\n");
                 GenPush(source_reg1);
             }
             else if (binExpr.type == NodeBinExpr.NodeBinExprType.lessthan)
