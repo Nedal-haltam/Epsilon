@@ -12,7 +12,7 @@ namespace Epsilon
         private List<Token> m_tokens;
         private int m_curr_index = 0;
         private bool ExitScope = false;
-        private Dictionary<string, List<NodeTermIntLit>> m_Arraydims = [];
+        public Dictionary<string, List<NodeTermIntLit>> m_Arraydims = [];
         public Parser(List<Token> tokens)
         {
             m_tokens = tokens;
@@ -138,15 +138,10 @@ namespace Epsilon
                 term.type = NodeTerm.NodeTermType.ident;
                 term.ident = new();
                 term.ident.ident = consume();
-                term.ident.index1 = null;
-                term.ident.index2 = null;
-                if (peek(TokenType.OpenSquare).HasValue)
-                    term.ident.index1 = parseindex();
-                if (peek(TokenType.OpenSquare).HasValue)
+                term.ident.indexes = [];
+                while (peek(TokenType.OpenSquare).HasValue)
                 {
-                    term.ident.index2 = parseindex();
-                    term.ident.dim1 = m_Arraydims[term.ident.ident.Value][0];
-                    term.ident.dim2 = m_Arraydims[term.ident.ident.Value][1];
+                    term.ident.indexes.Add(parseindex().Value);
                 }
                 return term;
             }
@@ -716,32 +711,30 @@ namespace Epsilon
         {
             NodeStmtDeclareArray declare = new();
             declare.ident = ident;
-            declare.values1 = [];
-            declare.values2 = [];
-            if (peek(TokenType.OpenSquare).HasValue)
+            declare.values = [];
+            while (peek(TokenType.OpenSquare).HasValue)
             {
                 Token dim = parsedimension();
-                declare.dim1 = new() { intlit = dim };
+                if (!m_Arraydims.ContainsKey(declare.ident.Value))
+                    m_Arraydims.Add(declare.ident.Value, []);
+                m_Arraydims[declare.ident.Value].Add(new() { intlit = dim });
             }
-            if (peek(TokenType.OpenSquare).HasValue)
-            {
-                Token dim = parsedimension();
-                declare.dim2 = new() { intlit = dim };
-                m_Arraydims.Add(ident.Value, [declare.dim1, declare.dim2.Value]);
-            }
-
-            int dim1 = Convert.ToInt32(declare.dim1.intlit.Value);
-            if (peek(TokenType.Equal).HasValue)
-            {
-                consume();
-                if (declare.dim2.HasValue)
-                {
-                    int dim2 = Convert.ToInt32(declare.dim2.Value.intlit.Value);
-                    declare.values2 = ParseArrayInit2D(dim1, dim2);
-                }
-                else
-                    declare.values1 = ParseArrayInit1D(dim1);
-            }
+            //if (peek(TokenType.Equal).HasValue)
+            //{
+            //    consume();
+            //    // TODO: support array initialization for an N-dimensional arrays
+            //    if (declare.dims.Count == 1)
+            //    {
+            //        int dim1 = Convert.ToInt32(declare.dims[0].intlit.Value);
+            //        ParseArrayInit1D(dim1).ForEach(x => declare.values.Add(x));
+            //    }
+            //    else if (declare.dims.Count == 2)
+            //    {
+            //        int dim1 = Convert.ToInt32(declare.dims[0].intlit.Value);
+            //        int dim2 = Convert.ToInt32(declare.dims[1].intlit.Value);
+            //        ParseArrayInit2D(dim1, dim2).ForEach(x => x.ForEach(y => declare.values.Add(y)));
+            //    }
+            //}
 
             try_consume_err(TokenType.SemiColon);
             NodeStmt stmt = new();
@@ -765,7 +758,7 @@ namespace Epsilon
                 ErrorExpected("expression(parseassignsinglevar)");
             }
             try_consume_err(TokenType.SemiColon);
-            NodeStmt stmt = new NodeStmt();
+            NodeStmt stmt = new();
             stmt.type = NodeStmt.NodeStmtType.assign;
             stmt.assign.type = NodeStmtAssign.NodeStmtAssignType.SingleVar;
             stmt.assign.singlevar = singlevar;
@@ -775,20 +768,9 @@ namespace Epsilon
         {
             NodeStmtAssignArray array = new();
             array.ident = ident;
-            if (peek(TokenType.OpenSquare).HasValue)
+            while (peek(TokenType.OpenSquare).HasValue)
             {
-                array.index1 = parseindex().Value;
-            }
-
-            if (peek(TokenType.OpenSquare).HasValue)
-            {
-                array.index2 = parseindex().Value;
-                if (!m_Arraydims.ContainsKey(array.ident.Value))
-                {
-                    ErrorExpected($"undeclared identifier : {array.ident.Value}");
-                }
-                array.dim1 = m_Arraydims[array.ident.Value][0];
-                array.dim2 = m_Arraydims[array.ident.Value][1];
+                array.indexes.Add(parseindex().Value);
             }
 
             try_consume_err(TokenType.Equal);
@@ -802,7 +784,7 @@ namespace Epsilon
                 ErrorExpected("expression(parseassignarray)");
             }
             try_consume_err(TokenType.SemiColon);
-            NodeStmt stmt = new NodeStmt();
+            NodeStmt stmt = new();
             stmt.type = NodeStmt.NodeStmtType.assign;
             stmt.assign.type = NodeStmtAssign.NodeStmtAssignType.Array;
             stmt.assign.array = array;
@@ -810,6 +792,7 @@ namespace Epsilon
         }
         NodeStmt? ParseStmt()
         {
+            // TODO: review from here
             if (IsStmtDeclare())
             {
                 Token vartype = consume();
@@ -853,7 +836,7 @@ namespace Epsilon
             else if (IsStmtIF())
             {
                 consume();
-                NodeStmtIF iff = new NodeStmtIF();
+                NodeStmtIF iff = new();
                 NodeIfPredicate? pred = ParseIfPredicate();
                 if (pred.HasValue)
                 {
@@ -865,7 +848,7 @@ namespace Epsilon
                 }
                 NodeIfElifs? elifs = ParseElifs();
                 iff.elifs = elifs;
-                NodeStmt stmt = new NodeStmt();
+                NodeStmt stmt = new();
                 stmt.type = NodeStmt.NodeStmtType.If;
                 stmt.If = iff;
                 return stmt;
@@ -873,7 +856,7 @@ namespace Epsilon
             else if (IsStmtFor())
             {
                 consume();
-                NodeStmtFor forr = new NodeStmtFor();
+                NodeStmtFor forr = new();
                 NodeForPredicate? pred = ParseForPredicate();
                 if (pred.HasValue)
                 {
@@ -883,7 +866,7 @@ namespace Epsilon
                 {
                     return null;
                 }
-                NodeStmt stmt = new NodeStmt();
+                NodeStmt stmt = new();
                 stmt.type = NodeStmt.NodeStmtType.For;
                 stmt.For = forr;
                 return stmt;
@@ -934,7 +917,7 @@ namespace Epsilon
             {
                 consume();
                 consume();
-                NodeStmtExit Return = new NodeStmtExit();
+                NodeStmtExit Return = new();
                 NodeExpr? expr = ParseExpr();
                 if (expr.HasValue)
                 {
@@ -946,7 +929,7 @@ namespace Epsilon
                 }
                 try_consume_err(TokenType.CloseParen);
                 try_consume_err(TokenType.SemiColon);
-                NodeStmt stmt = new NodeStmt();
+                NodeStmt stmt = new();
                 stmt.type = NodeStmt.NodeStmtType.Exit;
                 stmt.Exit = Return;
                 ExitScope = true;
@@ -959,7 +942,7 @@ namespace Epsilon
 
         public NodeProg ParseProg()
         {
-            NodeProg prog = new NodeProg();
+            NodeProg prog = new();
             
             while (peek().HasValue)
             {
@@ -974,7 +957,9 @@ namespace Epsilon
                     }
                 }
                 else
+                {
                     ErrorExpected($"statement");
+                }
             }
             return prog;
         }

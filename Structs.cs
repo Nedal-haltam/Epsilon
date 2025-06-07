@@ -67,15 +67,10 @@ namespace Epsilon
     public struct NodeStmtDeclareArray
     {
         public Token ident;
-        public NodeTermIntLit dim1;
-        public NodeTermIntLit? dim2;
-        public List<NodeExpr> values1;
-        public List<List<NodeExpr>> values2;
+        public List<NodeExpr> values;
         public NodeStmtDeclareArray()
         {
-            dim2 = null;
-            values1 = [];
-            values2 = [];
+            values = [];
         }
     }
     public struct NodeStmtAssignSingleVar
@@ -86,16 +81,11 @@ namespace Epsilon
     public struct NodeStmtAssignArray
     {
         public Token ident;
-        public NodeExpr index1;
-        public NodeExpr? index2;
+        public List<NodeExpr> indexes;
         public NodeExpr expr;
-        public NodeTermIntLit? dim1;
-        public NodeTermIntLit? dim2;
         public NodeStmtAssignArray()
         {
-            index2 = null;
-            dim1 = null;
-            dim2 = null;
+            indexes = [];
         }
     }
 
@@ -238,14 +228,10 @@ namespace Epsilon
     public class NodeTermIdent
     {
         public Token ident;
-        public NodeExpr? index1;
-        public NodeExpr? index2;
-        public NodeTermIntLit? dim1;
-        public NodeTermIntLit? dim2;
+        public List<NodeExpr> indexes;
         public NodeTermIdent()
         {
-            index1 = null;
-            index2 = null;
+            indexes = [];
         }
     }
     public class NodeTermParen
@@ -258,7 +244,7 @@ namespace Epsilon
     {
         public enum NodeBinExprType
         {
-            add, sub, sll, srl, equalequal, notequal, lessthan, greaterthan, and, or, xor
+            add, sub, sll, srl, equalequal, notequal, lessthan, greaterthan, and, or, xor, mult
         }
         public NodeBinExprType type;
         public NodeExpr lhs;

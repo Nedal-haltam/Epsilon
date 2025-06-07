@@ -22,7 +22,7 @@ namespace Epsilon
             List<Token> TokenizedProgram = Tokenizer.Tokenize();
             Parser Parser = new(TokenizedProgram);
             NodeProg ParsedProgram = Parser.ParseProg();
-            MIPSGenerator Generator = new(ParsedProgram);
+            MIPSGenerator Generator = new(ParsedProgram, Parser.m_Arraydims);
             StringBuilder GeneratedProgram = Generator.GenProg();
             if (OutputFilePath == null)
             {
