@@ -463,11 +463,17 @@ namespace Epsilon
             pred.scope = scope;
             return pred;
         }
-        List<NodeStmt> ParseDeclareSingleVar(Token ident)
+        List<NodeStmt> ParseDeclareSingleVar()
         {
             List<NodeStmt> stmts = [];
             do
             {
+                if (!peek(TokenType.Ident).HasValue)
+                {
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"expected identifier\n");
+                    Environment.Exit(1);
+                }
+                Token ident = consume();
                 NodeStmtDeclareSingleVar declare = new();
                 declare.ident = ident;
                 if (peek(TokenType.Equal).HasValue)
@@ -563,10 +569,10 @@ namespace Epsilon
             }
             return values;
         }
-        NodeStmt ParseDeclareArray(Token ident)
+        NodeStmt ParseDeclareArray()
         {
             NodeStmtDeclareArray declare = new();
-            declare.ident = ident;
+            declare.ident = consume();
             declare.values = [];
             if (!m_Arraydims.ContainsKey(declare.ident.Value))
                 m_Arraydims.Add(declare.ident.Value, []);
@@ -641,14 +647,13 @@ namespace Epsilon
                 {
                     ErrorExpected("variable type");
                 }
-                Token ident = consume();
                 if (peek(TokenType.OpenSquare).HasValue)
                 {
-                    return [ParseDeclareArray(ident)];
+                    return [ParseDeclareArray()];
                 }
                 else
                 {
-                    return ParseDeclareSingleVar(ident);
+                    return ParseDeclareSingleVar();
                 }
             }
             else if (IsStmtAssign())
