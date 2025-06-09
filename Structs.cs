@@ -147,7 +147,7 @@ namespace Epsilon
     {
         public NodeForInit? init;
         public NodeForCond? cond;
-        public NodeForUpdate? udpate;
+        public NodeForUpdate udpate;
         public NodeScope scope;
     }
     public struct NodeForInit

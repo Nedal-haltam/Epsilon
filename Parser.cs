@@ -3,6 +3,7 @@
 
 
 
+using System.Linq.Expressions;
 using System.Reflection.Metadata.Ecma335;
 
 namespace Epsilon
@@ -31,6 +32,14 @@ namespace Epsilon
             if (token.HasValue && token.Value.Type == type)
             {
                 return token;
+            }
+            return null;
+        }
+        Token? peekandconsume(TokenType type, int offset = 0)
+        {
+            if (peek(type, offset).HasValue)
+            {
+                return consume();
             }
             return null;
         }
@@ -105,15 +114,20 @@ namespace Epsilon
                    peek(TokenType.LessThan).HasValue ||
                    peek(TokenType.GreaterThan).HasValue;
         }
-
-        NodeExpr? parseindex()
+        NodeExpr ExpectedExpression(NodeExpr? expr)
+        {
+            if (!expr.HasValue)
+            {
+                Shartilities.Log(Shartilities.LogType.ERROR, $"expected expression\n");
+                Environment.Exit(1);
+                return new();
+            }
+            return expr.Value;
+        }
+        NodeExpr parseindex()
         {
             consume();
-            NodeExpr? index = ParseExpr();
-            if (!index.HasValue)
-            {
-                ErrorExpected("expression(parseindex)");
-            }
+            NodeExpr index = ExpectedExpression(ParseExpr());
             try_consume_err(TokenType.CloseSquare);
             return index;
         }
@@ -140,26 +154,21 @@ namespace Epsilon
                 term.ident.indexes = [];
                 while (peek(TokenType.OpenSquare).HasValue)
                 {
-                    term.ident.indexes.Add(parseindex().Value);
+                    term.ident.indexes.Add(parseindex());
                 }
                 return term;
             }
             else if (peek(TokenType.OpenParen).HasValue)
             {
                 consume();
-                NodeExpr? expr = ParseExpr();
-                if (!expr.HasValue)
-                {
-                    ErrorExpected("expression(parseterm)");
-                }
+                NodeExpr expr = ExpectedExpression(ParseExpr());
                 try_consume_err(TokenType.CloseParen);
                 NodeTermParen paren = new NodeTermParen();
-                paren.expr = expr.Value;
+                paren.expr = expr;
                 term.type = NodeTerm.NodeTermType.paren;
                 term.paren = paren;
                 return term;
             }
-
             return null;
         }
 
@@ -181,10 +190,11 @@ namespace Epsilon
                 case TokenType.Plus:
                 case TokenType.Minus:
                     return 2;
-                default: return null;
+                default:
+                    return null;
             }
         }
-        NodeBinExpr.NodeBinExprType? GetOpType(TokenType op)
+        NodeBinExpr.NodeBinExprType GetOpType(TokenType op)
         {
             if (op == TokenType.Plus)
                 return NodeBinExpr.NodeBinExprType.add;
@@ -208,7 +218,9 @@ namespace Epsilon
                 return NodeBinExpr.NodeBinExprType.or;
             if (op == TokenType.Xor)
                 return NodeBinExpr.NodeBinExprType.xor;
-            return null;
+            Shartilities.Log(Shartilities.LogType.ERROR, $"inavalid operation `{op.ToString()}`");
+            Environment.Exit(1);
+            return 0;
         }
         bool IsExprIntLit(NodeExpr expr)
         {
@@ -216,14 +228,13 @@ namespace Epsilon
         }
         NodeExpr? ParseExpr(int min_prec = 0)
         {
-            NodeTerm? Termlhs = ParseTerm();
-            if (!Termlhs.HasValue)
-            {
+            NodeTerm? _Termlhs = ParseTerm();
+            if (!_Termlhs.HasValue)
                 return null;
-            }
+            NodeTerm Termlhs = _Termlhs.Value;
             NodeExpr exprlhs = new NodeExpr();
             exprlhs.type = NodeExpr.NodeExprType.term;
-            exprlhs.term = Termlhs.Value;
+            exprlhs.term = Termlhs;
 
             if (IsBinExpr())
             {
@@ -234,40 +245,25 @@ namespace Epsilon
                     if (curr_tok.HasValue)
                     {
                         prec = GetPrec(curr_tok.Value.Type);
-                        if (!prec.HasValue || prec < min_prec)
-                        {
-                            break;
-                        }
+                        if (!prec.HasValue || prec < min_prec) break;
                     }
-                    else
-                    {
-                        break;
-                    }
+                    else break;
                     Token Operator = consume();
                     int next_min_prec = prec.Value + 1;
-                    NodeExpr? expr_rhs = ParseExpr(next_min_prec);
-                    if (!expr_rhs.HasValue)
-                    {
-                        ErrorExpected("expression(parseexpr)");
-                    }
+                    NodeExpr expr_rhs = ExpectedExpression(ParseExpr(next_min_prec));
                     NodeBinExpr expr = new NodeBinExpr();
                     NodeExpr expr_lhs2 = new NodeExpr();
                     expr_lhs2 = exprlhs;
-                    NodeBinExpr.NodeBinExprType? optype = GetOpType(Operator.Type);
-                    if (optype.HasValue)
-                        expr.type = optype.Value;
-                    else
-                        return null;
+                    NodeBinExpr.NodeBinExprType optype = GetOpType(Operator.Type);
+                    expr.type = optype;
                     expr.lhs = expr_lhs2;
-                    expr.rhs = expr_rhs.Value;
+                    expr.rhs = expr_rhs;
 
                     if (IsExprIntLit(expr.lhs) && IsExprIntLit(expr.rhs))
                     {
                         string constant1 = expr.lhs.term.intlit.intlit.Value;
                         string constant2 = expr.rhs.term.intlit.intlit.Value;
-                        string? value = Generator.GetImmedOperation(constant1, constant2, expr.type);
-                        if (value == null)
-                            return null;
+                        string value = Generator.GetImmedOperation(constant1, constant2, expr.type);
                         NodeTerm term = new();
                         term.type = NodeTerm.NodeTermType.intlit;
                         term.intlit.intlit.Value = value;
@@ -287,106 +283,70 @@ namespace Epsilon
             else
             {
                 exprlhs.type = NodeExpr.NodeExprType.term;
-                exprlhs.term = Termlhs.Value;
+                exprlhs.term = Termlhs;
 
                 return exprlhs;
             }
         }
 
-        NodeScope? ParseScope()
+        NodeScope ParseScope()
         {
             NodeScope scope = new NodeScope();
+            scope.stmts = [];
             if (peek(TokenType.OpenCurly).HasValue)
             {
                 consume();
-                scope.stmts = [];
                 while (!peek(TokenType.CloseCurly).HasValue)
                 {
-                    NodeStmt? stmt;
-                    stmt = ParseStmt();
-                    if (!stmt.HasValue)
-                    {
-                        return null;
-                    }
-                    scope.stmts.Add(stmt.Value);
+                    List<NodeStmt> stmt = ParseStmt();
+                    scope.stmts.AddRange(stmt);
                 }
                 try_consume_err(TokenType.CloseCurly);
                 return scope;
             }
             else
             {
-                NodeStmt? stmt = ParseStmt();
-                if (stmt.HasValue)
-                {
-                    scope.stmts = [];
-                    scope.stmts.Add(stmt.Value);
-                    return scope;
-                }
-                else
-                {
-                    return null;
-                }
+                List<NodeStmt> stmt = ParseStmt();
+                scope.stmts.AddRange(stmt);
+                return scope;
             }
         }
-
         NodeIfElifs? ParseElifs()
         {
             NodeIfElifs elifs = new NodeIfElifs();
             if (peek(TokenType.Elif).HasValue)
             {
                 consume();
-                NodeIfPredicate? pred = ParseIfPredicate();
-                if (!pred.HasValue)
-                {
-                    ErrorExpected("predicate");
-                }
+                NodeIfPredicate pred = ParseIfPredicate();
                 elifs.type = NodeIfElifs.NodeIfElifsType.elif;
                 elifs.elif = new NodeElif();
-                elifs.elif.pred = pred.Value;
+                elifs.elif.pred = pred;
                 elifs.elif.elifs = ParseElifs();
                 return elifs;
             }
             else if (peek(TokenType.Else).HasValue)
             {
                 consume();
-                NodeScope? scope = ParseScope();
-                if (!scope.HasValue)
-                {
-                    ErrorExpected("scope");
-                }
+                NodeScope scope = ParseScope();
                 elifs.type = NodeIfElifs.NodeIfElifsType.elsee;
                 elifs.elsee = new NodeElse();
-                elifs.elsee.scope = scope.Value;
+                elifs.elsee.scope = scope;
                 return elifs;
             }
             return null;
         }
 
-        NodeIfPredicate? ParseIfPredicate()
+        NodeIfPredicate ParseIfPredicate()
         {
             if (!peek(TokenType.OpenParen).HasValue)
-                return null;
+                Shartilities.Log(Shartilities.LogType.ERROR, $"expected `(` after `if`\n");
             consume();
             NodeIfPredicate pred = new NodeIfPredicate();
-            NodeExpr? cond = ParseExpr();
-            if (cond.HasValue)
-            {
-                pred.cond = cond.Value;
-            }
-            else
-            {
-                return null;
-            }
+            NodeExpr cond = ExpectedExpression(ParseExpr());
+            pred.cond = cond;
             try_consume_err(TokenType.CloseParen);
-            NodeScope? scope = ParseScope();
-            if (scope.HasValue)
-            {
-                pred.scope = scope.Value;
-            }
-            else
-            {
-                return null;
-            }
+            NodeScope scope = ParseScope();
+            pred.scope = scope;
             return pred;
         }
         NodeForInit? ParseForInit()
@@ -403,19 +363,13 @@ namespace Epsilon
                 if (peek(TokenType.Equal).HasValue)
                 {
                     consume();
-                    NodeExpr? expr = ParseExpr();
-                    if (!expr.HasValue)
-                    {
-                        ErrorExpected("expression(parseforinit)");
-                    }
-                    declare.expr = expr.Value;
+                    NodeExpr expr = ExpectedExpression(ParseExpr());
+                    declare.expr = expr;
                 }
                 else
                 {
-                    NodeExpr expr = new()
-                    {
-                        type = NodeExpr.NodeExprType.term
-                    };
+                    NodeExpr expr = new();
+                    expr.type = NodeExpr.NodeExprType.term;
                     expr.term.type = NodeTerm.NodeTermType.intlit;
                     expr.term.intlit.intlit.Type = TokenType.Int;
                     expr.term.intlit.intlit.Value = "0";
@@ -433,12 +387,8 @@ namespace Epsilon
                 NodeStmtAssignSingleVar singlevar = new();
                 singlevar.ident = consume();
                 consume();
-                NodeExpr? expr = ParseExpr();
-                if (!expr.HasValue)
-                {
-                    ErrorExpected("expression(parseforinit2)");
-                }
-                singlevar.expr = expr.Value;
+                NodeExpr expr = ExpectedExpression(ParseExpr());
+                singlevar.expr = expr;
                 try_consume_err(TokenType.SemiColon);
                 NodeForInit forinit = new NodeForInit();
                 forinit.type = NodeForInit.NodeForInitType.assign;
@@ -451,130 +401,98 @@ namespace Epsilon
         }
         NodeForCond? ParseForCond()
         {
-            NodeForCond forcond = new NodeForCond(); 
-            NodeExpr? cond = ParseExpr();
-            if (cond.HasValue)
-            {
-                try_consume_err(TokenType.SemiColon);
-                forcond.cond = cond.Value;
-            }
-            else
-            {
-                try_consume_err(TokenType.SemiColon);
-                return null;
-            }
-            return forcond;
-        }
-        NodeExpr? ParseWhileCond()
-        {
-            try_consume_err(TokenType.OpenParen);
+            NodeForCond? forcond;
             NodeExpr? cond = ParseExpr();
             if (!cond.HasValue)
             {
-                ErrorExpected("expression(parsestmtwhile)");
-                return null;
+                forcond = null;
             }
+            else
+            {
+                forcond = new()
+                { 
+                    cond = cond.Value
+                };
+            }
+            try_consume_err(TokenType.SemiColon);
+            return forcond;
+        }
+        NodeExpr ParseWhileCond()
+        {
+            try_consume_err(TokenType.OpenParen);
+            NodeExpr cond = ExpectedExpression(ParseExpr());
             try_consume_err(TokenType.CloseParen);
-            return cond.Value;
+            return cond;
         }
         NodeStmtAssign? ParseStmtUpdate()
         {
-            if (IsStmtAssign())
-            {
-                NodeStmtAssignSingleVar singlevar = new();
-                singlevar.ident = consume();
-                consume();
-                NodeExpr? expr = ParseExpr();
-                if (!expr.HasValue)
-                {
-                    ErrorExpected("expression(parsestmtupdate)");
-                }
-                singlevar.expr = expr.Value;
-                NodeStmtAssign assign = new();
-                assign.type = NodeStmtAssign.NodeStmtAssignType.SingleVar;
-                assign.singlevar = singlevar;
-                return assign;
-            }
-            else
-            {
+            if (!IsStmtAssign())
                 return null;
-            }
+            NodeStmtAssignSingleVar singlevar = new();
+            singlevar.ident = consume();
+            consume();
+            NodeExpr expr = ExpectedExpression(ParseExpr());
+            singlevar.expr = expr;
+            NodeStmtAssign assign = new();
+            assign.type = NodeStmtAssign.NodeStmtAssignType.SingleVar;
+            assign.singlevar = singlevar;
+            return assign;
         }
-        NodeForUpdate? ParseForUpdate()
+        NodeForUpdate ParseForUpdate()
         {
-            NodeForUpdate forupdate = new NodeForUpdate();
+            NodeForUpdate forupdate = new();
             forupdate.udpates = [];
-            NodeStmtAssign? update = ParseStmtUpdate();
-            if (!update.HasValue)
+            do
             {
-                try_consume_err(TokenType.CloseParen);
-                return null;
-            }
-            while (update.HasValue)
-            {
+                NodeStmtAssign? update = ParseStmtUpdate();
+                if (!update.HasValue)
+                    break;
                 forupdate.udpates.Add(update.Value);
-                if (peek(TokenType.CloseParen).HasValue)
-                {
-                    consume();
-                    return forupdate;
-                }
-                try_consume_err(TokenType.Comma);
-                update = ParseStmtUpdate();
-            }
-            ErrorExpected("statement assign");
-            return null;
+            } while (peekandconsume(TokenType.Comma).HasValue);
+            try_consume_err(TokenType.CloseParen);
+            return forupdate;
         }
-        NodeForPredicate? ParseForPredicate()
+        NodeForPredicate ParseForPredicate()
         {
             NodeForPredicate pred = new NodeForPredicate();
-            if (!peek(TokenType.OpenParen).HasValue)
-                return null;
-            consume();
+            try_consume_err(TokenType.OpenParen);
             pred.init = ParseForInit();
             pred.cond = ParseForCond();
             pred.udpate = ParseForUpdate();
-            NodeScope? scope = ParseScope();
-            if (scope.HasValue)
-            {
-                pred.scope = scope.Value;
-            }
-            else
-            {
-                return null;
-            }
+            NodeScope scope = ParseScope();
+            pred.scope = scope;
             return pred;
         }
-        NodeStmt? ParseDeclareSingleVar(Token ident)
+        List<NodeStmt> ParseDeclareSingleVar(Token ident)
         {
-            NodeStmtDeclareSingleVar declare = new();
-            declare.ident = ident;
-            if (peek(TokenType.Equal).HasValue)
+            List<NodeStmt> stmts = [];
+            do
             {
-                consume();
-                NodeExpr? expr = ParseExpr();
-                if (!expr.HasValue)
+                NodeStmtDeclareSingleVar declare = new();
+                declare.ident = ident;
+                if (peek(TokenType.Equal).HasValue)
                 {
-                    ErrorExpected("expression(parsedeclaresinglevar)");
+                    consume();
+                    NodeExpr expr = ExpectedExpression(ParseExpr());
+                    declare.expr = expr;
                 }
-                declare.expr = expr.Value;
-            }
-            else
-            {
-                NodeExpr expr = new()
+                else
                 {
-                    type = NodeExpr.NodeExprType.term
-                };
-                expr.term.type = NodeTerm.NodeTermType.intlit;
-                expr.term.intlit.intlit.Type = TokenType.Int;
-                expr.term.intlit.intlit.Value = "0";
-                declare.expr = expr;
-            }
+                    NodeExpr expr = new();
+                    expr.type = NodeExpr.NodeExprType.term;
+                    expr.term.type = NodeTerm.NodeTermType.intlit;
+                    expr.term.intlit.intlit.Type = TokenType.Int;
+                    expr.term.intlit.intlit.Value = "0";
+                    declare.expr = expr;
+                }
+                NodeStmt stmt = new();
+                stmt.type = NodeStmt.NodeStmtType.declare;
+                stmt.declare.type = NodeStmtDeclare.NodeStmtDeclareType.SingleVar;
+                stmt.declare.singlevar = declare;
+                stmts.Add(stmt);
+            } while (peekandconsume(TokenType.Comma).HasValue);
             try_consume_err(TokenType.SemiColon);
-            NodeStmt stmt = new();
-            stmt.type = NodeStmt.NodeStmtType.declare;
-            stmt.declare.type = NodeStmtDeclare.NodeStmtDeclareType.SingleVar;
-            stmt.declare.singlevar = declare;
-            return stmt;
+            return stmts;
         }
         NodeExpr ExprZero()
         {
@@ -604,10 +522,8 @@ namespace Epsilon
             try_consume_err(TokenType.OpenCurly);
             for (int i = 0; i < dim; i++)
             {
-                NodeExpr? expr = ParseExpr();
-                if (!expr.HasValue)
-                    ErrorExpected("expression(parsearrayinit)");
-                values.Add(expr.Value);
+                NodeExpr expr = ExpectedExpression(ParseExpr());
+                values.Add(expr);
                 if (peek(TokenType.CloseCurly).HasValue)
                 {
                     consume();
@@ -647,7 +563,7 @@ namespace Epsilon
             }
             return values;
         }
-        NodeStmt? ParseDeclareArray(Token ident)
+        NodeStmt ParseDeclareArray(Token ident)
         {
             NodeStmtDeclareArray declare = new();
             declare.ident = ident;
@@ -683,17 +599,13 @@ namespace Epsilon
             stmt.declare.array = declare;
             return stmt;
         }
-        NodeStmt? ParseAssignSingleVar(Token ident)
+        NodeStmt ParseAssignSingleVar(Token ident)
         {
             NodeStmtAssignSingleVar singlevar = new();
             singlevar.ident = ident;
             consume();
-            NodeExpr? expr = ParseExpr();
-            if (!expr.HasValue)
-            {
-                ErrorExpected("expression(parseassignsinglevar)");
-            }
-            singlevar.expr = expr.Value;
+            NodeExpr expr = ExpectedExpression(ParseExpr());
+            singlevar.expr = expr;
             try_consume_err(TokenType.SemiColon);
             NodeStmt stmt = new();
             stmt.type = NodeStmt.NodeStmtType.assign;
@@ -701,22 +613,18 @@ namespace Epsilon
             stmt.assign.singlevar = singlevar;
             return stmt;
         }
-        NodeStmt? ParseAssignArray(Token ident)
+        NodeStmt ParseAssignArray(Token ident)
         {
             NodeStmtAssignArray array = new();
             array.ident = ident;
             while (peek(TokenType.OpenSquare).HasValue)
             {
-                array.indexes.Add(parseindex().Value);
+                array.indexes.Add(parseindex());
             }
 
             try_consume_err(TokenType.Equal);
-            NodeExpr? expr = ParseExpr();
-            if (!expr.HasValue)
-            {
-                ErrorExpected("expression(parseassignarray)");
-            }
-            array.expr = expr.Value;
+            NodeExpr expr = ExpectedExpression(ParseExpr());
+            array.expr = expr;
             try_consume_err(TokenType.SemiColon);
             NodeStmt stmt = new();
             stmt.type = NodeStmt.NodeStmtType.assign;
@@ -724,7 +632,7 @@ namespace Epsilon
             stmt.assign.array = array;
             return stmt;
         }
-        NodeStmt? ParseStmt()
+        List<NodeStmt> ParseStmt()
         {
             if (IsStmtDeclare())
             {
@@ -736,7 +644,7 @@ namespace Epsilon
                 Token ident = consume();
                 if (peek(TokenType.OpenSquare).HasValue)
                 {
-                    return ParseDeclareArray(ident);
+                    return [ParseDeclareArray(ident)];
                 }
                 else
                 {
@@ -748,67 +656,55 @@ namespace Epsilon
                 Token ident = consume();
                 if (peek(TokenType.OpenSquare).HasValue)
                 {
-                    return ParseAssignArray(ident);
+                    return [ParseAssignArray(ident)];
                 }
                 else if (peek(TokenType.Equal).HasValue)
                 {
-                    return ParseAssignSingleVar(ident);
+                    return [ParseAssignSingleVar(ident)];
+                }
+                else
+                {
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"invalid assign statement\n");
+                    Environment.Exit(1);
+                    return [];
                 }
             }
             else if (IsStmtIF())
             {
                 consume();
                 NodeStmtIF iff = new();
-                NodeIfPredicate? pred = ParseIfPredicate();
-                if (pred.HasValue)
-                {
-                    iff.pred = pred.Value;
-                }
-                else
-                {
-                    return null;
-                }
+                NodeIfPredicate pred = ParseIfPredicate();
+                iff.pred = pred;
                 NodeIfElifs? elifs = ParseElifs();
                 iff.elifs = elifs;
                 NodeStmt stmt = new();
                 stmt.type = NodeStmt.NodeStmtType.If;
                 stmt.If = iff;
-                return stmt;
+                return [stmt];
             }
             else if (IsStmtFor())
             {
                 consume();
                 NodeStmtFor forr = new();
-                NodeForPredicate? pred = ParseForPredicate();
-                if (pred.HasValue)
-                {
-                    forr.pred = pred.Value;
-                } 
-                else
-                {
-                    return null;
-                }
+                NodeForPredicate pred = ParseForPredicate();
+                forr.pred = pred;
                 NodeStmt stmt = new();
                 stmt.type = NodeStmt.NodeStmtType.For;
                 stmt.For = forr;
-                return stmt;
+                return [stmt];
             }
             else if (IsStmtWhile())
             {
                 consume();
-                NodeExpr? expr = ParseWhileCond();
+                NodeExpr expr = ParseWhileCond();
                 NodeStmtWhile whilee = new();
-                whilee.cond = expr.Value;
-                NodeScope? scope = ParseScope();
-                if (!scope.HasValue)
-                {
-                    ErrorExpected("scope");
-                }
-                whilee.scope = scope.Value;
+                whilee.cond = expr;
+                NodeScope scope = ParseScope();
+                whilee.scope = scope;
                 NodeStmt stmt = new();
                 stmt.type = NodeStmt.NodeStmtType.While;
                 stmt.While = whilee;
-                return stmt;
+                return [stmt];
             }
             else if (IsStmtBreak())
             {
@@ -819,7 +715,7 @@ namespace Epsilon
                 NodeStmt stmt = new();
                 stmt.type = NodeStmt.NodeStmtType.Break;
                 stmt.Break = breakk;
-                return stmt;
+                return [stmt];
             }
             else if (IsStmtContinue())
             {
@@ -830,28 +726,28 @@ namespace Epsilon
                 NodeStmt stmt = new();
                 stmt.type = NodeStmt.NodeStmtType.Continue;
                 stmt.Continue = continuee;
-                return stmt;
+                return [stmt];
             }
             else if (IsStmtExit())
             {
                 consume();
                 consume();
                 NodeStmtExit exit = new();
-                NodeExpr? expr = ParseExpr();
-                if (!expr.HasValue)
-                {
-                    ErrorExpected("expression(parsestmtexit)");
-                }
-                exit.expr = expr.Value;
+                NodeExpr expr = ExpectedExpression(ParseExpr());
+                exit.expr = expr;
                 try_consume_err(TokenType.CloseParen);
                 try_consume_err(TokenType.SemiColon);
                 NodeStmt stmt = new();
                 stmt.type = NodeStmt.NodeStmtType.Exit;
                 stmt.Exit = exit;
-                return stmt;
+                return [stmt];
             }
-
-            return null;
+            else
+            {
+                Shartilities.Log(Shartilities.LogType.ERROR, $"invalid statement\n");
+                Environment.Exit(1);
+                return [];
+            }
         }
 
 
@@ -861,12 +757,8 @@ namespace Epsilon
             
             while (peek().HasValue)
             {
-                NodeStmt? stmt = ParseStmt();
-                if (!stmt.HasValue)
-                {
-                    ErrorExpected($"statement");
-                }
-                prog.scope.stmts.Add(stmt.Value);
+                List<NodeStmt> stmt = ParseStmt();
+                prog.scope.stmts.AddRange(stmt);
             }
             return prog;
         }

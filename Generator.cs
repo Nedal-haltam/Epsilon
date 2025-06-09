@@ -41,7 +41,7 @@ namespace Epsilon
             Console.ResetColor();
             Environment.Exit(1);
         }
-        public static string? GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
+        public static string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
         {
             if (op == NodeBinExpr.NodeBinExprType.add)
                 return (Convert.ToInt32(imm1) + Convert.ToInt32(imm2)).ToString();
@@ -67,7 +67,9 @@ namespace Epsilon
                 return (Convert.ToInt32(imm1) ^ Convert.ToInt32(imm2)).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.mult)
                 return (Convert.ToInt32(imm1) * Convert.ToInt32(imm2)).ToString();
-            return null;
+            Shartilities.Log(Shartilities.LogType.ERROR, $"invalid operation `{op.ToString()}`\n");
+            Environment.Exit(1);
+            return "";
         }
     }
     class MIPSGenerator : Generator
@@ -536,18 +538,18 @@ namespace Epsilon
                 m_scopeend.Pop();
                 m_outputcode.Append("# begin update\n");
                 m_outputcode.Append($"{label_update}:\n");
-                if (forr.pred.udpate.HasValue)
+                if (forr.pred.udpate.udpates.Count != 0)
                 {
-                    for (int i = 0; i < forr.pred.udpate.Value.udpates.Count; i++)
+                    for (int i = 0; i < forr.pred.udpate.udpates.Count; i++)
                     {
-                        GenStmtAssign(forr.pred.udpate.Value.udpates[i]);
+                        GenStmtAssign(forr.pred.udpate.udpates[i]);
                     }
                 }
                 m_outputcode.Append("# end update\n");
                 m_outputcode.Append($"J {label_start}\n");
                 m_outputcode.Append($"{label_end}:\n");
             }
-            else if (forr.pred.udpate.HasValue)
+            else if (forr.pred.udpate.udpates.Count != 0)
             {
                 string label_start = $"TEMP_LABEL{m_labels_count++}_START";
                 string label_end = $"TEMP_LABEL{m_labels_count++}_END";
@@ -561,9 +563,9 @@ namespace Epsilon
                 m_scopeend.Pop();
                 m_outputcode.Append("# begin update\n");
                 m_outputcode.Append($"{label_update}:\n");
-                for (int i = 0; i < forr.pred.udpate.Value.udpates.Count; i++)
+                for (int i = 0; i < forr.pred.udpate.udpates.Count; i++)
                 {
-                    GenStmtAssign(forr.pred.udpate.Value.udpates[i]);
+                    GenStmtAssign(forr.pred.udpate.udpates[i]);
                 }
                 m_outputcode.Append("# end update\n");
                 m_outputcode.Append($"J {label_start}\n");
