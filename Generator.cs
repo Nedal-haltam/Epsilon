@@ -1,10 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.Intrinsics.X86;
-using System.Security.Cryptography;
-using System.Security.Principal;
-using System.Text;
+﻿using System.Text;
 #pragma warning disable CS8500
 
 
@@ -394,11 +388,8 @@ namespace Epsilon
                 {
                     Error($"variable {ident.Value} is already declared", ident.Line);
                 }
-                else
-                {
-                    GenExpr(declare.singlevar.expr);
-                    vars.m_vars.Add(new(ident.Value, 1));
-                }
+                GenExpr(declare.singlevar.expr);
+                vars.m_vars.Add(new(ident.Value, 1));
             }
             else if (declare.type == NodeStmtDeclare.NodeStmtDeclareType.Array)
             {
@@ -407,45 +398,25 @@ namespace Epsilon
                 {
                     Error($"variable {ident.Value} is already declared", ident.Line);
                 }
-                else
+                List<NodeTermIntLit> dims = m_Arraydims[declare.array.ident.Value];
+                int count = 1;
+                foreach (NodeTermIntLit l in dims)
                 {
-                    List<NodeTermIntLit> dims = m_Arraydims[declare.array.ident.Value];
-                    int count = 1;
-                    foreach (NodeTermIntLit l in dims)
+                    if (int.TryParse(l.intlit.Value, out int dim))
                     {
-                        if (int.TryParse(l.intlit.Value, out int dim))
-                        {
-                            count *= dim;
-                        }
-                        else
-                        {
-                            Shartilities.Log(Shartilities.LogType.ERROR, "Generator: could not parse to int\n");
-                            Environment.Exit(1);
-                        }
+                        count *= dim;
                     }
-                    m_outputcode.Append($"ADDI $sp, $sp, -{count}\n");
-                    m_StackSize += (count);
-                    vars.m_vars.Add(new(ident.Value, count));
+                    else
+                    {
+                        Shartilities.Log(Shartilities.LogType.ERROR, "Generator: could not parse to int\n");
+                        Environment.Exit(1);
+                    }
                 }
+                m_outputcode.Append($"ADDI $sp, $sp, -{count}\n");
+                m_StackSize += (count);
+                vars.m_vars.Add(new(ident.Value, count));
             }
         }
-        void GenMult(string reg, string intlit)
-        {
-            string count = "$8";
-            string temp = "$9";
-            m_outputcode.Append($"ADDI {count}, $zero, {intlit}\n");
-            m_outputcode.Append($"ADD {temp}, $zero, {reg}\n");
-            string label_start = $"LABEL{m_labels_count++}_START";
-            string label_end = $"LABEL{m_labels_count++}_END";
-
-            m_outputcode.Append($"{label_start}:\n");
-            m_outputcode.Append($"ADDI {count}, {count}, -1\n");
-            m_outputcode.Append($"BEQ {count}, $zero, {label_end}\n");
-            m_outputcode.Append($"ADD {reg}, {reg}, {temp}\n");
-            m_outputcode.Append($"J {label_start}\n");
-            m_outputcode.Append($"{label_end}:\n");
-        }
-
         void GenArrayAssign(NodeStmtAssignArray array)
         {
             string reg_addr = "$1";
@@ -641,29 +612,21 @@ namespace Epsilon
         void GenStmtBreak(NodeStmtBreak breakk)
         {
             if (m_scopeend.Count == 0)
-                Error("no enclosing loop out of which to break", breakk.breakk.Line);
+                Error("no enclosing loop out of which to break from", breakk.breakk.Line);
             m_outputcode.Append($"J {m_scopeend.Peek()}\n");
         }
         void GenStmtContinue(NodeStmtContinuee continuee)
         {
             if (m_scopestart.Count == 0)
-                Error("no enclosing loop out of which to break", continuee.continuee.Line);
+                Error("no enclosing loop out of which to continue", continuee.continuee.Line);
             m_outputcode.Append($"J {m_scopestart.Peek()}\n");
         }
         void GenStmtExit(NodeStmtExit exit)
         {
             string reg = "$1";
             GenExpr(exit.expr, reg);
+            // TODO: generate a proper exit syscall
             m_outputcode.Append("HLT\n");
-        }
-        void GenStmtCleanStack(NodeStmtCleanStack CleanStack)
-        {
-            m_outputcode.Append($"ADDI $1, $zero, 0\n");
-            m_outputcode.Append($"ADDI $2, $zero, {STACK_CAPACITY + 1}\n");
-            m_outputcode.Append($"Clean_Loop:\n");
-            m_outputcode.Append($"SW $zero, 0($1)\n");
-            m_outputcode.Append($"ADDI $1, $1, 1\n");
-            m_outputcode.Append($"BNE $1, $2, Clean_Loop\n");
         }
         void GenStmt(NodeStmt stmt)
         {
@@ -698,10 +661,6 @@ namespace Epsilon
             else if (stmt.type == NodeStmt.NodeStmtType.Exit)
             {
                 GenStmtExit(stmt.Exit);
-            }
-            else if (stmt.type == NodeStmt.NodeStmtType.CleanSack)
-            {
-                GenStmtCleanStack(stmt.CleanStack);
             }
         }
 

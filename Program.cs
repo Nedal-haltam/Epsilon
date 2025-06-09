@@ -38,6 +38,7 @@ namespace Epsilon
             if (!Shartilities.ShiftArgs(ref args, out string InputFilePath))
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, "no input file provided\n");
+                Shartilities.Log(Shartilities.LogType.NORMAL, $"Usage: {Environment.ProcessPath} <input file> [output file]");
                 Environment.Exit(1);
             }
             if (!Shartilities.ShiftArgs(ref args, out string? OutputFilePath))
