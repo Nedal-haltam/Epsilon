@@ -33,16 +33,37 @@ namespace Epsilon
                 File.WriteAllText(OutputFilePath, GeneratedProgram.ToString());
             }
         }
+        static void Usage()
+        {
+            Shartilities.Log(Shartilities.LogType.NORMAL, $"Usage: {Environment.ProcessPath} <input file> [-o output file]\n");
+        }
         static void Main(string[] args)
         {
             if (!Shartilities.ShiftArgs(ref args, out string InputFilePath))
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, "no input file provided\n");
-                Shartilities.Log(Shartilities.LogType.NORMAL, $"Usage: {Environment.ProcessPath} <input file> [output file]");
+                Usage();
                 Environment.Exit(1);
             }
-            if (!Shartilities.ShiftArgs(ref args, out string? OutputFilePath))
-                OutputFilePath = null;
+            string? OutputFilePath = null;
+            while (Shartilities.ShiftArgs(ref args, out string arg))
+            {
+                if (arg == "-o")
+                {
+                    if (!Shartilities.ShiftArgs(ref args, out string OutputFilePathuser))
+                    {
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Expected output file path\n");
+                        Environment.Exit(1);
+                    }
+                    OutputFilePath = OutputFilePathuser;
+                }
+                else
+                {
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Invalid argument `{arg}` was provided\n");
+                    Usage();
+                    Environment.Exit(1);
+                }
+            }
 
             Compile(InputFilePath, OutputFilePath);
         }
