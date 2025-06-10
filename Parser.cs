@@ -20,7 +20,7 @@ namespace Epsilon
 
         Token? peek(int offset = 0)
         {
-            if (m_curr_index + offset < m_tokens.Count)
+            if (0 <= m_curr_index + offset && m_curr_index + offset < m_tokens.Count)
             {
                 return m_tokens[m_curr_index + offset];
             }
@@ -55,17 +55,9 @@ namespace Epsilon
             {
                 return consume();
             }
-            ErrorExpected($"Expected: {type}");
+            Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error expected `{type}` on line: {peek().Value.Line}\n");
             return null;
         }
-        void ErrorExpected(string msg)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Parser: Error Expected {msg} on line: {peek().Value.Line}");
-            Console.ResetColor();
-            Environment.Exit(1);
-        }
-
         bool IsStmtDeclare()
         {
             return (peek(TokenType.Int).HasValue) &&
@@ -218,7 +210,7 @@ namespace Epsilon
                 return NodeBinExpr.NodeBinExprType.or;
             if (op == TokenType.Xor)
                 return NodeBinExpr.NodeBinExprType.xor;
-            Shartilities.Log(Shartilities.LogType.ERROR, $"inavalid operation `{op.ToString()}`");
+            Shartilities.Log(Shartilities.LogType.ERROR, $"inavalid operation `{op.ToString()}`\n");
             Environment.Exit(1);
             return 0;
         }
@@ -339,7 +331,10 @@ namespace Epsilon
         NodeIfPredicate ParseIfPredicate()
         {
             if (!peek(TokenType.OpenParen).HasValue)
+            {
                 Shartilities.Log(Shartilities.LogType.ERROR, $"expected `(` after `if`\n");
+                Environment.Exit(1);
+            }
             consume();
             NodeIfPredicate pred = new NodeIfPredicate();
             NodeExpr cond = ExpectedExpression(ParseExpr());
@@ -357,7 +352,7 @@ namespace Epsilon
                 NodeStmtDeclareSingleVar declare = new();
                 if (vartype.Type != TokenType.Int)
                 {
-                    ErrorExpected("variable type");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error Expected variable type on line: {vartype.Line}\n");
                 }
                 declare.ident = consume();
                 if (peek(TokenType.Equal).HasValue)
@@ -517,7 +512,7 @@ namespace Epsilon
             Token size_token = consume();
             if (!uint.TryParse(size_token.Value, out uint _))
             {
-                ErrorExpected("a constant size for the array");
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error Expected a constant size for the array on line: {size_token.Line}\n");
             }
             try_consume_err(TokenType.CloseSquare);
             return size_token;
@@ -545,7 +540,7 @@ namespace Epsilon
             values = ParseArrayInit(dim);
             if (values.Count != dim)
             {
-                ErrorExpected("dimensions are not aligned");
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error dimensions are not aligned on line: {peek(-1).Value.Line}\n");
             }
             return values;
         }
@@ -565,7 +560,7 @@ namespace Epsilon
             }
             if (values.Count != dim1)
             {
-                ErrorExpected("dimensions are not aligned");
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error dimensions are not aligned on line: {peek(-1).Value.Line}\n");
             }
             return values;
         }
@@ -645,7 +640,7 @@ namespace Epsilon
                 Token vartype = consume();
                 if (vartype.Type != TokenType.Int)
                 {
-                    ErrorExpected("variable type");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error Expected variable type on line: {vartype.Line}\n");
                 }
                 if (peek(TokenType.OpenSquare).HasValue)
                 {
@@ -669,7 +664,7 @@ namespace Epsilon
                 }
                 else
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"invalid assign statement\n");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"invalid assign statement\n or line: {ident.Line}\n");
                     Environment.Exit(1);
                     return [];
                 }

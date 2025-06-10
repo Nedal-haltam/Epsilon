@@ -56,17 +56,9 @@ namespace Epsilon
         private string m_thecode = thecode;
         private int m_curr_index = 0;
         private List<Token> m_tokens = [];
-        void Error(char curr_token)
-        {
-            ConsoleColor before = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Error.WriteLine($"Invalid token: {curr_token}");
-            Console.ForegroundColor = before;
-            Environment.Exit(1);
-        }
         char? Peek(int offset = 0)
         {
-            if (m_curr_index + offset < m_thecode.Length)
+            if (0 <= m_curr_index + offset && m_curr_index + offset < m_thecode.Length)
             {
                 return m_thecode[m_curr_index + offset];
             }
@@ -313,7 +305,8 @@ namespace Epsilon
                     }
                     else
                     {
-                        Error(curr_token);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Invalid token: {curr_token}\n");
+                        Environment.Exit(1);
                     }
                 }
                 else if (curr_token == '\n')
@@ -327,7 +320,8 @@ namespace Epsilon
                 }
                 else
                 {
-                    Error(curr_token);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Invalid token: {curr_token}\n");
+                    Environment.Exit(1);
                 }
                 buffer.Clear();
             }

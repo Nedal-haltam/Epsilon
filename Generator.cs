@@ -82,29 +82,29 @@ namespace Epsilon
 
         void GenPush(string reg)
         {
-            m_outputcode.Append($"SW {reg}, 0($sp)\n");
-            m_outputcode.Append("ADDI $sp, $sp, -1\n");
+            m_outputcode.AppendLine($"SW {reg}, 0($sp)");
+            m_outputcode.AppendLine("ADDI $sp, $sp, -1");
             m_StackSize++;
         }
 
         void GenPop(string reg)
         {
-            m_outputcode.Append("ADDI $sp, $sp, 1\n");
-            m_outputcode.Append($"LW {reg}, 0($sp)\n");
+            m_outputcode.AppendLine("ADDI $sp, $sp, 1");
+            m_outputcode.AppendLine($"LW {reg}, 0($sp)");
             m_StackSize--;
         }
         void StackPopEndScope(int popcount)
         {
-            m_outputcode.Append($"ADDi $sp, $sp, {popcount}\n");
+            m_outputcode.AppendLine($"ADDi $sp, $sp, {popcount}");
         }
         void BeginScope()
         {
-            m_outputcode.Append("# begin scope\n");
+            m_outputcode.AppendLine("# begin scope");
             m_scopes.Push(vars.m_vars.Count);
         }
         void EndScope()
         {
-            m_outputcode.Append("# end scope\n");
+            m_outputcode.AppendLine("# end scope");
             int Vars_topop = vars.m_vars.Count - m_scopes.Pop();
             int i = vars.m_vars.Count - 1;
             int iterations = Vars_topop;
@@ -199,7 +199,7 @@ namespace Epsilon
             m_outputcode.AppendLine($"# begin array address");
             string reg = DestReg ?? "$1";
             List<NodeTermIntLit> dims = m_Arraydims[ident.Value];
-            Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal\n");
+            Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
 
             // arr[i][j][k] = arr[index], s.t index = (i * dim[1] * dim[2]) + (j * dim[2]) + k
             // we get the address from GenExpr(index), then GenPop(reg)
@@ -207,9 +207,9 @@ namespace Epsilon
             GenExpr(index, reg);
 
             int relative_location = m_StackSize - VariableLocation(ident.Value);
-            m_outputcode.Append($"SUB {reg}, $zero, {reg}\n");
-            m_outputcode.Append($"ADDI {reg}, {reg}, {relative_location}\n");
-            m_outputcode.Append($"ADD {reg}, {reg}, $sp\n");
+            m_outputcode.AppendLine($"SUB {reg}, $zero, {reg}");
+            m_outputcode.AppendLine($"ADDI {reg}, {reg}, {relative_location}");
+            m_outputcode.AppendLine($"ADD {reg}, {reg}, $sp");
             if (DestReg == null)
                 GenPush(reg);
             m_outputcode.AppendLine($"# end array address");
@@ -220,13 +220,13 @@ namespace Epsilon
             {
                 string reg = DestReg ?? "$1";
                 string sign = (term.Negative) ? "-" : "";
-                m_outputcode.Append($"ADDI {reg}, $zero, {sign}{term.intlit.intlit.Value}\n");
+                m_outputcode.AppendLine($"ADDI {reg}, $zero, {sign}{term.intlit.intlit.Value}");
                 if (DestReg == null)
                     GenPush(reg);
             }
             else if (term.type == NodeTerm.NodeTermType.ident)
             {
-                m_outputcode.Append($"########## {term.ident.ident.Value}\n");
+                m_outputcode.AppendLine($"########## {term.ident.ident.Value}");
                 NodeTermIdent ident = term.ident;
                 if (!IsVariableDeclared(ident.ident.Value))
                 {
@@ -236,9 +236,9 @@ namespace Epsilon
                 {
                     string reg = DestReg ?? "$1";
                     int relative_location = m_StackSize - VariableLocation(ident.ident.Value);
-                    m_outputcode.Append($"LW {reg}, {relative_location}($sp)\n");
+                    m_outputcode.AppendLine($"LW {reg}, {relative_location}($sp)");
                     if (term.Negative)
-                        m_outputcode.Append($"SUB {reg}, $zero, {reg}\n");
+                        m_outputcode.AppendLine($"SUB {reg}, $zero, {reg}");
                     if (DestReg == null)
                         GenPush(reg);
                 }
@@ -247,17 +247,17 @@ namespace Epsilon
                     string reg_addr = "$1";
                     string reg = DestReg ?? "$2";
 
-                    m_outputcode.Append($"# begin index\n");
+                    m_outputcode.AppendLine($"# begin index");
                     GenArrayAddr(ident.indexes, ident.ident, reg_addr);
-                    m_outputcode.Append($"# end index\n");
+                    m_outputcode.AppendLine($"# end index");
 
-                    m_outputcode.Append($"# begin data\n");
-                    m_outputcode.Append($"LW {reg}, 0({reg_addr})\n");
+                    m_outputcode.AppendLine($"# begin data");
+                    m_outputcode.AppendLine($"LW {reg}, 0({reg_addr})");
                     if (term.Negative)
-                        m_outputcode.Append($"SUB {reg}, $zero, {reg}\n");
+                        m_outputcode.AppendLine($"SUB {reg}, $zero, {reg}");
                     if (DestReg == null)
                         GenPush(reg);
-                    m_outputcode.Append($"# end data\n");
+                    m_outputcode.AppendLine($"# end data");
                 }
             }
             else if (term.type == NodeTerm.NodeTermType.paren)
@@ -275,40 +275,40 @@ namespace Epsilon
             switch (binExpr.type)
             {
                 case NodeBinExpr.NodeBinExprType.add:
-                    m_outputcode.Append($"ADD {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"ADD {reg}, {reg}, {reg2}");
                     break;    
                 case NodeBinExpr.NodeBinExprType.sub:
-                    m_outputcode.Append($"SUB {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"SUB {reg}, {reg}, {reg2}");
                     break;    
                 case NodeBinExpr.NodeBinExprType.sll:
-                    m_outputcode.Append($"SLL {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"SLL {reg}, {reg}, {reg2}");
                     break;    
                 case NodeBinExpr.NodeBinExprType.srl:
-                    m_outputcode.Append($"SRL {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"SRL {reg}, {reg}, {reg2}");
                     break;    
                 case NodeBinExpr.NodeBinExprType.equalequal:
-                    m_outputcode.Append($"SEQ {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"SEQ {reg}, {reg}, {reg2}");
                     break;    
                 case NodeBinExpr.NodeBinExprType.notequal:
-                    m_outputcode.Append($"SNE {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"SNE {reg}, {reg}, {reg2}");
                     break;    
                 case NodeBinExpr.NodeBinExprType.lessthan:
-                    m_outputcode.Append($"SLT {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"SLT {reg}, {reg}, {reg2}");
                     break;    
                 case NodeBinExpr.NodeBinExprType.greaterthan:
-                    m_outputcode.Append($"SGT {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"SGT {reg}, {reg}, {reg2}");
                     break;    
                 case NodeBinExpr.NodeBinExprType.and:
-                    m_outputcode.Append($"AND {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"AND {reg}, {reg}, {reg2}");
                     break;    
                 case NodeBinExpr.NodeBinExprType.or:
-                    m_outputcode.Append($"OR {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"OR {reg}, {reg}, {reg2}");
                     break;    
                 case NodeBinExpr.NodeBinExprType.xor:
-                    m_outputcode.Append($"XOR {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"XOR {reg}, {reg}, {reg2}");
                     break;    
                 case NodeBinExpr.NodeBinExprType.mult:
-                    m_outputcode.Append($"MUL {reg}, {reg}, {reg2}\n");
+                    m_outputcode.AppendLine($"MUL {reg}, {reg}, {reg2}");
                     break;    
                 default:
                     Error("expected binary operator", -1);
@@ -414,7 +414,7 @@ namespace Epsilon
                         Environment.Exit(1);
                     }
                 }
-                m_outputcode.Append($"ADDI $sp, $sp, -{count}\n");
+                m_outputcode.AppendLine($"ADDI $sp, $sp, -{count}");
                 m_StackSize += (count);
                 vars.m_vars.Add(new(ident.Value, count));
             }
@@ -426,7 +426,7 @@ namespace Epsilon
             GenArrayAddr(array.indexes, array.ident);
             GenExpr(array.expr, reg_data);
             GenPop(reg_addr);
-            m_outputcode.Append($"SW {reg_data}, 0({reg_addr})\n");
+            m_outputcode.AppendLine($"SW {reg_data}, 0({reg_addr})");
         }
         void GenStmtAssign(NodeStmtAssign assign)
         {
@@ -440,7 +440,7 @@ namespace Epsilon
                 }
                 GenExpr(assign.singlevar.expr, reg);
                 int relative_location = m_StackSize - VariableLocation(ident.Value);
-                m_outputcode.Append($"SW {reg}, {relative_location}($sp)\n");
+                m_outputcode.AppendLine($"SW {reg}, {relative_location}($sp)");
             }
             else if (assign.type == NodeStmtAssign.NodeStmtAssignType.Array)
             {
@@ -459,18 +459,18 @@ namespace Epsilon
                 string reg = "$1";
                 string label = $"LABEL{m_labels_count++}_elifs";
                 GenExpr(elifs.elif.pred.cond, reg);
-                m_outputcode.Append($"BEQ $1, $zero, {label}\n");
+                m_outputcode.AppendLine($"BEQ $1, $zero, {label}");
                 GenScope(elifs.elif.pred.scope);
-                m_outputcode.Append($"J {label_end}\n");
+                m_outputcode.AppendLine($"J {label_end}");
                 if (elifs.elif.elifs.HasValue)
                 {
-                    m_outputcode.Append($"J {label_end}\n");
-                    m_outputcode.Append($"{label}:\n");
+                    m_outputcode.AppendLine($"J {label_end}");
+                    m_outputcode.AppendLine($"{label}:");
                     GenElifs(elifs.elif.elifs.Value, label_end);
                 }
                 else
                 {
-                    m_outputcode.Append($"{label}:\n");
+                    m_outputcode.AppendLine($"{label}:");
                 }
             }
             else if (elifs.type == NodeIfElifs.NodeIfElifsType.elsee)
@@ -489,55 +489,55 @@ namespace Epsilon
             string label_end = $"LABEL{m_labels_count++}_END";
             string label = $"LABEL{m_labels_count++}_elifs";
 
-            m_outputcode.Append($"{label_start}:\n");
+            m_outputcode.AppendLine($"{label_start}:");
             GenExpr(iff.pred.cond, reg);
-            m_outputcode.Append($"BEQ $1, $zero, {label}\n");
+            m_outputcode.AppendLine($"BEQ $1, $zero, {label}");
             GenScope(iff.pred.scope);
             if (iff.elifs.HasValue)
             {
-                m_outputcode.Append($"J {label_end}\n");
-                m_outputcode.Append($"{label}:\n");
+                m_outputcode.AppendLine($"J {label_end}");
+                m_outputcode.AppendLine($"{label}:");
                 GenElifs(iff.elifs.Value, label_end);
             }
             else
             {
-                m_outputcode.Append($"{label}:\n");
+                m_outputcode.AppendLine($"{label}:");
             }
-            m_outputcode.Append($"{label_end}:\n");
+            m_outputcode.AppendLine($"{label_end}:");
             return label_start;
         }
         void GenStmtFor(NodeStmtFor forr)
         {
-            m_outputcode.Append("# begin forloop\n");
+            m_outputcode.AppendLine("# begin forloop");
             BeginScope();
             if (forr.pred.init.HasValue)
             {
-                m_outputcode.Append("# begin init\n");
+                m_outputcode.AppendLine("# begin init");
                 if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.declare)
                     GenStmtDeclare(forr.pred.init.Value.declare);
                 else if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.assign)
                     GenStmtAssign(forr.pred.init.Value.assign);
-                m_outputcode.Append("# end init\n");
+                m_outputcode.AppendLine("# end init");
             }
             if (forr.pred.cond.HasValue)
             {
-                m_outputcode.Append("# begin condition\n");
+                m_outputcode.AppendLine("# begin condition");
                 string label_start = $"TEMP_LABEL{m_labels_count++}_START";
                 string label_end = $"TEMP_LABEL{m_labels_count++}_END";
                 string label_update = $"TEMP_LABEL{m_labels_count++}_START";
 
-                m_outputcode.Append($"{label_start}:\n");
+                m_outputcode.AppendLine($"{label_start}:");
                 string reg = "$1";
                 GenExpr(forr.pred.cond.Value.cond, reg);
-                m_outputcode.Append($"BEQ $1, $zero, {label_end}\n");
-                m_outputcode.Append("# end condition\n");
+                m_outputcode.AppendLine($"BEQ $1, $zero, {label_end}");
+                m_outputcode.AppendLine("# end condition");
                 m_scopestart.Push(label_update);
                 m_scopeend.Push(label_end);
                 GenScope(forr.pred.scope);
                 m_scopestart.Pop();
                 m_scopeend.Pop();
-                m_outputcode.Append("# begin update\n");
-                m_outputcode.Append($"{label_update}:\n");
+                m_outputcode.AppendLine("# begin update");
+                m_outputcode.AppendLine($"{label_update}:");
                 if (forr.pred.udpate.udpates.Count != 0)
                 {
                     for (int i = 0; i < forr.pred.udpate.udpates.Count; i++)
@@ -545,9 +545,9 @@ namespace Epsilon
                         GenStmtAssign(forr.pred.udpate.udpates[i]);
                     }
                 }
-                m_outputcode.Append("# end update\n");
-                m_outputcode.Append($"J {label_start}\n");
-                m_outputcode.Append($"{label_end}:\n");
+                m_outputcode.AppendLine("# end update");
+                m_outputcode.AppendLine($"J {label_start}");
+                m_outputcode.AppendLine($"{label_end}:");
             }
             else if (forr.pred.udpate.udpates.Count != 0)
             {
@@ -555,80 +555,80 @@ namespace Epsilon
                 string label_end = $"TEMP_LABEL{m_labels_count++}_END";
                 string label_update = $"TEMP_LABEL{m_labels_count++}_START";
 
-                m_outputcode.Append($"{label_start}:\n");
+                m_outputcode.AppendLine($"{label_start}:");
                 m_scopestart.Push(label_update);
                 m_scopeend.Push(label_end);
                 GenScope(forr.pred.scope);
                 m_scopestart.Pop();
                 m_scopeend.Pop();
-                m_outputcode.Append("# begin update\n");
-                m_outputcode.Append($"{label_update}:\n");
+                m_outputcode.AppendLine("# begin update");
+                m_outputcode.AppendLine($"{label_update}:");
                 for (int i = 0; i < forr.pred.udpate.udpates.Count; i++)
                 {
                     GenStmtAssign(forr.pred.udpate.udpates[i]);
                 }
-                m_outputcode.Append("# end update\n");
-                m_outputcode.Append($"J {label_start}\n");
-                m_outputcode.Append($"{label_end}:\n");
+                m_outputcode.AppendLine("# end update");
+                m_outputcode.AppendLine($"J {label_start}");
+                m_outputcode.AppendLine($"{label_end}:");
             }
             else
             {
                 string label_start = $"TEMP_LABEL{m_labels_count++}_START";
                 string label_end = $"TEMP_LABEL{m_labels_count++}_END";
 
-                m_outputcode.Append($"{label_start}:\n");
+                m_outputcode.AppendLine($"{label_start}:");
                 m_scopestart.Push(label_start);
                 m_scopeend.Push(label_end);
                 GenScope(forr.pred.scope);
                 m_scopestart.Pop();
                 m_scopeend.Pop();
-                m_outputcode.Append($"J {label_start}\n");
-                m_outputcode.Append($"{label_end}:\n");
+                m_outputcode.AppendLine($"J {label_start}");
+                m_outputcode.AppendLine($"{label_end}:");
             }
             EndScope();
-            m_outputcode.Append("# end forloop\n");
+            m_outputcode.AppendLine("# end forloop");
         }
         void GenStmtWhile(NodeStmtWhile whilee)
         {
-            m_outputcode.Append("# begin whileloop\n");
+            m_outputcode.AppendLine("# begin whileloop");
             BeginScope();
-            m_outputcode.Append("# begin condition\n");
+            m_outputcode.AppendLine("# begin condition");
             string label_start = $"TEMP_LABEL{m_labels_count++}_START";
             string label_end = $"TEMP_LABEL{m_labels_count++}_END";
 
-            m_outputcode.Append($"{label_start}:\n");
+            m_outputcode.AppendLine($"{label_start}:");
             string reg = "$1";
             GenExpr(whilee.cond, reg);
-            m_outputcode.Append($"BEQ $1, $zero, {label_end}\n");
-            m_outputcode.Append("# end condition\n");
+            m_outputcode.AppendLine($"BEQ $1, $zero, {label_end}");
+            m_outputcode.AppendLine("# end condition");
             m_scopestart.Push(label_start);
             m_scopeend.Push(label_end);
             GenScope(whilee.scope);
             m_scopestart.Pop();
             m_scopeend.Pop();
-            m_outputcode.Append($"J {label_start}\n");
-            m_outputcode.Append($"{label_end}:\n");
+            m_outputcode.AppendLine($"J {label_start}");
+            m_outputcode.AppendLine($"{label_end}:");
             EndScope();
-            m_outputcode.Append("# end whileloop\n");
+            m_outputcode.AppendLine("# end whileloop");
         }
         void GenStmtBreak(NodeStmtBreak breakk)
         {
             if (m_scopeend.Count == 0)
                 Error("no enclosing loop out of which to break from", breakk.breakk.Line);
-            m_outputcode.Append($"J {m_scopeend.Peek()}\n");
+            m_outputcode.AppendLine($"J {m_scopeend.Peek()}");
         }
         void GenStmtContinue(NodeStmtContinuee continuee)
         {
             if (m_scopestart.Count == 0)
                 Error("no enclosing loop out of which to continue", continuee.continuee.Line);
-            m_outputcode.Append($"J {m_scopestart.Peek()}\n");
+            m_outputcode.AppendLine($"J {m_scopestart.Peek()}");
         }
         void GenStmtExit(NodeStmtExit exit)
         {
             string reg = "$1";
             GenExpr(exit.expr, reg);
             // TODO: generate a proper exit syscall
-            m_outputcode.Append("HLT\n");
+            m_outputcode.AppendLine("HLT");
         }
         void GenStmt(NodeStmt stmt)
         {
@@ -668,9 +668,10 @@ namespace Epsilon
 
         public StringBuilder GenProg()
         {
-            m_outputcode.Append(".text\n");
-            m_outputcode.Append("main:\n");
-            m_outputcode.Append($"ADDI $sp, $zero, {STACK_CAPACITY}\n");
+
+            m_outputcode.AppendLine(".text");
+            m_outputcode.AppendLine("main:");
+            m_outputcode.AppendLine($"ADDI $sp, $zero, {STACK_CAPACITY}");
             foreach (NodeStmt stmt in m_prog.scope.stmts)
                 GenStmt(stmt);
 
