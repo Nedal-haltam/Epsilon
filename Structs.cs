@@ -191,7 +191,7 @@ namespace Epsilon
     {
         public Token FunctionName;
         public NodeStmtScope FunctionBody;
-        public Dictionary<string, List<NodeTermIntLit>> m_Arraydims;
+        public Dictionary<string, List<NodeTermIntLit>> DimensionsOfArrays;
         public int Arity;
     }
 

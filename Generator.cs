@@ -1,27 +1,11 @@
 ﻿using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-#pragma warning disable CS8500
-
 
 namespace Epsilon
 {
-    public struct Var
+    public struct Var(string value, int size)
     {
-        public Var(string value, int size)
-        {
-            Value = value;
-            Size = size;
-        }
-        public string Value { get; set; }
-        public int Size { get; set; }
-    }
-    public struct Vars
-    {
-        public Vars()
-        {
-            m_vars = [];
-        }
-        public List<Var> m_vars = [];
+        public string Value { get; set; } = value;
+        public int Size { get; set; } = size;
     }
     class Generator
     {
@@ -31,23 +15,18 @@ namespace Epsilon
         public NodeProg m_prog;
         public readonly StringBuilder m_outputcode = new();
         public int m_labels_count = 0;
-        public Dictionary<string, NodeStmtFunction> m_Functions = new();
-        public Dictionary<string, NodeStmtFunction> m_STD_FUNCTIONS  = new();
+        public Dictionary<string, NodeStmtFunction> m_Functions = [];
+        public Dictionary<string, NodeStmtFunction> m_STD_FUNCTIONS  = [];
+        public readonly List<string> CalledFunctions = [];
+        public List<string> StringLits = [];
 
-        public Vars vars = new();
+
+        public List<Var> m_vars = [];
         public readonly Stack<int> m_scopes = [];
         public int m_StackSize = 0;
         public readonly Stack<string?> m_scopestart = [];
         public readonly Stack<string?> m_scopeend = [];
-        public Dictionary<string, List<NodeTermIntLit>> m_Arraydims = new();
-
-        public void Error(string msg, int line)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Generator: Error: {msg} on line: {line}");
-            Console.ResetColor();
-            Environment.Exit(1);
-        }
+        public Dictionary<string, List<NodeTermIntLit>> DimensionsOfArrays = [];
         public static string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
         {
             if (op == NodeBinExpr.NodeBinExprType.add)
@@ -74,7 +53,7 @@ namespace Epsilon
                 return (Convert.ToInt32(imm1) ^ Convert.ToInt32(imm2)).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.mult)
                 return (Convert.ToInt32(imm1) * Convert.ToInt32(imm2)).ToString();
-            Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid operation `{op.ToString()}`\n");
+            Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid operation `{op}`\n");
             Environment.Exit(1);
             return "";
         }
@@ -84,7 +63,7 @@ namespace Epsilon
         public RISCVGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> Functions, Dictionary<string, NodeStmtFunction> STD_FUNCTIONS)
         {
             m_prog = prog;
-            m_Arraydims = Arraydims;
+            DimensionsOfArrays = Arraydims;
             m_Functions = Functions;
             m_STD_FUNCTIONS = STD_FUNCTIONS;
         }
@@ -110,22 +89,22 @@ namespace Epsilon
         void BeginScope()
         {
             m_outputcode.AppendLine($"# begin scope");
-            m_scopes.Push(vars.m_vars.Count);
+            m_scopes.Push(m_vars.Count);
         }
         void EndScope()
         {
             m_outputcode.AppendLine($"# end scope");
-            int Vars_topop = vars.m_vars.Count - m_scopes.Pop();
-            int i = vars.m_vars.Count - 1;
+            int Vars_topop = m_vars.Count - m_scopes.Pop();
+            int i = m_vars.Count - 1;
             int iterations = Vars_topop;
             int popcount = 0;
             while (iterations-- > 0)
             {
-                popcount += vars.m_vars[i--].Size;
+                popcount += m_vars[i--].Size;
             }
             StackPopEndScope(popcount);
             m_StackSize -= popcount;
-            vars.m_vars.RemoveRange(vars.m_vars.Count - Vars_topop, Vars_topop);
+            m_vars.RemoveRange(m_vars.Count - Vars_topop, Vars_topop);
         }
         void GenScope(NodeStmtScope scope)
         {
@@ -138,20 +117,20 @@ namespace Epsilon
         }
         bool IsVariableDeclared(string name)
         {
-            for (int i = 0; i < vars.m_vars.Count; i++)
-                if (vars.m_vars[i].Value == name)
+            for (int i = 0; i < m_vars.Count; i++)
+                if (m_vars[i].Value == name)
                     return true;
             return false;
         }
         int VariableLocation(string name)
         {
             int index = 0;
-            for (int i = 0; i < vars.m_vars.Count; i++)
+            for (int i = 0; i < m_vars.Count; i++)
             {
-                if (vars.m_vars[i].Value == name)
+                if (m_vars[i].Value == name)
                     break;
                 else
-                    index += vars.m_vars[i].Size;
+                    index += m_vars[i].Size;
             }
             return index;
         }
@@ -161,21 +140,35 @@ namespace Epsilon
             if (i == dims.Count - 1)
             {
                 expr.type = NodeExpr.NodeExprType.term;
-                expr.term = new();
-                expr.term.type = NodeTerm.NodeTermType.intlit;
-                expr.term.intlit = new();
-                expr.term.intlit.intlit = new() { Type = TokenType.IntLit, Value = $"{dims[^1].intlit.Value}" };
+                expr.term = new()
+                {
+                    type = NodeTerm.NodeTermType.intlit,
+                    intlit = new()
+                };
+                expr.term.intlit.intlit = new() 
+                { 
+                    Type = TokenType.IntLit, 
+                    Value = $"{dims[^1].intlit.Value}" 
+                };
                 return expr;
             }
             expr.type = NodeExpr.NodeExprType.binExpr;
-            expr.binexpr = new();
-            expr.binexpr.type = NodeBinExpr.NodeBinExprType.mult;
-            expr.binexpr.lhs = new();
+            expr.binexpr = new()
+            {
+                type = NodeBinExpr.NodeBinExprType.mult,
+                lhs = new()
+            };
             expr.binexpr.lhs.type = NodeExpr.NodeExprType.term;
-            expr.binexpr.lhs.term = new();
-            expr.binexpr.lhs.term.type = NodeTerm.NodeTermType.intlit;
-            expr.binexpr.lhs.term.intlit = new();
-            expr.binexpr.lhs.term.intlit.intlit = new() { Type = TokenType.IntLit, Value = $"{dims[i].intlit.Value}" };
+            expr.binexpr.lhs.term = new()
+            {
+                type = NodeTerm.NodeTermType.intlit,
+                intlit = new()
+            };
+            expr.binexpr.lhs.term.intlit.intlit = new() 
+            { 
+                Type = TokenType.IntLit, 
+                Value = $"{dims[i].intlit.Value}" 
+            };
             expr.binexpr.rhs = GenIndexExprMult(ref indexes, ref dims, i + 1);
             return expr;
         }
@@ -185,21 +178,27 @@ namespace Epsilon
             if (i == dims.Count - 1)
             {
                 expr.type = NodeExpr.NodeExprType.term;
-                expr.term = new();
-                expr.term.type = NodeTerm.NodeTermType.paren;
-                expr.term.paren = new();
+                expr.term = new()
+                {
+                    type = NodeTerm.NodeTermType.paren,
+                    paren = new()
+                };
                 expr.term.paren.expr = indexes[^1];
                 return expr;
             }
             expr.type = NodeExpr.NodeExprType.binExpr;
-            expr.binexpr = new();
-            expr.binexpr.type = NodeBinExpr.NodeBinExprType.add;
-            expr.binexpr.lhs = new();
+            expr.binexpr = new()
+            {
+                type = NodeBinExpr.NodeBinExprType.add,
+                lhs = new()
+            };
             expr.binexpr.lhs.type = NodeExpr.NodeExprType.binExpr;
-            expr.binexpr.lhs.binexpr = new();
-            expr.binexpr.lhs.binexpr.type = NodeBinExpr.NodeBinExprType.mult;
-            expr.binexpr.lhs.binexpr.lhs = indexes[i];
-            expr.binexpr.lhs.binexpr.rhs = GenIndexExprMult(ref indexes, ref dims, i + 1);
+            expr.binexpr.lhs.binexpr = new()
+            {
+                type = NodeBinExpr.NodeBinExprType.mult,
+                lhs = indexes[i],
+                rhs = GenIndexExprMult(ref indexes, ref dims, i + 1)
+            };
 
             expr.binexpr.rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
             return expr;
@@ -208,7 +207,7 @@ namespace Epsilon
         {
             m_outputcode.AppendLine($"# begin array address");
             string reg = DestReg ?? $"{FirstTempReg}";
-            List<NodeTermIntLit> dims = m_Arraydims[ident.Value];
+            List<NodeTermIntLit> dims = DimensionsOfArrays[ident.Value];
             Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
 
             // arr[i][j][k] = arr[index], s.t index = (i * dim[1] * dim[2]) + (j * dim[2]) + k
@@ -224,7 +223,6 @@ namespace Epsilon
                 GenPush(reg);
             m_outputcode.AppendLine($"# end array address");
         }
-        List<string> StringLits = [];
         void GenTerm(NodeTerm term, string? DestReg = null)
         {
             if (term.type == NodeTerm.NodeTermType.intlit)
@@ -257,7 +255,8 @@ namespace Epsilon
                 NodeTermIdent ident = term.ident;
                 if (!IsVariableDeclared(ident.ident.Value))
                 {
-                    Error($"variable {ident.ident.Value} is not declared", ident.ident.Line);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable {ident.ident.Value} is not declared on line {ident.ident.Line}\n");
+                    Environment.Exit(1);
                 }
                 if (ident.indexes.Count == 0)
                 {
@@ -293,7 +292,8 @@ namespace Epsilon
             }
             else
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid term `{term.type.ToString()}`\n");
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid term `{term.type}`\n");
+                Environment.Exit(1);
             }
         }
         void GenBinExpr(NodeBinExpr binExpr, string? DestReg = null)
@@ -342,7 +342,8 @@ namespace Epsilon
                     m_outputcode.AppendLine($"    MUL {reg}, {reg}, {reg2}");
                     break;    
                 default:
-                    Error("expected binary operator", -1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"invalide binary operator `{binExpr.type}`\n");
+                    Environment.Exit(1);
                     return;
             }
             if (DestReg == null)
@@ -419,19 +420,21 @@ namespace Epsilon
                 Token ident = declare.singlevar.ident;
                 if (IsVariableDeclared(ident.Value))
                 {
-                    Error($"variable {ident.Value} is already declared", ident.Line);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable {ident.Value} is already declared on line {ident.Line}\n");
+                    Environment.Exit(1);
                 }
                 GenExpr(declare.singlevar.expr);
-                vars.m_vars.Add(new(ident.Value, 1));
+                m_vars.Add(new(ident.Value, 1));
             }
             else if (declare.type == NodeStmtDeclare.NodeStmtDeclareType.Array)
             {
                 Token ident = declare.array.ident;
                 if (IsVariableDeclared(ident.Value))
                 {
-                    Error($"variable {ident.Value} is already declared", ident.Line);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable {ident.Value} is already declared on line {ident.Line}\n");
+                    Environment.Exit(1);
                 }
-                List<NodeTermIntLit> dims = m_Arraydims[declare.array.ident.Value];
+                List<NodeTermIntLit> dims = DimensionsOfArrays[declare.array.ident.Value];
                 int count = 1;
                 foreach (NodeTermIntLit l in dims)
                 {
@@ -441,13 +444,13 @@ namespace Epsilon
                     }
                     else
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, "GGenerator: enerator: could not parse to int\n");
+                        Shartilities.Log(Shartilities.LogType.ERROR, "Generator: could not parse to int\n");
                         Environment.Exit(1);
                     }
                 }
                 m_outputcode.AppendLine($"    ADDI sp, sp, -{8*count}");
                 m_StackSize += (count);
-                vars.m_vars.Add(new(ident.Value, count));
+                m_vars.Add(new(ident.Value, count));
             }
         }
         void GenArrayAssign(NodeStmtAssignArray array)
@@ -467,7 +470,8 @@ namespace Epsilon
                 string reg = $"{FirstTempReg}";
                 if (!IsVariableDeclared(ident.Value))
                 {
-                    Error($"variable {ident.Value} is not declared", ident.Line);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable {ident.Value} is not declared on line {ident.Line}\n");
+                    Environment.Exit(1);
                 }
                 GenExpr(assign.singlevar.expr, reg);
                 int relative_location = m_StackSize - VariableLocation(ident.Value);
@@ -478,7 +482,8 @@ namespace Epsilon
                 Token ident = assign.array.ident;
                 if (!IsVariableDeclared(ident.Value))
                 {
-                    Error($"variable {ident.Value} is not declared", ident.Line);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable {ident.Value} is not declared on line {ident.Line}\n");
+                    Environment.Exit(1);
                 }
                 GenArrayAssign(assign.array);
             }
@@ -510,7 +515,7 @@ namespace Epsilon
             }
             else
             {
-                Error("UNREACHABLE", -1);
+                Shartilities.UNREACHABLE("GenElifs");
             }
         }
         string GenStmtIF(NodeStmtIF iff)
@@ -645,16 +650,21 @@ namespace Epsilon
         void GenStmtBreak(NodeStmtBreak breakk)
         {
             if (m_scopeend.Count == 0)
-                Error("no enclosing loop out of which to break from", breakk.breakk.Line);
+            {
+                Shartilities.Log(Shartilities.LogType.ERROR, $"no enclosing loop out of which to break from on line {breakk.breakk.Line}\n");
+                Environment.Exit(1);
+            }
             m_outputcode.AppendLine($"    J {m_scopeend.Peek()}");
         }
         void GenStmtContinue(NodeStmtContinuee continuee)
         {
             if (m_scopestart.Count == 0)
-                Error("no enclosing loop out of which to continue", continuee.continuee.Line);
+            {
+                Shartilities.Log(Shartilities.LogType.ERROR, $"no enclosing loop out of which to continue on line {continuee.continuee.Line}\n");
+                Environment.Exit(1);
+            }
             m_outputcode.AppendLine($"    J {m_scopestart.Peek()}");
         }
-        List<string> CalledFunctions = [];
         void GenStmtFunction(NodeStmtFunctionCall Function)
         {
             if (!CalledFunctions.Contains(Function.FunctionName.Value))
@@ -673,7 +683,7 @@ namespace Epsilon
                 GenPop($"a{i}");
             }
         }
-        void GenFunctionDefinition(string FunctionName)
+        void GenFunction(string FunctionName)
         {
             NodeStmtFunction Function = m_Functions[FunctionName];
 
@@ -730,11 +740,19 @@ namespace Epsilon
             }
             else
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid statement `{stmt.type.ToString()}`\n");
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid statement `{stmt.type}`\n");
                 Environment.Exit(1);
             }
         }
-
+        void ResetBeforeGenFunction()
+        {
+            m_StackSize = 0;
+            m_vars.Clear();
+            m_scopes.Clear();
+            m_scopestart.Clear();
+            m_scopeend.Clear();
+            DimensionsOfArrays.Clear();
+        }
         public StringBuilder GenProg()
         {
 
@@ -743,37 +761,24 @@ namespace Epsilon
             m_outputcode.AppendLine($"    .section .text");
             m_outputcode.AppendLine($"    .globl _start");
             m_outputcode.AppendLine($"    _start:");
-            //m_outputcode.AppendLine($"    ADDI sp, zero, {STACK_CAPACITY}");
 
             if (!m_Functions.ContainsKey("main"))
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n");
                 Environment.Exit(1);
             }
-            vars = new();
-            m_scopes.Clear();
-            m_StackSize = 0;
-            m_scopestart.Clear();
-            m_scopeend.Clear();
-            m_Arraydims.Clear();
-            m_Arraydims = m_Functions["main"].m_Arraydims;
+            ResetBeforeGenFunction();
+            DimensionsOfArrays = m_Functions["main"].DimensionsOfArrays;
             GenScope(m_Functions["main"].FunctionBody);
             m_outputcode.AppendLine($"    ADDI a0, zero, 0");
             m_outputcode.AppendLine($"    call exit");
-            //foreach (NodeStmt stmt in m_prog.scope.stmts)
-            //    GenStmt(stmt);
             for (int i = 0; i < CalledFunctions.Count; i++)
             {
-                vars = new();
-                m_scopes.Clear();
-                m_StackSize = 0;
-                m_scopestart.Clear();
-                m_scopeend.Clear();
-                m_Arraydims.Clear();
                 if (m_STD_FUNCTIONS.ContainsKey(CalledFunctions[i]))
                     continue;
-                m_Arraydims = m_Functions[CalledFunctions[i]].m_Arraydims;
-                GenFunctionDefinition(CalledFunctions[i]);
+                ResetBeforeGenFunction();
+                DimensionsOfArrays = m_Functions[CalledFunctions[i]].DimensionsOfArrays;
+                GenFunction(CalledFunctions[i]);
             }
 
             m_outputcode.AppendLine($"strlen:");
@@ -806,4 +811,3 @@ namespace Epsilon
         }
     }
 }
-#pragma warning restore CS8500

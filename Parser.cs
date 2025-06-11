@@ -14,7 +14,7 @@ namespace Epsilon
     {
         private List<Token> m_tokens;
         private int m_curr_index = 0;
-        public Dictionary<string, List<NodeTermIntLit>> m_Arraydims = [];
+        public Dictionary<string, List<NodeTermIntLit>> DimensionsOfArrays = [];
         public Dictionary<string, NodeStmtFunction> Functions = [];
         public Dictionary<string, NodeStmtFunction> STD_FUNCTIONS = [];
         public Parser(List<Token> tokens)
@@ -605,19 +605,19 @@ namespace Epsilon
             NodeStmtDeclareArray declare = new();
             declare.ident = consume();
             declare.values = [];
-            if (m_Arraydims.ContainsKey(declare.ident.Value))
+            if (DimensionsOfArrays.ContainsKey(declare.ident.Value))
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: array `{declare.ident.Value}` is alread delcared\n");
                 Environment.Exit(1);
             }
             else
             {
-                m_Arraydims.Add(declare.ident.Value, []);
+                DimensionsOfArrays.Add(declare.ident.Value, []);
             }
             while (peek(TokenType.OpenSquare).HasValue)
             {
                 Token dim = parsedimension();
-                m_Arraydims[declare.ident.Value].Add(new() { intlit = dim });
+                DimensionsOfArrays[declare.ident.Value].Add(new() { intlit = dim });
             }
             //if (peek(TokenType.Equal).HasValue)
             //{
@@ -798,15 +798,15 @@ namespace Epsilon
                     Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: expected a scope for function `{FunctionName.Value}`\n");
                     Environment.Exit(1);
                 }
-                Dictionary<string, List<NodeTermIntLit>> saved = new(m_Arraydims);
-                m_Arraydims.Clear();
+                Dictionary<string, List<NodeTermIntLit>> saved = new(DimensionsOfArrays);
+                DimensionsOfArrays.Clear();
 
                 NodeStmtScope FunctionBody = ParseScope();
                 NodeStmtFunction Function = new();
                 Function.Arity = 0;
                 Function.FunctionName = FunctionName;
                 Function.FunctionBody = FunctionBody;
-                Function.m_Arraydims = new(m_Arraydims);
+                Function.DimensionsOfArrays = new(DimensionsOfArrays);
                 if (STD_FUNCTIONS.ContainsKey(FunctionName.Value))
                 {
                     Shartilities.Log(Shartilities.LogType.ERROR, $"cannot define function `{FunctionName.Value}`\n");
@@ -814,8 +814,8 @@ namespace Epsilon
                 }
                 Functions.Add(FunctionName.Value, Function);
 
-                m_Arraydims.Clear();
-                m_Arraydims = saved;
+                DimensionsOfArrays.Clear();
+                DimensionsOfArrays = saved;
                 return [];
             }
             else if (peek(TokenType.returnn).HasValue)
