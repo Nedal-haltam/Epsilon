@@ -34,6 +34,7 @@ namespace Epsilon
         public readonly Stack<string?> m_scopestart = [];
         public readonly Stack<string?> m_scopeend = [];
         public Dictionary<string, List<NodeTermIntLit>> m_Arraydims = new();
+        public Dictionary<string, NodeStmtFunction> m_Functions = new();
         public void Error(string msg, int line)
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -74,10 +75,11 @@ namespace Epsilon
     }
     class MIPSGenerator : Generator
     {
-        public MIPSGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims)
+        public MIPSGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> Functions)
         {
             m_prog = prog;
             m_Arraydims = Arraydims;
+            m_Functions = Functions;
         }
 
         void GenPush(string reg)
@@ -95,7 +97,7 @@ namespace Epsilon
         }
         void StackPopEndScope(int popcount)
         {
-            m_outputcode.AppendLine($"ADDi $sp, $sp, {popcount}");
+            m_outputcode.AppendLine($"ADDI $sp, $sp, {popcount}");
         }
         void BeginScope()
         {
@@ -117,7 +119,7 @@ namespace Epsilon
             m_StackSize -= popcount;
             vars.m_vars.RemoveRange(vars.m_vars.Count - Vars_topop, Vars_topop);
         }
-        void GenScope(NodeScope scope)
+        void GenScope(NodeStmtScope scope)
         {
             BeginScope();
             foreach (NodeStmt stmt in scope.stmts)
@@ -623,6 +625,23 @@ namespace Epsilon
                 Error("no enclosing loop out of which to continue", continuee.continuee.Line);
             m_outputcode.AppendLine($"J {m_scopestart.Peek()}");
         }
+        List<string> CalledFunctions = [];
+        void GenStmtFunction(NodeStmtFunctionCall Function)
+        {
+            if (!CalledFunctions.Contains(Function.FunctionName.Value))
+                CalledFunctions.Add(Function.FunctionName.Value);
+            m_outputcode.AppendLine($"jal {Function.FunctionName.Value}");
+        }
+        void GenFunctionDefinition(string FunctionName)
+        {
+            NodeStmtFunction Function = m_Functions[FunctionName];
+
+            m_outputcode.AppendLine($"{FunctionName}:");
+            GenPush("$31");
+            GenScope(Function.FunctionBody);
+            GenPop("$31");
+            m_outputcode.AppendLine($"jr $31");
+        }
         void GenStmtExit(NodeStmtExit exit)
         {
             string reg = "$1";
@@ -660,9 +679,18 @@ namespace Epsilon
             {
                 GenStmtContinue(stmt.Continue);
             }
+            else if (stmt.type == NodeStmt.NodeStmtType.Function)
+            {
+                GenStmtFunction(stmt.CalledFunction);
+            }
             else if (stmt.type == NodeStmt.NodeStmtType.Exit)
             {
                 GenStmtExit(stmt.Exit);
+            }
+            else
+            {
+                Shartilities.Log(Shartilities.LogType.ERROR, $"invalid statement `{stmt.type.ToString()}` to generate\n");
+                Environment.Exit(1);
             }
         }
 
@@ -672,9 +700,19 @@ namespace Epsilon
             m_outputcode.AppendLine(".text");
             m_outputcode.AppendLine("main:");
             m_outputcode.AppendLine($"ADDI $sp, $zero, {STACK_CAPACITY}");
+
             foreach (NodeStmt stmt in m_prog.scope.stmts)
                 GenStmt(stmt);
 
+            // TODO: this is not acceptable for function generate, it has to have it's own stack and should conflict with any variables like m_Arraydims, ...
+            vars = new();
+            m_StackSize = 0;
+            for (int i = 0; i < CalledFunctions.Count; i++)
+            {
+                m_Arraydims.Clear();
+                m_Arraydims = m_Functions[CalledFunctions[i]].m_Arraydims;
+                GenFunctionDefinition(CalledFunctions[i]);
+            }
             return m_outputcode;
         }
     }

@@ -7,16 +7,16 @@ namespace Epsilon
 {
     public struct NodeProg
     {
-        public NodeScope scope;
+        public NodeStmtScope scope;
         public NodeProg()
         {
             scope = new();
         }
     }
-    public struct NodeScope
+    public struct NodeStmtScope
     {
         public List<NodeStmt> stmts;
-        public NodeScope()
+        public NodeStmtScope()
         {
             stmts = [];
         }
@@ -25,7 +25,7 @@ namespace Epsilon
     {
         public enum NodeStmtType
         {
-            declare, assign, If, For, While, Break, Continue, Exit
+            declare, assign, If, For, While, Scope, Break, Continue, Function, Return, Exit
         }
         public NodeStmtType type;
         public NodeStmtDeclare declare;
@@ -33,8 +33,11 @@ namespace Epsilon
         public NodeStmtIF If;
         public NodeStmtFor For;
         public NodeStmtWhile While;
+        public NodeStmtScope Scope;
         public NodeStmtBreak Break;
         public NodeStmtContinuee Continue;
+        public NodeStmtFunctionCall CalledFunction;
+        public NodeStmtReturn Return;
         public NodeStmtExit Exit;
     }
     public struct NodeStmtDeclare
@@ -57,7 +60,7 @@ namespace Epsilon
         public NodeStmtAssignSingleVar singlevar;
         public NodeStmtAssignArray array;
     }
-    
+
     public struct NodeStmtDeclareSingleVar
     {
         public Token ident;
@@ -104,7 +107,7 @@ namespace Epsilon
     public struct NodeIfPredicate
     {
         public NodeExpr cond;
-        public NodeScope scope;
+        public NodeStmtScope scope;
     }
     public struct NodeIfElifs
     {
@@ -129,7 +132,7 @@ namespace Epsilon
     }
     public struct NodeElse
     {
-        public NodeScope scope;
+        public NodeStmtScope scope;
     }
 
 
@@ -148,7 +151,7 @@ namespace Epsilon
         public NodeForInit? init;
         public NodeForCond? cond;
         public NodeForUpdate udpate;
-        public NodeScope scope;
+        public NodeStmtScope scope;
     }
     public struct NodeForInit
     {
@@ -172,7 +175,7 @@ namespace Epsilon
     public struct NodeStmtWhile
     {
         public NodeExpr cond;
-        public NodeScope scope;
+        public NodeStmtScope scope;
     }
 
     public struct NodeStmtBreak
@@ -182,6 +185,23 @@ namespace Epsilon
     public struct NodeStmtContinuee
     {
         public Token continuee;
+    }
+
+    public struct NodeStmtFunction
+    {
+        public Token FunctionName;
+        public NodeStmtScope FunctionBody;
+        public Dictionary<string, List<NodeTermIntLit>> m_Arraydims;
+    }
+
+    public struct NodeStmtReturn
+    {
+        public NodeExpr expr;
+    }
+
+    public struct NodeStmtFunctionCall
+    {
+        public Token FunctionName;
     }
 
     public struct NodeStmtExit
@@ -244,80 +264,4 @@ namespace Epsilon
         public NodeExpr lhs;
         public NodeExpr rhs;
     }
-
-
-
-
-
-
-    /*
-    L[] -> means a list of that thing
-    prog ->
-        - scope
-    scope ->
-        - L[stmt]
-    stmt ->
-        [declare]
-        [assign]
-        [if]
-        [for]
-        [exit]
-    declare ->
-        int ident = [expr];
-        int ident[intlit]; / int ident[intlit] = {[expr], [expr], ...};
-        int ident[intlit][intlit]; / int ident[intlit][intlit] = {{[expr], [expr], ...}, {[expr], [expr], ...}, ...};
-    assign ->
-        ident = [expr];
-        ident[ [expr] ] = [expr];
-        ident[ [expr] ][ [expr] ] = [expr];
-    if ->
-        if ([expr])[scope][elifs]
-    elifs ->
-        elif([expr])[scope][elifs]
-        else[scope]
-    for ->
-        for([forinit]; [forcond]; [forupdate])[scope]
-    forinit ->
-        [declare]
-        [assign]
-    forcond ->
-        [expr]
-    forupdate ->
-        L[assign]
-    exit ->
-        [expr]
-    expr ->
-        [term]
-        [binexpr]
-    term ->
-        intlit
-        ident
-        [termparen]
-    binexpr ->
-        [expr] + [expr]
-        [expr] - [expr]
-        [expr] << [expr]
-        [expr] >> [expr]
-        [expr] == [expr]
-        [expr] != [expr]
-        [expr] < [expr]
-        [expr] > [expr]
-
-    termparen ->
-        [expr]
-    */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
