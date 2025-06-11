@@ -32,6 +32,7 @@ namespace Epsilon
         public readonly StringBuilder m_outputcode = new();
         public int m_labels_count = 0;
         public Dictionary<string, NodeStmtFunction> m_Functions = new();
+        public Dictionary<string, NodeStmtFunction> m_STD_FUNCTIONS  = new();
 
         public Vars vars = new();
         public readonly Stack<int> m_scopes = [];
@@ -73,18 +74,19 @@ namespace Epsilon
                 return (Convert.ToInt32(imm1) ^ Convert.ToInt32(imm2)).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.mult)
                 return (Convert.ToInt32(imm1) * Convert.ToInt32(imm2)).ToString();
-            Shartilities.Log(Shartilities.LogType.ERROR, $"invalid operation `{op.ToString()}`\n");
+            Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid operation `{op.ToString()}`\n");
             Environment.Exit(1);
             return "";
         }
     }
-    class MIPSGenerator : Generator
+    class RISCVGenerator : Generator
     {
-        public MIPSGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> Functions)
+        public RISCVGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> Functions, Dictionary<string, NodeStmtFunction> STD_FUNCTIONS)
         {
             m_prog = prog;
             m_Arraydims = Arraydims;
             m_Functions = Functions;
+            m_STD_FUNCTIONS = STD_FUNCTIONS;
         }
 
         void GenPush(string reg)
@@ -222,6 +224,7 @@ namespace Epsilon
                 GenPush(reg);
             m_outputcode.AppendLine($"# end array address");
         }
+        List<string> StringLits = [];
         void GenTerm(NodeTerm term, string? DestReg = null)
         {
             if (term.type == NodeTerm.NodeTermType.intlit)
@@ -229,6 +232,22 @@ namespace Epsilon
                 string reg = DestReg ?? $"{FirstTempReg}";
                 string sign = (term.Negative) ? "-" : "";
                 m_outputcode.AppendLine($"    ADDI {reg}, zero, {sign}{term.intlit.intlit.Value}");
+                if (DestReg == null)
+                    GenPush(reg);
+            }
+            else if (term.type == NodeTerm.NodeTermType.stringlit)
+            {
+                string reg = DestReg ?? $"{FirstTempReg}";
+                StringLits.Add(term.stringlit.stringlit.Value);
+                m_outputcode.AppendLine($"    la {reg}, StringLits{StringLits.Count - 1}");
+                if (DestReg == null)
+                    GenPush(reg);
+            }
+            else if (term.type == NodeTerm.NodeTermType.functioncall)
+            {
+                string reg = DestReg ?? $"{FirstTempReg}";
+                GenStmtFunction(new() { FunctionName = term.functioncall.FunctionName, parameters = term.functioncall.parameters });
+                m_outputcode.AppendLine($"    mv {reg}, s0");
                 if (DestReg == null)
                     GenPush(reg);
             }
@@ -244,7 +263,7 @@ namespace Epsilon
                 {
                     string reg = DestReg ?? $"{FirstTempReg}";
                     int relative_location = m_StackSize - VariableLocation(ident.ident.Value);
-                    m_outputcode.AppendLine($"    LW {reg}, {relative_location*8}(sp)");
+                    m_outputcode.AppendLine($"    LW {reg}, {relative_location * 8}(sp)");
                     if (term.Negative)
                         m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
                     if (DestReg == null)
@@ -271,6 +290,10 @@ namespace Epsilon
             else if (term.type == NodeTerm.NodeTermType.paren)
             {
                 GenExpr(term.paren.expr, DestReg);
+            }
+            else
+            {
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid term `{term.type.ToString()}`\n");
             }
         }
         void GenBinExpr(NodeBinExpr binExpr, string? DestReg = null)
@@ -418,7 +441,7 @@ namespace Epsilon
                     }
                     else
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, "Generator: could not parse to int\n");
+                        Shartilities.Log(Shartilities.LogType.ERROR, "GGenerator: enerator: could not parse to int\n");
                         Environment.Exit(1);
                     }
                 }
@@ -636,7 +659,19 @@ namespace Epsilon
         {
             if (!CalledFunctions.Contains(Function.FunctionName.Value))
                 CalledFunctions.Add(Function.FunctionName.Value);
-            m_outputcode.AppendLine($"    jal {Function.FunctionName.Value}");
+            for (int i = 0; i < Function.parameters.Count; i++)
+            {
+                GenPush($"a{i}");
+            }
+            for (int i = 0; i < Function.parameters.Count; i++)
+            {
+                GenExpr(Function.parameters[i], $"a{i}");
+            }
+            m_outputcode.AppendLine($"    call {Function.FunctionName.Value}");
+            for (int i = Function.parameters.Count - 1; i >= 0; i--)
+            {
+                GenPop($"a{i}");
+            }
         }
         void GenFunctionDefinition(string FunctionName)
         {
@@ -695,7 +730,7 @@ namespace Epsilon
             }
             else
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"invalid statement `{stmt.type.ToString()}` to generate\n");
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid statement `{stmt.type.ToString()}`\n");
                 Environment.Exit(1);
             }
         }
@@ -712,7 +747,7 @@ namespace Epsilon
 
             if (!m_Functions.ContainsKey("main"))
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"no entry point `main` is defined\n");
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n");
                 Environment.Exit(1);
             }
             vars = new();
@@ -735,9 +770,23 @@ namespace Epsilon
                 m_scopestart.Clear();
                 m_scopeend.Clear();
                 m_Arraydims.Clear();
+                if (m_STD_FUNCTIONS.ContainsKey(CalledFunctions[i]))
+                    continue;
                 m_Arraydims = m_Functions[CalledFunctions[i]].m_Arraydims;
                 GenFunctionDefinition(CalledFunctions[i]);
             }
+
+            m_outputcode.AppendLine($"strlen:");
+            m_outputcode.AppendLine($"    mv t0, a0");
+            m_outputcode.AppendLine($"    li s0, 0");
+            m_outputcode.AppendLine($"strlen_loop:");
+            m_outputcode.AppendLine($"    lbu t1, 0(t0)");
+            m_outputcode.AppendLine($"    beqz t1, strlen_done");
+            m_outputcode.AppendLine($"    addi s0, s0, 1");
+            m_outputcode.AppendLine($"    addi t0, t0, 1");
+            m_outputcode.AppendLine($"    j strlen_loop");
+            m_outputcode.AppendLine($"strlen_done:");
+            m_outputcode.AppendLine($"    ret");
 
             m_outputcode.AppendLine($"write:");
             m_outputcode.AppendLine($"    li a7, SYS_WRITE");
@@ -746,8 +795,13 @@ namespace Epsilon
             m_outputcode.AppendLine($"exit:");
 	        m_outputcode.AppendLine($"    li a7, SYS_EXIT");
 	        m_outputcode.AppendLine($"    ecall");
-            m_outputcode.AppendLine($"    ret");
+            m_outputcode.AppendLine($"    ret\n\n");
 
+            for (int i = 0; i < StringLits.Count; i++)
+            {
+                m_outputcode.AppendLine($"StringLits{i}:");
+                m_outputcode.AppendLine($"    .string \"{StringLits[i]}\\n\"");
+            }
             return m_outputcode;
         }
     }

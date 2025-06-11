@@ -47,6 +47,7 @@ namespace Epsilon
         Elif,
         Else,
         IntLit,
+        stringlit,
         Exit,
         fslash,
         star,
@@ -275,6 +276,16 @@ namespace Epsilon
                     buffer.Append(Consume());
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.NotEqual, Line = line });
+                }
+                else if (Peek("\""))
+                {
+                    Consume();
+                    while (!Peek("\""))
+                    {
+                        buffer.Append(Consume());
+                    }
+                    Consume();
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.stringlit, Line = line });
                 }
                 // single-character tokens
                 else if (tokens.TryGetValue(curr_token.ToString(), out TokenType tt))

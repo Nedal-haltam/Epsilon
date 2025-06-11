@@ -192,6 +192,7 @@ namespace Epsilon
         public Token FunctionName;
         public NodeStmtScope FunctionBody;
         public Dictionary<string, List<NodeTermIntLit>> m_Arraydims;
+        public int Arity;
     }
 
     public struct NodeStmtReturn
@@ -202,6 +203,7 @@ namespace Epsilon
     public struct NodeStmtFunctionCall
     {
         public Token FunctionName;
+        public List<NodeExpr> parameters;
     }
 
     public struct NodeStmtExit
@@ -227,17 +229,28 @@ namespace Epsilon
     {
         public enum NodeTermType
         {
-            intlit, ident, paren
+            intlit, stringlit, functioncall, ident, paren
         }
         public NodeTermType type;
         public bool Negative;
         public NodeTermIntLit intlit;
+        public NodeTermStringLit stringlit;
+        public NodeTermFunctionCall functioncall;
         public NodeTermIdent ident;
         public NodeTermParen paren;
     }
     public struct NodeTermIntLit
     {
         public Token intlit;
+    }
+    public struct NodeTermStringLit
+    {
+        public Token stringlit;
+    }
+    public struct NodeTermFunctionCall
+    {
+        public Token FunctionName;
+        public List<NodeExpr> parameters;
     }
     public class NodeTermIdent
     {

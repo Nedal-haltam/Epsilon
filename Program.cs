@@ -22,7 +22,7 @@ namespace Epsilon
             List<Token> TokenizedProgram = Tokenizer.Tokenize();
             Parser Parser = new(TokenizedProgram);
             NodeProg ParsedProgram = Parser.ParseProg();
-            MIPSGenerator Generator = new(ParsedProgram, Parser.m_Arraydims, Parser.Functions);
+            RISCVGenerator Generator = new(ParsedProgram, Parser.m_Arraydims, Parser.Functions, Parser.STD_FUNCTIONS);
             StringBuilder GeneratedProgram = Generator.GenProg();
             if (OutputFilePath == null)
             {
@@ -39,7 +39,6 @@ namespace Epsilon
         }
         static void Main(string[] args)
         {
-            //Compile("../../../main.e");
             if (!Shartilities.ShiftArgs(ref args, out string InputFilePath))
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, "no input file provided\n");
