@@ -16,7 +16,11 @@ namespace Epsilon
         private int m_curr_index = 0;
         public Dictionary<string, List<NodeTermIntLit>> DimensionsOfArrays = [];
         public Dictionary<string, NodeStmtFunction> Functions = [];
-        public Dictionary<string, NodeStmtFunction> STD_FUNCTIONS = [];
+        public List<string> STD_FUNCTIONS = 
+        [
+            "print",
+            "strlen",
+        ];
         public Parser(List<Token> tokens)
         {
             m_tokens = tokens;
@@ -152,7 +156,6 @@ namespace Epsilon
             }
             else if (peek(TokenType.Ident).HasValue && peek(TokenType.OpenParen, 1).HasValue)
             {
-
                 term.type = NodeTerm.NodeTermType.functioncall;
                 term.functioncall = new();
                 term.functioncall.FunctionName = consume();
@@ -807,7 +810,7 @@ namespace Epsilon
                 Function.FunctionName = FunctionName;
                 Function.FunctionBody = FunctionBody;
                 Function.DimensionsOfArrays = new(DimensionsOfArrays);
-                if (STD_FUNCTIONS.ContainsKey(FunctionName.Value))
+                if (STD_FUNCTIONS.Contains(FunctionName.Value))
                 {
                     Shartilities.Log(Shartilities.LogType.ERROR, $"cannot define function `{FunctionName.Value}`\n");
                     Environment.Exit(1);
@@ -844,32 +847,107 @@ namespace Epsilon
                 stmt.Exit = exit;
                 return [stmt];
             }
-            else if (peek().HasValue && (Functions.ContainsKey(peek().Value.Value) || STD_FUNCTIONS.ContainsKey(peek().Value.Value)))
+            else if (peek(TokenType.Ident).HasValue && peek(TokenType.OpenParen, 1).HasValue)
             {
-                Token CalledFunctionName = consume();
-                TryConsumeError(TokenType.OpenParen);
-                List<NodeExpr> parameters = [];
-                if (!peek(TokenType.CloseParen).HasValue)
-                    do
-                    {
-                        NodeExpr expr = ExpectedExpression(ParseExpr());
-                        parameters.Add(expr);
-                    } while (peekandconsume(TokenType.Comma).HasValue);
-                TryConsumeError(TokenType.CloseParen);
-
-                NodeStmtFunctionCall CalledFunction = new();
-                CalledFunction.FunctionName = CalledFunctionName;
-                CalledFunction.parameters = parameters;
-                NodeStmt stmt = new();
-                stmt.type = NodeStmt.NodeStmtType.Function;
-                stmt.CalledFunction = CalledFunction;
-                TryConsumeError(TokenType.SemiColon);
-                if (CalledFunctionName.Value == "main")
+                if (Functions.ContainsKey(peek().Value.Value))
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: cannot call functions `main`\n");
-                    Environment.Exit(1);
+                    Token CalledFunctionName = consume();
+                    TryConsumeError(TokenType.OpenParen);
+                    List<NodeExpr> parameters = [];
+                    if (!peek(TokenType.CloseParen).HasValue)
+                        do
+                        {
+                            NodeExpr expr = ExpectedExpression(ParseExpr());
+                            parameters.Add(expr);
+                        } while (peekandconsume(TokenType.Comma).HasValue);
+                    TryConsumeError(TokenType.CloseParen);
+                    TryConsumeError(TokenType.SemiColon);
+                    NodeStmtFunctionCall CalledFunction = new();
+                    CalledFunction.FunctionName = CalledFunctionName;
+                    CalledFunction.parameters = parameters;
+                    NodeStmt stmt = new();
+                    stmt.type = NodeStmt.NodeStmtType.Function;
+                    stmt.CalledFunction = CalledFunction;
+                    if (CalledFunctionName.Value == "main")
+                    {
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: cannot call functions `main`\n");
+                        Environment.Exit(1);
+                    }
+                    return [stmt];
                 }
-                return [stmt];
+                else if (STD_FUNCTIONS.Contains(peek().Value.Value))
+                {
+                    Token CalledFunctionName = consume();
+                    if (CalledFunctionName.Value == "print")
+                    {
+                        TryConsumeError(TokenType.OpenParen);
+                        NodeExpr InputString = ExpectedExpression(ParseExpr());
+                        if (InputString.type != NodeExpr.NodeExprType.term && InputString.term.type != NodeTerm.NodeTermType.stringlit)
+                        {
+                            Shartilities.Log(Shartilities.LogType.ERROR, $"invalid paramter to function `{CalledFunctionName.Value}`\n");
+                            Environment.Exit(1);
+                        }
+                        TryConsumeError(TokenType.CloseParen);
+                        TryConsumeError(TokenType.SemiColon);
+                        NodeExpr FDStdout = new()
+                        {
+                            type = NodeExpr.NodeExprType.term,
+                            term = new()
+                            {
+                                type = NodeTerm.NodeTermType.intlit,
+                                intlit = new()
+                                {
+                                    intlit = new() { Value = "1", Type = TokenType.IntLit, Line = CalledFunctionName.Line },
+                                },
+                            },
+                        };
+                        NodeExpr strlen = new()
+                        {
+                            type = NodeExpr.NodeExprType.term,
+                            term = new()
+                            {
+                                type = NodeTerm.NodeTermType.intlit,
+                                intlit = new()
+                                {
+                                    intlit = new() { Value = (1 + InputString.term.stringlit.stringlit.Value.Length).ToString(), Type = TokenType.IntLit, Line = CalledFunctionName.Line },
+                                },
+                            },
+                        };
+                        NodeStmtFunctionCall CalledFunction = new();
+                        CalledFunction.FunctionName = CalledFunctionName;
+                        CalledFunction.parameters = [FDStdout, InputString, strlen];
+                        NodeStmt stmt = new();
+                        stmt.type = NodeStmt.NodeStmtType.Function;
+                        stmt.CalledFunction = CalledFunction;
+                        return [stmt];
+                    }
+                    else if (CalledFunctionName.Value == "strlen")
+                    {
+                        TryConsumeError(TokenType.OpenParen);
+                        NodeExpr InputString = ExpectedExpression(ParseExpr());
+                        TryConsumeError(TokenType.CloseParen);
+                        TryConsumeError(TokenType.SemiColon);
+                        NodeStmtFunctionCall CalledFunction = new();
+                        CalledFunction.FunctionName = CalledFunctionName;
+                        CalledFunction.parameters = [InputString];
+                        NodeStmt stmt = new();
+                        stmt.type = NodeStmt.NodeStmtType.Function;
+                        stmt.CalledFunction = CalledFunction;
+                        return [stmt];
+                    }
+                    else
+                    {
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"undefined std function `{CalledFunctionName.Value}`\n");
+                        Environment.Exit(1);
+                        return [];
+                    }
+                }
+                else
+                {
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"function `{peek().Value.Value}` is undefined\n");
+                    Environment.Exit(1);
+                    return [];
+                }
             }
             else
             {
@@ -878,15 +956,8 @@ namespace Epsilon
                 return [];
             }
         }
-
-
         public NodeProg ParseProg()
         {
-            NodeStmtFunction Functionwrite = new() { FunctionName = new() { Type = TokenType.Ident, Value = "write", Line = -1 }, Arity = 3, };
-            NodeStmtFunction Functionstrlen = new() { FunctionName = new() { Type = TokenType.Ident, Value = "strlen", Line = -1 }, Arity = 1, };
-            STD_FUNCTIONS.Add(Functionwrite.FunctionName.Value, Functionwrite);
-            STD_FUNCTIONS.Add(Functionstrlen.FunctionName.Value, Functionstrlen);
-
             NodeProg prog = new();
             
             while (peek().HasValue)

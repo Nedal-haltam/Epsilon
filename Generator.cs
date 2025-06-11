@@ -16,7 +16,7 @@ namespace Epsilon
         public readonly StringBuilder m_outputcode = new();
         public int m_labels_count = 0;
         public Dictionary<string, NodeStmtFunction> m_Functions = [];
-        public Dictionary<string, NodeStmtFunction> m_STD_FUNCTIONS  = [];
+        public List<string> m_STD_FUNCTIONS  = [];
         public readonly List<string> CalledFunctions = [];
         public List<string> StringLits = [];
 
@@ -60,7 +60,7 @@ namespace Epsilon
     }
     class RISCVGenerator : Generator
     {
-        public RISCVGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> Functions, Dictionary<string, NodeStmtFunction> STD_FUNCTIONS)
+        public RISCVGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> Functions, List<string> STD_FUNCTIONS)
         {
             m_prog = prog;
             DimensionsOfArrays = Arraydims;
@@ -774,7 +774,7 @@ namespace Epsilon
             m_outputcode.AppendLine($"    call exit");
             for (int i = 0; i < CalledFunctions.Count; i++)
             {
-                if (m_STD_FUNCTIONS.ContainsKey(CalledFunctions[i]))
+                if (m_STD_FUNCTIONS.Contains(CalledFunctions[i]))
                     continue;
                 ResetBeforeGenFunction();
                 DimensionsOfArrays = m_Functions[CalledFunctions[i]].DimensionsOfArrays;
@@ -793,7 +793,7 @@ namespace Epsilon
             m_outputcode.AppendLine($"strlen_done:");
             m_outputcode.AppendLine($"    ret");
 
-            m_outputcode.AppendLine($"write:");
+            m_outputcode.AppendLine($"print:");
             m_outputcode.AppendLine($"    li a7, SYS_WRITE");
             m_outputcode.AppendLine($"    ecall");
 	        m_outputcode.AppendLine($"    ret");
