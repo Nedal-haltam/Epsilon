@@ -808,6 +808,11 @@ namespace Epsilon
                 stmt.type = NodeStmt.NodeStmtType.Function;
                 stmt.CalledFunction = CalledFunction;
                 TryConsumeError(TokenType.SemiColon);
+                if (CalledFunctionName.Value == "main")
+                {
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"cannot call functions `main`\n");
+                    Environment.Exit(1);
+                }
                 return [stmt];
             }
             else
