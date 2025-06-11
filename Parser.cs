@@ -882,9 +882,9 @@ namespace Epsilon
                     {
                         TryConsumeError(TokenType.OpenParen);
                         NodeExpr InputString = ExpectedExpression(ParseExpr());
-                        if (InputString.type != NodeExpr.NodeExprType.term && InputString.term.type != NodeTerm.NodeTermType.stringlit)
+                        if (!(InputString.type == NodeExpr.NodeExprType.term && InputString.term.type == NodeTerm.NodeTermType.stringlit))
                         {
-                            Shartilities.Log(Shartilities.LogType.ERROR, $"invalid paramter to function `{CalledFunctionName.Value}`\n");
+                            Shartilities.Log(Shartilities.LogType.ERROR, $"invalid paramter to function `{CalledFunctionName.Value}` on line: {CalledFunctionName.Line}\n");
                             Environment.Exit(1);
                         }
                         TryConsumeError(TokenType.CloseParen);

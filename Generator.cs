@@ -513,10 +513,6 @@ namespace Epsilon
             {
                 GenScope(elifs.elsee.scope);
             }
-            else
-            {
-                Shartilities.UNREACHABLE("GenElifs");
-            }
         }
         string GenStmtIF(NodeStmtIF iff)
         {
