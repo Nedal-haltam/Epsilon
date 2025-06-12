@@ -1008,7 +1008,8 @@ namespace Epsilon
                     }
                     else if (CalledFunctionName.Value == "itoa")
                     {
-                        Shartilities.UNREACHABLE("NOT IMPLEMENTED");
+                        // TODO: change the implementation of `itoa` to operate on the desired buffer no the default one (i.e. `itoaTempBuffer`)
+                        Shartilities.TODO("calling itoa");
                         return [];
                     }
                     else

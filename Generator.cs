@@ -326,40 +326,42 @@ namespace Epsilon
             {
                 case NodeBinExpr.NodeBinExprType.add:
                     m_outputcode.AppendLine($"    ADD {reg}, {reg}, {reg2}");
-                    break;    
+                    break;
                 case NodeBinExpr.NodeBinExprType.sub:
                     m_outputcode.AppendLine($"    SUB {reg}, {reg}, {reg2}");
-                    break;    
+                    break;
                 case NodeBinExpr.NodeBinExprType.sll:
                     m_outputcode.AppendLine($"    SLL {reg}, {reg}, {reg2}");
-                    break;    
+                    break;
                 case NodeBinExpr.NodeBinExprType.srl:
                     m_outputcode.AppendLine($"    SRL {reg}, {reg}, {reg2}");
-                    break;    
+                    break;
                 case NodeBinExpr.NodeBinExprType.equalequal:
-                    m_outputcode.AppendLine($"    SEQ {reg}, {reg}, {reg2}");
-                    break;    
+                    m_outputcode.AppendLine($"    XOR {reg}, {reg}, {reg2}");
+                    m_outputcode.AppendLine($"    SEQZ {reg}, {reg}");
+                    break;
                 case NodeBinExpr.NodeBinExprType.notequal:
-                    m_outputcode.AppendLine($"    SNE {reg}, {reg}, {reg2}");
-                    break;    
+                    m_outputcode.AppendLine($"    XOR {reg}, {reg}, {reg2}");
+                    m_outputcode.AppendLine($"    SNEZ {reg}, {reg}");
+                    break;
                 case NodeBinExpr.NodeBinExprType.lessthan:
                     m_outputcode.AppendLine($"    SLT {reg}, {reg}, {reg2}");
-                    break;    
+                    break;
                 case NodeBinExpr.NodeBinExprType.greaterthan:
                     m_outputcode.AppendLine($"    SGT {reg}, {reg}, {reg2}");
-                    break;    
+                    break;
                 case NodeBinExpr.NodeBinExprType.and:
                     m_outputcode.AppendLine($"    AND {reg}, {reg}, {reg2}");
-                    break;    
+                    break;
                 case NodeBinExpr.NodeBinExprType.or:
                     m_outputcode.AppendLine($"    OR {reg}, {reg}, {reg2}");
-                    break;    
+                    break;
                 case NodeBinExpr.NodeBinExprType.xor:
                     m_outputcode.AppendLine($"    XOR {reg}, {reg}, {reg2}");
-                    break;    
+                    break;
                 case NodeBinExpr.NodeBinExprType.mult:
                     m_outputcode.AppendLine($"    MUL {reg}, {reg}, {reg2}");
-                    break;    
+                    break;
                 default:
                     Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid binary operator `{binExpr.type}`\n");
                     Environment.Exit(1);
@@ -825,7 +827,9 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    addi sp, sp, -8");
                 m_outputcode.AppendLine($"    sw ra, 8(sp)");
                 m_outputcode.AppendLine($"    mv t1, a0");
-                m_outputcode.AppendLine($"    addi t2, a1, 32");
+                //m_outputcode.AppendLine($"    addi t2, a1, 32");
+                m_outputcode.AppendLine($"    la t2, itoaTempBuffer");
+                m_outputcode.AppendLine($"    addi t2, t2, 32");
                 m_outputcode.AppendLine($"    sb zero, 0(t2)");
                 m_outputcode.AppendLine($"itoa_loop:");
                 m_outputcode.AppendLine($"    beqz t1, itoa_done");
