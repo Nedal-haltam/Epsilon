@@ -1,20 +1,14 @@
-﻿
-
-
-
-using System.Runtime.CompilerServices;
-
-namespace Epsilon
+﻿namespace Epsilon
 {
     class Parser(List<Token> tokens)
     {
-        private List<Token> m_tokens = tokens;
+        private readonly List<Token> m_tokens = tokens;
         private int m_curr_index = 0;
         public Dictionary<string, List<NodeTermIntLit>> DimensionsOfArrays = [];
         public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
         public List<string> STD_FUNCTIONS = 
         [
-            "print",
+            "printf",
             "strlen",
             "itoa"
         ];
@@ -952,34 +946,19 @@ namespace Epsilon
                         FunctionName = CalledFunctionName,
                         parameters = []
                     };
-                    if (CalledFunctionName.Value == "print")
+                    if (CalledFunctionName.Value == "printf")
                     {
                         TryConsumeError(TokenType.OpenParen);
-                        NodeExpr PrintParameter = ExpectedExpression(ParseExpr());
+                        List<NodeExpr> parameters = [];
+                        if (!Peek(TokenType.CloseParen).HasValue)
+                            do
+                            {
+                                NodeExpr expr = ExpectedExpression(ParseExpr());
+                                parameters.Add(expr);
+                            } while (PeekAndConsume(TokenType.Comma).HasValue);
                         TryConsumeError(TokenType.CloseParen);
                         TryConsumeError(TokenType.SemiColon);
-
-                        CalledFunction.parameters.Add(PrintParameter);
-                        if (PrintParameter.type == NodeExpr.NodeExprType.term && PrintParameter.term.type == NodeTerm.NodeTermType.stringlit)
-                        {
-                            CalledFunction.FunctionName.Value = "print_string";
-                            CalledFunction.parameters.Add(new()
-                            {
-                                type = NodeExpr.NodeExprType.term,
-                                term = new()
-                                {
-                                    type = NodeTerm.NodeTermType.intlit,
-                                    intlit = new()
-                                    {
-                                        intlit = new() { Value = (PrintParameter.term.stringlit.stringlit.Value.Length).ToString(), Type = TokenType.IntLit, Line = CalledFunctionName.Line },
-                                    },
-                                },
-                            });
-                        }
-                        else
-                        {
-                            CalledFunction.FunctionName.Value = "print_number";
-                        }
+                        CalledFunction.parameters = parameters;
                         NodeStmt stmt = new()
                         {
                             type = NodeStmt.NodeStmtType.Function,
@@ -996,6 +975,7 @@ namespace Epsilon
                             Shartilities.Log(Shartilities.LogType.ERROR, $"invalid paramter to function `{CalledFunctionName.Value}` on line: {CalledFunctionName.Line}\n");
                             Environment.Exit(1);
                         }
+
                         TryConsumeError(TokenType.CloseParen);
                         TryConsumeError(TokenType.SemiColon);
                         CalledFunction.parameters = [StrlenParameter];

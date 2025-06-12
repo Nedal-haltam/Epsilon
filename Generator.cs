@@ -157,7 +157,7 @@ namespace Epsilon
             }
             return index;
         }
-        NodeExpr GenIndexExprMult(ref List<NodeExpr> indexes, ref List<NodeTermIntLit> dims, int i)
+        static NodeExpr GenIndexExprMult(ref List<NodeExpr> indexes, ref List<NodeTermIntLit> dims, int i)
         {
             NodeExpr expr = new();
             if (i == dims.Count - 1)
@@ -195,7 +195,7 @@ namespace Epsilon
             expr.binexpr.rhs = GenIndexExprMult(ref indexes, ref dims, i + 1);
             return expr;
         }
-        NodeExpr GenIndexExpr(ref List<NodeExpr> indexes, ref List<NodeTermIntLit> dims, int i)
+        static NodeExpr GenIndexExpr(ref List<NodeExpr> indexes, ref List<NodeTermIntLit> dims, int i)
         {
             NodeExpr expr = new();
             if (i == dims.Count - 1)
@@ -260,8 +260,13 @@ namespace Epsilon
             else if (term.type == NodeTerm.NodeTermType.stringlit)
             {
                 string reg = DestReg ?? $"{FirstTempReg}";
-                StringLits.Add(term.stringlit.stringlit.Value);
-                m_outputcode.AppendLine($"    la {reg}, StringLits{StringLits.Count - 1}");
+                int index = StringLits.IndexOf(term.stringlit.stringlit.Value);
+                if (index == -1)
+                {
+                    StringLits.Add(term.stringlit.stringlit.Value);
+                    index = StringLits.Count - 1;
+                }
+                m_outputcode.AppendLine($"    la {reg}, StringLits{index}");
                 if (DestReg == null)
                     GenPush(reg);
             }
@@ -813,37 +818,6 @@ namespace Epsilon
         }
         void GenStdFunctions()
         {
-            if (!m_UserDefinedFunctions.ContainsKey("print_string"))
-            {
-                m_outputcode.AppendLine($"print_string:");
-                m_outputcode.AppendLine($"    mv a2, a1");
-                m_outputcode.AppendLine($"    mv a1, a0");
-                m_outputcode.AppendLine($"    li a0, 1");
-                m_outputcode.AppendLine($"    li a7, SYS_WRITE");
-                m_outputcode.AppendLine($"    ecall");
-                m_outputcode.AppendLine($"    ret");
-                m_outputcode.AppendLine($"exit:");
-                m_outputcode.AppendLine($"    li a7, SYS_EXIT");
-                m_outputcode.AppendLine($"    ecall");
-                m_outputcode.AppendLine($"    ret");
-            }
-
-            if (!m_UserDefinedFunctions.ContainsKey("print_number"))
-            {
-                m_outputcode.AppendLine($"print_number:");
-                m_outputcode.AppendLine($"    addi sp, sp, -8");
-                m_outputcode.AppendLine($"    sw ra, 0(sp)");
-                m_outputcode.AppendLine($"    la a1, itoaTempBuffer");
-                m_outputcode.AppendLine($"    call itoa");
-                m_outputcode.AppendLine($"    li a0, 1");
-                m_outputcode.AppendLine($"    mv a1, s0");
-                m_outputcode.AppendLine($"    li a2, 32");
-                m_outputcode.AppendLine($"    li a7, SYS_WRITE");
-                m_outputcode.AppendLine($"    ecall");
-                m_outputcode.AppendLine($"    lw ra, 0(sp)");
-                m_outputcode.AppendLine($"    addi sp, sp, 8");
-                m_outputcode.AppendLine($"    ret");
-            }
             if (!m_UserDefinedFunctions.ContainsKey("strlen"))
             {
                 m_outputcode.AppendLine($"strlen:");
@@ -883,11 +857,11 @@ namespace Epsilon
         public StringBuilder GenProg()
         {
 
-            m_outputcode.AppendLine($"    .equ SYS_WRITE, 64");
-            m_outputcode.AppendLine($"    .equ SYS_EXIT, 93");
-            m_outputcode.AppendLine($"    .section .text");
-            m_outputcode.AppendLine($"    .globl _start");
-            m_outputcode.AppendLine($"    _start:");
+            m_outputcode.AppendLine($".equ SYS_WRITE, 64");
+            m_outputcode.AppendLine($".equ SYS_EXIT, 93");
+            m_outputcode.AppendLine($".section .text");
+            m_outputcode.AppendLine($".globl main");
+            m_outputcode.AppendLine($"main:");
 
             if (!m_UserDefinedFunctions.ContainsKey("main"))
             {
@@ -896,25 +870,29 @@ namespace Epsilon
             }
             // TODO: should resolve and generate global and keep them without resetting
 
-            LocalAttributes = new();
-            LocalAttributes.m_DimensionsOfArrays = m_UserDefinedFunctions["main"].DimensionsOfArrays;
-            LocalAttributes.m_parameters = m_UserDefinedFunctions["main"].parameters;
+            LocalAttributes = new()
+            {
+                m_DimensionsOfArrays = m_UserDefinedFunctions["main"].DimensionsOfArrays,
+                m_parameters = m_UserDefinedFunctions["main"].parameters
+            };
             GenScope(m_UserDefinedFunctions["main"].FunctionBody);
             m_outputcode.AppendLine($"    ADDI a0, zero, 0");
             m_outputcode.AppendLine($"    call exit");
             for (int i = 0; i < CalledFunctions.Count; i++)
             {
-                if (m_UserDefinedFunctions.ContainsKey(CalledFunctions[i]))
+                if (m_UserDefinedFunctions.TryGetValue(CalledFunctions[i], out NodeStmtFunction value))
                 {
-                    LocalAttributes = new();
-                    LocalAttributes.m_DimensionsOfArrays = m_UserDefinedFunctions[CalledFunctions[i]].DimensionsOfArrays;
-                    LocalAttributes.m_parameters = m_UserDefinedFunctions[CalledFunctions[i]].parameters;
+                    LocalAttributes = new()
+                    {
+                        m_DimensionsOfArrays = value.DimensionsOfArrays,
+                        m_parameters = value.parameters
+                    };
                     GenFunctionDefinition(CalledFunctions[i]);
                 }
             }
 
             GenStdFunctions();
-
+            m_outputcode.AppendLine($".section .data");
             for (int i = 0; i < StringLits.Count; i++)
             {
                 m_outputcode.AppendLine($"StringLits{i}:");
@@ -923,7 +901,7 @@ namespace Epsilon
             m_outputcode.AppendLine($".section .bss");
             m_outputcode.AppendLine($"itoaTempBuffer:     ");
             m_outputcode.AppendLine($"    .space 32");
-
+            m_outputcode.AppendLine($".extern printf");
             return m_outputcode;
         }
     }
