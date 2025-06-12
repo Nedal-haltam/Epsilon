@@ -2,6 +2,8 @@
 
 
 
+using System.Runtime.CompilerServices;
+
 namespace Epsilon
 {
     class Parser(List<Token> tokens)
@@ -9,11 +11,12 @@ namespace Epsilon
         private List<Token> m_tokens = tokens;
         private int m_curr_index = 0;
         public Dictionary<string, List<NodeTermIntLit>> DimensionsOfArrays = [];
-        public Dictionary<string, NodeStmtFunction> Functions = [];
+        public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
         public List<string> STD_FUNCTIONS = 
         [
             "print",
             "strlen",
+            "itoa"
         ];
 
         Token? Peek(int offset = 0)
@@ -831,17 +834,23 @@ namespace Epsilon
             {
                 Consume();
                 Token FunctionName = Consume();
+                List<NodeTermIdent> parameters = [];
                 TryConsumeError(TokenType.OpenParen);
-                int arity = 0;
                 if (!Peek(TokenType.CloseParen).HasValue)
                     do
                     {
-                        arity++;
-                        if (!(Peek(TokenType.Int).HasValue && Peek(TokenType.Ident).HasValue))
+                        if (!(Peek(TokenType.Int).HasValue && Peek(TokenType.Ident, 1).HasValue))
                         {
                             Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: error in definition of function `{FunctionName.Value}`\n");
                             Environment.Exit(1);
                         }
+                        Consume();
+                        // TODO: support arrays as parameters to functions
+                        parameters.Add(new()
+                        {
+                            ident = Consume(),
+                            indexes = [],
+                        });
                     } while (PeekAndConsume(TokenType.Comma).HasValue);
                 TryConsumeError(TokenType.CloseParen);
                 if (!Peek(TokenType.OpenCurly).HasValue)
@@ -855,8 +864,8 @@ namespace Epsilon
                 NodeStmtScope FunctionBody = ParseScope();
                 NodeStmtFunction Function = new()
                 {
-                    Arity = 0,
                     FunctionName = FunctionName,
+                    parameters = parameters,
                     FunctionBody = FunctionBody,
                     DimensionsOfArrays = new(DimensionsOfArrays)
                 };
@@ -865,7 +874,7 @@ namespace Epsilon
                     Shartilities.Log(Shartilities.LogType.ERROR, $"cannot define function `{FunctionName.Value}`\n");
                     Environment.Exit(1);
                 }
-                Functions.Add(FunctionName.Value, Function);
+                UserDefinedFunctions.Add(FunctionName.Value, Function);
 
                 DimensionsOfArrays.Clear();
                 DimensionsOfArrays = saved;
@@ -905,7 +914,7 @@ namespace Epsilon
             }
             else if (Peek(TokenType.Ident).HasValue && Peek(TokenType.OpenParen, 1).HasValue)
             {
-                if (Peek().HasValue && Functions.ContainsKey(Peek().Value.Value))
+                if (Peek().HasValue && UserDefinedFunctions.ContainsKey(Peek().Value.Value))
                 {
                     Token CalledFunctionName = Consume();
                     TryConsumeError(TokenType.OpenParen);
@@ -930,7 +939,7 @@ namespace Epsilon
                     };
                     if (CalledFunctionName.Value == "main")
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: cannot call functions `main`\n");
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: cannot call function `main`\n");
                         Environment.Exit(1);
                     }
                     return [stmt];
@@ -938,46 +947,39 @@ namespace Epsilon
                 else if (Peek().HasValue && STD_FUNCTIONS.Contains(Peek().Value.Value))
                 {
                     Token CalledFunctionName = Consume();
+                    NodeStmtFunctionCall CalledFunction = new()
+                    {
+                        FunctionName = CalledFunctionName,
+                        parameters = []
+                    };
                     if (CalledFunctionName.Value == "print")
                     {
                         TryConsumeError(TokenType.OpenParen);
-                        NodeExpr InputString = ExpectedExpression(ParseExpr());
-                        if (!(InputString.type == NodeExpr.NodeExprType.term && InputString.term.type == NodeTerm.NodeTermType.stringlit))
-                        {
-                            Shartilities.Log(Shartilities.LogType.ERROR, $"invalid paramter to function `{CalledFunctionName.Value}` on line: {CalledFunctionName.Line}\n");
-                            Environment.Exit(1);
-                        }
+                        NodeExpr PrintParameter = ExpectedExpression(ParseExpr());
                         TryConsumeError(TokenType.CloseParen);
                         TryConsumeError(TokenType.SemiColon);
-                        NodeExpr FDStdout = new()
+
+                        CalledFunction.parameters.Add(PrintParameter);
+                        if (PrintParameter.type == NodeExpr.NodeExprType.term && PrintParameter.term.type == NodeTerm.NodeTermType.stringlit)
                         {
-                            type = NodeExpr.NodeExprType.term,
-                            term = new()
+                            CalledFunction.FunctionName.Value = "print_string";
+                            CalledFunction.parameters.Add(new()
                             {
-                                type = NodeTerm.NodeTermType.intlit,
-                                intlit = new()
+                                type = NodeExpr.NodeExprType.term,
+                                term = new()
                                 {
-                                    intlit = new() { Value = "1", Type = TokenType.IntLit, Line = CalledFunctionName.Line },
+                                    type = NodeTerm.NodeTermType.intlit,
+                                    intlit = new()
+                                    {
+                                        intlit = new() { Value = (PrintParameter.term.stringlit.stringlit.Value.Length).ToString(), Type = TokenType.IntLit, Line = CalledFunctionName.Line },
+                                    },
                                 },
-                            },
-                        };
-                        NodeExpr strlen = new()
+                            });
+                        }
+                        else
                         {
-                            type = NodeExpr.NodeExprType.term,
-                            term = new()
-                            {
-                                type = NodeTerm.NodeTermType.intlit,
-                                intlit = new()
-                                {
-                                    intlit = new() { Value = (InputString.term.stringlit.stringlit.Value.Length).ToString(), Type = TokenType.IntLit, Line = CalledFunctionName.Line },
-                                },
-                            },
-                        };
-                        NodeStmtFunctionCall CalledFunction = new()
-                        {
-                            FunctionName = CalledFunctionName,
-                            parameters = [FDStdout, InputString, strlen]
-                        };
+                            CalledFunction.FunctionName.Value = "print_number";
+                        }
                         NodeStmt stmt = new()
                         {
                             type = NodeStmt.NodeStmtType.Function,
@@ -988,20 +990,26 @@ namespace Epsilon
                     else if (CalledFunctionName.Value == "strlen")
                     {
                         TryConsumeError(TokenType.OpenParen);
-                        NodeExpr InputString = ExpectedExpression(ParseExpr());
+                        NodeExpr StrlenParameter = ExpectedExpression(ParseExpr());
+                        if (!(StrlenParameter.type == NodeExpr.NodeExprType.term && StrlenParameter.term.type == NodeTerm.NodeTermType.stringlit))
+                        {
+                            Shartilities.Log(Shartilities.LogType.ERROR, $"invalid paramter to function `{CalledFunctionName.Value}` on line: {CalledFunctionName.Line}\n");
+                            Environment.Exit(1);
+                        }
                         TryConsumeError(TokenType.CloseParen);
                         TryConsumeError(TokenType.SemiColon);
-                        NodeStmtFunctionCall CalledFunction = new()
-                        {
-                            FunctionName = CalledFunctionName,
-                            parameters = [InputString]
-                        };
+                        CalledFunction.parameters = [StrlenParameter];
                         NodeStmt stmt = new()
                         {
                             type = NodeStmt.NodeStmtType.Function,
                             CalledFunction = CalledFunction
                         };
                         return [stmt];
+                    }
+                    else if (CalledFunctionName.Value == "itoa")
+                    {
+                        Shartilities.UNREACHABLE("NOT IMPLEMENTED");
+                        return [];
                     }
                     else
                     {

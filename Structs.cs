@@ -190,9 +190,9 @@ namespace Epsilon
     public struct NodeStmtFunction
     {
         public Token FunctionName;
+        public List<NodeTermIdent> parameters;
         public NodeStmtScope FunctionBody;
         public Dictionary<string, List<NodeTermIntLit>> DimensionsOfArrays;
-        public int Arity;
     }
 
     public struct NodeStmtReturn

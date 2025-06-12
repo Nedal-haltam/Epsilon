@@ -15,8 +15,7 @@ namespace Epsilon
         public NodeProg m_prog;
         public readonly StringBuilder m_outputcode = new();
         public int m_labels_count = 0;
-        public Dictionary<string, NodeStmtFunction> m_Functions = [];
-        public List<string> m_STD_FUNCTIONS  = [];
+        public Dictionary<string, NodeStmtFunction> m_UserDefinedFunctions = [];
         public readonly List<string> CalledFunctions = [];
         public List<string> StringLits = [];
 
@@ -24,14 +23,16 @@ namespace Epsilon
         {
             public FunctionAttributes()
             {
-                m_vars = [];
+                m_parameters = [];
+                _m_vars = [];
                 m_scopes = [];
                 m_StackSize = 0;
                 m_scopestart = [];
                 m_scopeend = [];
                 m_DimensionsOfArrays = [];
             }
-            public List<Var> m_vars;
+            public List<NodeTermIdent> m_parameters;
+            public List<Var> _m_vars;
             public readonly Stack<int> m_scopes;
             public int m_StackSize;
             public readonly Stack<string?> m_scopestart;
@@ -72,12 +73,11 @@ namespace Epsilon
     }
     class RISCVGenerator : Generator
     {
-        public RISCVGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> Functions, List<string> STD_FUNCTIONS)
+        public RISCVGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> UserDefinedFunctions)
         {
             m_prog = prog;
             LocalAttributes.m_DimensionsOfArrays = Arraydims;
-            m_Functions = Functions;
-            m_STD_FUNCTIONS = STD_FUNCTIONS;
+            m_UserDefinedFunctions = UserDefinedFunctions;
         }
 
         void GenPush(string reg)
@@ -101,22 +101,22 @@ namespace Epsilon
         void BeginScope()
         {
             m_outputcode.AppendLine($"# begin scope");
-            LocalAttributes.m_scopes.Push(LocalAttributes.m_vars.Count);
+            LocalAttributes.m_scopes.Push(LocalAttributes._m_vars.Count);
         }
         void EndScope()
         {
             m_outputcode.AppendLine($"# end scope");
-            int Vars_topop = LocalAttributes.m_vars.Count - LocalAttributes.m_scopes.Pop();
-            int i = LocalAttributes.m_vars.Count - 1;
+            int Vars_topop = LocalAttributes._m_vars.Count - LocalAttributes.m_scopes.Pop();
+            int i = LocalAttributes._m_vars.Count - 1;
             int iterations = Vars_topop;
             int popcount = 0;
             while (iterations-- > 0)
             {
-                popcount += LocalAttributes.m_vars[i--].Size;
+                popcount += LocalAttributes._m_vars[i--].Size;
             }
             StackPopEndScope(popcount);
             LocalAttributes.m_StackSize -= popcount;
-            LocalAttributes.m_vars.RemoveRange(LocalAttributes.m_vars.Count - Vars_topop, Vars_topop);
+            LocalAttributes._m_vars.RemoveRange(LocalAttributes._m_vars.Count - Vars_topop, Vars_topop);
         }
         void GenScope(NodeStmtScope scope)
         {
@@ -127,22 +127,15 @@ namespace Epsilon
             }
             EndScope();
         }
-        bool IsVariableDeclared(string name)
-        {
-            for (int i = 0; i < LocalAttributes.m_vars.Count; i++)
-                if (LocalAttributes.m_vars[i].Value == name)
-                    return true;
-            return false;
-        }
-        int VariableLocation(string name)
+        int VariableLocation_m_vars(string name)
         {
             int index = 0;
-            for (int i = 0; i < LocalAttributes.m_vars.Count; i++)
+            for (int i = 0; i < LocalAttributes._m_vars.Count; i++)
             {
-                if (LocalAttributes.m_vars[i].Value == name)
+                if (LocalAttributes._m_vars[i].Value == name)
                     break;
                 else
-                    index += LocalAttributes.m_vars[i].Size;
+                    index += LocalAttributes._m_vars[i].Size;
             }
             return index;
         }
@@ -217,6 +210,7 @@ namespace Epsilon
         }
         void GenArrayAddr(List<NodeExpr> indexes, Token ident, string? DestReg = null)
         {
+            // assuming `ident` is in m_vars
             m_outputcode.AppendLine($"# begin array address");
             string reg = DestReg ?? $"{FirstTempReg}";
             List<NodeTermIntLit> dims = LocalAttributes.m_DimensionsOfArrays[ident.Value];
@@ -227,7 +221,7 @@ namespace Epsilon
             NodeExpr index = GenIndexExpr(ref indexes, ref dims, 0);
             GenExpr(index, reg);
 
-            int relative_location = LocalAttributes.m_StackSize - VariableLocation(ident.Value);
+            int relative_location = LocalAttributes.m_StackSize - VariableLocation_m_vars(ident.Value);
             m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
             m_outputcode.AppendLine($"    ADDI {reg}, {reg}, {relative_location}");
             m_outputcode.AppendLine($"    ADD {reg}, {reg}, sp");
@@ -265,37 +259,50 @@ namespace Epsilon
             {
                 m_outputcode.AppendLine($"########## {term.ident.ident.Value}");
                 NodeTermIdent ident = term.ident;
-                if (!IsVariableDeclared(ident.ident.Value))
-                {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable {ident.ident.Value} is not declared on line {ident.ident.Line}\n");
-                    Environment.Exit(1);
-                }
                 if (ident.indexes.Count == 0)
                 {
-                    string reg = DestReg ?? $"{FirstTempReg}";
-                    int relative_location = LocalAttributes.m_StackSize - VariableLocation(ident.ident.Value);
-                    m_outputcode.AppendLine($"    LW {reg}, {relative_location * 8}(sp)");
-                    if (term.Negative)
-                        m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
-                    if (DestReg == null)
-                        GenPush(reg);
+                    if (LocalAttributes._m_vars.Any(x => x.Value == ident.ident.Value))
+                    {
+                        string reg = DestReg ?? $"{FirstTempReg}";
+                        int relative_location = LocalAttributes.m_StackSize - VariableLocation_m_vars(ident.ident.Value);
+                        m_outputcode.AppendLine($"    LW {reg}, {relative_location * 8}(sp)");
+                        if (term.Negative)
+                            m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
+                        if (DestReg == null)
+                            GenPush(reg);
+                    }
+                    else if (LocalAttributes.m_parameters.Any(x => x.ident.Value == ident.ident.Value))
+                    {
+                        string reg = DestReg ?? $"{FirstTempReg}";
+                        m_outputcode.AppendLine($"    mv {reg}, a{LocalAttributes.m_parameters.FindIndex(x => x.ident.Value == ident.ident.Value)}");
+                        if (term.Negative)
+                            m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
+                        if (DestReg == null)
+                            GenPush(reg);
+                    }
                 }
                 else
                 {
                     string reg_addr = $"{FirstTempReg}";
                     string reg = DestReg ?? $"{SecondTempReg}";
+                    if (LocalAttributes._m_vars.Any(x => x.Value == ident.ident.Value))
+                    {
+                        m_outputcode.AppendLine($"# begin index");
+                        GenArrayAddr(ident.indexes, ident.ident, reg_addr);
+                        m_outputcode.AppendLine($"# end index");
 
-                    m_outputcode.AppendLine($"# begin index");
-                    GenArrayAddr(ident.indexes, ident.ident, reg_addr);
-                    m_outputcode.AppendLine($"# end index");
-
-                    m_outputcode.AppendLine($"# begin data");
-                    m_outputcode.AppendLine($"    LW {reg}, 0({reg_addr})");
-                    if (term.Negative)
-                        m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
-                    if (DestReg == null)
-                        GenPush(reg);
-                    m_outputcode.AppendLine($"# end data");
+                        m_outputcode.AppendLine($"# begin data");
+                        m_outputcode.AppendLine($"    LW {reg}, 0({reg_addr})");
+                        if (term.Negative)
+                            m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
+                        if (DestReg == null)
+                            GenPush(reg);
+                        m_outputcode.AppendLine($"# end data");
+                    }
+                    else
+                    {
+                        Shartilities.TODO("array: GenTerm");
+                    }
                 }
             }
             else if (term.type == NodeTerm.NodeTermType.paren)
@@ -354,7 +361,7 @@ namespace Epsilon
                     m_outputcode.AppendLine($"    MUL {reg}, {reg}, {reg2}");
                     break;    
                 default:
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"invalide binary operator `{binExpr.type}`\n");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid binary operator `{binExpr.type}`\n");
                     Environment.Exit(1);
                     return;
             }
@@ -430,49 +437,60 @@ namespace Epsilon
             if (declare.type == NodeStmtDeclare.NodeStmtDeclareType.SingleVar)
             {
                 Token ident = declare.singlevar.ident;
-                if (IsVariableDeclared(ident.Value))
+                if (!LocalAttributes._m_vars.Any(x => x.Value == ident.Value) && !LocalAttributes.m_parameters.Any(x => x.ident.Value == ident.Value))
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable {ident.Value} is already declared on line {ident.Line}\n");
-                    Environment.Exit(1);
+                    GenExpr(declare.singlevar.expr);
+                    LocalAttributes._m_vars.Add(new(ident.Value, 1));
                 }
-                GenExpr(declare.singlevar.expr);
-                LocalAttributes.m_vars.Add(new(ident.Value, 1));
+                else
+                {
+                    Shartilities.TODO("single: GenStmtDeclare");
+                }
             }
             else if (declare.type == NodeStmtDeclare.NodeStmtDeclareType.Array)
             {
                 Token ident = declare.array.ident;
-                if (IsVariableDeclared(ident.Value))
+                if (!LocalAttributes._m_vars.Any(x => x.Value == ident.Value) && !LocalAttributes.m_parameters.Any(x => x.ident.Value == ident.Value))
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable {ident.Value} is already declared on line {ident.Line}\n");
-                    Environment.Exit(1);
+                    List<NodeTermIntLit> dims = LocalAttributes.m_DimensionsOfArrays[ident.Value];
+                    int count = 1;
+                    foreach (NodeTermIntLit l in dims)
+                    {
+                        if (int.TryParse(l.intlit.Value, out int dim))
+                        {
+                            count *= dim;
+                        }
+                        else
+                        {
+                            Shartilities.Log(Shartilities.LogType.ERROR, "Generator: could not parse to int\n");
+                            Environment.Exit(1);
+                        }
+                    }
+                    m_outputcode.AppendLine($"    ADDI sp, sp, -{8 * count}");
+                    LocalAttributes.m_StackSize += (count);
+                    LocalAttributes._m_vars.Add(new(ident.Value, count));
                 }
-                List<NodeTermIntLit> dims = LocalAttributes.m_DimensionsOfArrays[declare.array.ident.Value];
-                int count = 1;
-                foreach (NodeTermIntLit l in dims)
+                else
                 {
-                    if (int.TryParse(l.intlit.Value, out int dim))
-                    {
-                        count *= dim;
-                    }
-                    else
-                    {
-                        Shartilities.Log(Shartilities.LogType.ERROR, "Generator: could not parse to int\n");
-                        Environment.Exit(1);
-                    }
+                    Shartilities.TODO("array: GenStmtDeclare");
                 }
-                m_outputcode.AppendLine($"    ADDI sp, sp, -{8*count}");
-                LocalAttributes.m_StackSize += (count);
-                LocalAttributes.m_vars.Add(new(ident.Value, count));
             }
         }
         void GenArrayAssign(NodeStmtAssignArray array)
         {
-            string reg_addr = $"{FirstTempReg}";
-            string reg_data = $"{SecondTempReg}";
-            GenArrayAddr(array.indexes, array.ident);
-            GenExpr(array.expr, reg_data);
-            GenPop(reg_addr);
-            m_outputcode.AppendLine($"    SW {reg_data}, 0({reg_addr})");
+            if (LocalAttributes._m_vars.Any(x => x.Value == array.ident.Value))
+            {
+                string reg_addr = $"{FirstTempReg}";
+                string reg_data = $"{SecondTempReg}";
+                GenArrayAddr(array.indexes, array.ident);
+                GenExpr(array.expr, reg_data);
+                GenPop(reg_addr);
+                m_outputcode.AppendLine($"    SW {reg_data}, 0({reg_addr})");
+            }
+            else
+            {
+                Shartilities.TODO("GenArrayAssign");
+            }
         }
         void GenStmtAssign(NodeStmtAssign assign)
         {
@@ -480,21 +498,23 @@ namespace Epsilon
             {
                 Token ident = assign.singlevar.ident;
                 string reg = $"{FirstTempReg}";
-                if (!IsVariableDeclared(ident.Value))
+                if (LocalAttributes._m_vars.Any(x => x.Value == ident.Value))
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable {ident.Value} is not declared on line {ident.Line}\n");
-                    Environment.Exit(1);
+                    GenExpr(assign.singlevar.expr, reg);
+                    int relative_location = LocalAttributes.m_StackSize - VariableLocation_m_vars(ident.Value);
+                    m_outputcode.AppendLine($"    SW {reg}, {relative_location * 8}(sp)");
                 }
-                GenExpr(assign.singlevar.expr, reg);
-                int relative_location = LocalAttributes.m_StackSize - VariableLocation(ident.Value);
-                m_outputcode.AppendLine($"    SW {reg}, {relative_location*8}(sp)");
+                else
+                {
+                    Shartilities.TODO($"single: GenStmtAssign");
+                }
             }
             else if (assign.type == NodeStmtAssign.NodeStmtAssignType.Array)
             {
                 Token ident = assign.array.ident;
-                if (!IsVariableDeclared(ident.Value))
+                if (LocalAttributes._m_vars.Any(x => x.Value == ident.Value))
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable {ident.Value} is not declared on line {ident.Line}\n");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator(GenStmtAssign): variable {ident.Value} is not declared on line {ident.Line}\n");
                     Environment.Exit(1);
                 }
                 GenArrayAssign(assign.array);
@@ -659,7 +679,7 @@ namespace Epsilon
         {
             if (LocalAttributes.m_scopeend.Count == 0)
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"no enclosing loop out of which to break from on line {breakk.breakk.Line}\n");
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no enclosing loop out of which to break from on line {breakk.breakk.Line}\n");
                 Environment.Exit(1);
             }
             m_outputcode.AppendLine($"    J {LocalAttributes.m_scopeend.Peek()}");
@@ -668,7 +688,7 @@ namespace Epsilon
         {
             if (LocalAttributes.m_scopestart.Count == 0)
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"no enclosing loop out of which to continue on line {continuee.continuee.Line}\n");
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no enclosing loop out of which to continue on line {continuee.continuee.Line}\n");
                 Environment.Exit(1);
             }
             m_outputcode.AppendLine($"    J {LocalAttributes.m_scopestart.Peek()}");
@@ -693,7 +713,7 @@ namespace Epsilon
         }
         void GenFunction(string FunctionName)
         {
-            NodeStmtFunction Function = m_Functions[FunctionName];
+            NodeStmtFunction Function = m_UserDefinedFunctions[FunctionName];
 
             m_outputcode.AppendLine($"{FunctionName}:");
 
@@ -752,37 +772,76 @@ namespace Epsilon
                 Environment.Exit(1);
             }
         }
-        void ResetBeforeGenFunction(ref FunctionAttributes attr)
-        {
-            attr.m_StackSize = 0;
-            attr.m_vars.Clear();
-            attr.m_scopes.Clear();
-            attr.m_scopestart.Clear();
-            attr.m_scopeend.Clear();
-            attr.m_DimensionsOfArrays.Clear();
-        }
         void GenStdFunctions()
         {
-            m_outputcode.AppendLine($"print:");
-            m_outputcode.AppendLine($"    li a7, SYS_WRITE");
-            m_outputcode.AppendLine($"    ecall");
-            m_outputcode.AppendLine($"    ret");
-            m_outputcode.AppendLine($"exit:");
-            m_outputcode.AppendLine($"    li a7, SYS_EXIT");
-            m_outputcode.AppendLine($"    ecall");
-            m_outputcode.AppendLine($"    ret\n\n");
+            if (!m_UserDefinedFunctions.ContainsKey("print_string"))
+            {
+                m_outputcode.AppendLine($"print_string:");
+                m_outputcode.AppendLine($"    mv a2, a1");
+                m_outputcode.AppendLine($"    mv a1, a0");
+                m_outputcode.AppendLine($"    li a0, 1");
+                m_outputcode.AppendLine($"    li a7, SYS_WRITE");
+                m_outputcode.AppendLine($"    ecall");
+                m_outputcode.AppendLine($"    ret");
+                m_outputcode.AppendLine($"exit:");
+                m_outputcode.AppendLine($"    li a7, SYS_EXIT");
+                m_outputcode.AppendLine($"    ecall");
+                m_outputcode.AppendLine($"    ret");
+            }
 
-            m_outputcode.AppendLine($"strlen:");
-            m_outputcode.AppendLine($"    mv t0, a0");
-            m_outputcode.AppendLine($"    li s0, 0");
-            m_outputcode.AppendLine($"strlen_loop:");
-            m_outputcode.AppendLine($"    lbu t1, 0(t0)");
-            m_outputcode.AppendLine($"    beqz t1, strlen_done");
-            m_outputcode.AppendLine($"    addi s0, s0, 1");
-            m_outputcode.AppendLine($"    addi t0, t0, 1");
-            m_outputcode.AppendLine($"    j strlen_loop");
-            m_outputcode.AppendLine($"strlen_done:");
-            m_outputcode.AppendLine($"    ret");
+            if (!m_UserDefinedFunctions.ContainsKey("print_number"))
+            {
+                m_outputcode.AppendLine($"print_number:");
+                m_outputcode.AppendLine($"    addi sp, sp, -8");
+                m_outputcode.AppendLine($"    sw ra, 8(sp)");
+                m_outputcode.AppendLine($"    la a1, itoaTempBuffer");
+                m_outputcode.AppendLine($"    call itoa");
+                m_outputcode.AppendLine($"    li a0, 1");
+                m_outputcode.AppendLine($"    mv a1, s0");
+                m_outputcode.AppendLine($"    li a2, 32");
+                m_outputcode.AppendLine($"    li a7, SYS_WRITE");
+                m_outputcode.AppendLine($"    ecall");
+                m_outputcode.AppendLine($"    lw ra, 8(sp)");
+                m_outputcode.AppendLine($"    addi sp, sp, 8");
+                m_outputcode.AppendLine($"    ret");
+            }
+            if (!m_UserDefinedFunctions.ContainsKey("strlen"))
+            {
+                m_outputcode.AppendLine($"strlen:");
+                m_outputcode.AppendLine($"    mv t0, a0");
+                m_outputcode.AppendLine($"    li s0, 0");
+                m_outputcode.AppendLine($"strlen_loop:");
+                m_outputcode.AppendLine($"    lbu t1, 0(t0)");
+                m_outputcode.AppendLine($"    beqz t1, strlen_done");
+                m_outputcode.AppendLine($"    addi s0, s0, 1");
+                m_outputcode.AppendLine($"    addi t0, t0, 1");
+                m_outputcode.AppendLine($"    j strlen_loop");
+                m_outputcode.AppendLine($"strlen_done:");
+                m_outputcode.AppendLine($"    ret");
+            }
+            if (!m_UserDefinedFunctions.ContainsKey("itoa"))
+            {
+                m_outputcode.AppendLine($"itoa:");
+                m_outputcode.AppendLine($"    addi sp, sp, -8");
+                m_outputcode.AppendLine($"    sw ra, 8(sp)");
+                m_outputcode.AppendLine($"    mv t1, a0");
+                m_outputcode.AppendLine($"    addi t2, a1, 32");
+                m_outputcode.AppendLine($"    sb zero, 0(t2)");
+                m_outputcode.AppendLine($"itoa_loop:");
+                m_outputcode.AppendLine($"    beqz t1, itoa_done");
+                m_outputcode.AppendLine($"    li t3, 10");
+                m_outputcode.AppendLine($"    rem t4, t1, t3");
+                m_outputcode.AppendLine($"    addi t4, t4, '0'");
+                m_outputcode.AppendLine($"    addi t2, t2, -1");
+                m_outputcode.AppendLine($"    sb t4, 0(t2)");
+                m_outputcode.AppendLine($"    div t1, t1, t3");
+                m_outputcode.AppendLine($"    j itoa_loop");
+                m_outputcode.AppendLine($"itoa_done:");
+                m_outputcode.AppendLine($"    mv s0, t2");
+                m_outputcode.AppendLine($"    lw ra, 8(sp)");
+                m_outputcode.AppendLine($"    addi sp, sp, 8");
+                m_outputcode.AppendLine($"    ret");
+            }
         }
         public StringBuilder GenProg()
         {
@@ -793,25 +852,28 @@ namespace Epsilon
             m_outputcode.AppendLine($"    .globl _start");
             m_outputcode.AppendLine($"    _start:");
 
-            if (!m_Functions.ContainsKey("main"))
+            if (!m_UserDefinedFunctions.ContainsKey("main"))
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n");
                 Environment.Exit(1);
             }
-            // TODO: should resolve and generate global and keep them without resetting them and then generate user defined functions, and main
+            // TODO: should resolve and generate global and keep them without resetting
 
-            ResetBeforeGenFunction(ref LocalAttributes);
-            LocalAttributes.m_DimensionsOfArrays = m_Functions["main"].DimensionsOfArrays;
-            GenScope(m_Functions["main"].FunctionBody);
+            LocalAttributes = new();
+            LocalAttributes.m_DimensionsOfArrays = m_UserDefinedFunctions["main"].DimensionsOfArrays;
+            LocalAttributes.m_parameters = m_UserDefinedFunctions["main"].parameters;
+            GenScope(m_UserDefinedFunctions["main"].FunctionBody);
             m_outputcode.AppendLine($"    ADDI a0, zero, 0");
             m_outputcode.AppendLine($"    call exit");
             for (int i = 0; i < CalledFunctions.Count; i++)
             {
-                if (m_STD_FUNCTIONS.Contains(CalledFunctions[i]))
-                    continue;
-                ResetBeforeGenFunction(ref LocalAttributes);
-                LocalAttributes.m_DimensionsOfArrays = m_Functions[CalledFunctions[i]].DimensionsOfArrays;
-                GenFunction(CalledFunctions[i]);
+                if (m_UserDefinedFunctions.ContainsKey(CalledFunctions[i]))
+                {
+                    LocalAttributes = new();
+                    LocalAttributes.m_DimensionsOfArrays = m_UserDefinedFunctions[CalledFunctions[i]].DimensionsOfArrays;
+                    LocalAttributes.m_parameters = m_UserDefinedFunctions[CalledFunctions[i]].parameters;
+                    GenFunction(CalledFunctions[i]);
+                }
             }
 
             GenStdFunctions();
@@ -821,6 +883,10 @@ namespace Epsilon
                 m_outputcode.AppendLine($"StringLits{i}:");
                 m_outputcode.AppendLine($"    .string \"{StringLits[i]}\"");
             }
+            m_outputcode.AppendLine($".section .bss");
+            m_outputcode.AppendLine($"itoaTempBuffer:     ");
+            m_outputcode.AppendLine($"    .space 32");
+
             return m_outputcode;
         }
     }
