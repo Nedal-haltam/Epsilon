@@ -83,7 +83,7 @@ namespace Epsilon
         void GenPush(string reg)
         {
             m_outputcode.AppendLine($"    addi sp, sp, -8");
-            m_outputcode.AppendLine($"    sw {reg}, 0(sp)");
+            m_outputcode.AppendLine($"    SD {reg}, 0(sp)");
             LocalAttributes.m_StackSize++;
         }
         void GenPushMany(List<string> regs)
@@ -91,14 +91,14 @@ namespace Epsilon
             m_outputcode.AppendLine($"    addi sp, sp, -{regs.Count * 8}");
             for (int i = 0; i < regs.Count; i++)
             {
-                m_outputcode.AppendLine($"    sw {regs[i]}, {8 * i}(sp)");
+                m_outputcode.AppendLine($"    SD {regs[i]}, {8 * i}(sp)");
             }
             LocalAttributes.m_StackSize += regs.Count;
         }
 
         void GenPop(string reg)
         {
-            m_outputcode.AppendLine($"    lw {reg}, 0(sp)");
+            m_outputcode.AppendLine($"    LD {reg}, 0(sp)");
             m_outputcode.AppendLine($"    addi sp, sp, 8");
             LocalAttributes.m_StackSize--;
         }
@@ -106,7 +106,7 @@ namespace Epsilon
         {
             for (int i = 0; i < regs.Count; i++)
             {
-                m_outputcode.AppendLine($"    lw {regs[regs.Count - i - 1]}, {8 * (regs.Count - i - 1)}(sp)");
+                m_outputcode.AppendLine($"    LD {regs[regs.Count - i - 1]}, {8 * (regs.Count - i - 1)}(sp)");
             }
             m_outputcode.AppendLine($"    addi sp, sp, {regs.Count * 8}");
             LocalAttributes.m_StackSize -= regs.Count;
@@ -240,9 +240,7 @@ namespace Epsilon
             GenExpr(index, reg);
 
             int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - 1;
-            m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
-            m_outputcode.AppendLine($"    ADDI {reg}, {reg}, {relative_location}");
-            m_outputcode.AppendLine($"    ADD {reg}, {reg}, sp");
+            m_outputcode.AppendLine($"    ADDI {reg}, sp, {8*relative_location}");
             if (DestReg == null)
                 GenPush(reg);
             m_outputcode.AppendLine($"# end array address");
@@ -288,7 +286,7 @@ namespace Epsilon
                     {
                         string reg = DestReg ?? $"{FirstTempReg}";
                         int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.ident.Value) - 1;
-                        m_outputcode.AppendLine($"    LW {reg}, {relative_location * 8}(sp)");
+                        m_outputcode.AppendLine($"    LD {reg}, {relative_location * 8}(sp)");
                         if (term.Negative)
                             m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
                         if (DestReg == null)
@@ -315,7 +313,7 @@ namespace Epsilon
                         m_outputcode.AppendLine($"# end index");
 
                         m_outputcode.AppendLine($"# begin data");
-                        m_outputcode.AppendLine($"    LW {reg}, 0({reg_addr})");
+                        m_outputcode.AppendLine($"    LD {reg}, 0({reg_addr})");
                         if (term.Negative)
                             m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
                         if (DestReg == null)
@@ -462,20 +460,26 @@ namespace Epsilon
             if (declare.type == NodeStmtDeclare.NodeStmtDeclareType.SingleVar)
             {
                 Token ident = declare.singlevar.ident;
-                if (!LocalAttributes.m_vars.Any(x => x.Value == ident.Value) && !LocalAttributes.m_parameters.Any(x => x.ident.Value == ident.Value))
+                if (LocalAttributes.m_vars.Any(x => x.Value == ident.Value) || LocalAttributes.m_parameters.Any(x => x.ident.Value == ident.Value))
                 {
-                    GenExpr(declare.singlevar.expr);
-                    LocalAttributes.m_vars.Add(new(ident.Value, 1));
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{ident.Value}` is alread declared\n");
+                    Environment.Exit(1);
                 }
                 else
                 {
-                    Shartilities.TODO("single: GenStmtDeclare");
+                    GenExpr(declare.singlevar.expr);
+                    LocalAttributes.m_vars.Add(new(ident.Value, 1));
                 }
             }
             else if (declare.type == NodeStmtDeclare.NodeStmtDeclareType.Array)
             {
                 Token ident = declare.array.ident;
-                if (!LocalAttributes.m_vars.Any(x => x.Value == ident.Value) && !LocalAttributes.m_parameters.Any(x => x.ident.Value == ident.Value))
+                if (LocalAttributes.m_vars.Any(x => x.Value == ident.Value) || LocalAttributes.m_parameters.Any(x => x.ident.Value == ident.Value))
+                {
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{ident.Value}` is alread declared\n");
+                    Environment.Exit(1);
+                }
+                else
                 {
                     List<NodeTermIntLit> dims = LocalAttributes.m_DimensionsOfArrays[ident.Value];
                     int count = 1;
@@ -495,10 +499,6 @@ namespace Epsilon
                     LocalAttributes.m_StackSize += (count);
                     LocalAttributes.m_vars.Add(new(ident.Value, count));
                 }
-                else
-                {
-                    Shartilities.TODO("array: GenStmtDeclare");
-                }
             }
         }
         void GenArrayAssign(NodeStmtAssignArray array)
@@ -510,7 +510,7 @@ namespace Epsilon
                 GenArrayAddr(array.indexes, array.ident);
                 GenExpr(array.expr, reg_data);
                 GenPop(reg_addr);
-                m_outputcode.AppendLine($"    SW {reg_data}, 0({reg_addr})");
+                m_outputcode.AppendLine($"    SD {reg_data}, 0({reg_addr})");
             }
             else
             {
@@ -527,7 +527,7 @@ namespace Epsilon
                 {
                     GenExpr(assign.singlevar.expr, reg);
                     int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - 1;
-                    m_outputcode.AppendLine($"    SW {reg}, {relative_location * 8}(sp)");
+                    m_outputcode.AppendLine($"    SD {reg}, {relative_location * 8}(sp)");
                 }
                 else
                 {
@@ -539,10 +539,12 @@ namespace Epsilon
                 Token ident = assign.array.ident;
                 if (LocalAttributes.m_vars.Any(x => x.Value == ident.Value))
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator(GenStmtAssign): variable {ident.Value} is not declared on line {ident.Line}\n");
-                    Environment.Exit(1);
+                    GenArrayAssign(assign.array);
                 }
-                GenArrayAssign(assign.array);
+                else
+                {
+                    Shartilities.TODO($"array: GenStmtAssign");
+                }
             }
         }
         void GenElifs(NodeIfElifs elifs, string label_end)
@@ -748,10 +750,10 @@ namespace Epsilon
             m_outputcode.AppendLine($"{FunctionName}:");
 
             m_outputcode.AppendLine($"    addi sp, sp, -8");
-            m_outputcode.AppendLine($"    sw ra, 0(sp)");
+            m_outputcode.AppendLine($"    SD ra, 0(sp)");
             GenScope(Function.FunctionBody);
             m_outputcode.AppendLine($"    li s0, 0");
-            m_outputcode.AppendLine($"    lw ra, 0(sp)");
+            m_outputcode.AppendLine($"    LD ra, 0(sp)");
             m_outputcode.AppendLine($"    addi sp, sp, 8");
             m_outputcode.AppendLine($"    ret");
         }
@@ -764,7 +766,7 @@ namespace Epsilon
         void GenStmtReturn(NodeStmtReturn returnn)
         {
             GenExpr(returnn.expr, "s0");
-            m_outputcode.AppendLine($"    lw ra, 0(sp)");
+            m_outputcode.AppendLine($"    LD ra, 0(sp)");
             m_outputcode.AppendLine($"    addi sp, sp, 8");
             m_outputcode.AppendLine($"    ret");
         }
@@ -818,6 +820,10 @@ namespace Epsilon
         }
         void GenStdFunctions()
         {
+            m_outputcode.AppendLine($"exit:");
+            m_outputcode.AppendLine($"    li a7, SYS_EXIT");
+            m_outputcode.AppendLine($"    ecall");
+            m_outputcode.AppendLine($"    ret");
             if (!m_UserDefinedFunctions.ContainsKey("strlen"))
             {
                 m_outputcode.AppendLine($"strlen:");
