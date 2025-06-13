@@ -50,7 +50,7 @@ namespace Epsilon
     }
     class Tokenizer(string thecode)
     {
-        Dictionary<string, TokenType> KeyWords = new()
+        readonly Dictionary<string, TokenType> KeyWords = new()
         {
             { "int", TokenType.Int},
             { "if", TokenType.If},
@@ -64,10 +64,7 @@ namespace Epsilon
             { "return", TokenType.returnn},
             { "exit", TokenType.Exit},
         };
-        Dictionary<string, TokenType> _Tokens = new()
-        {
-        };
-        private string m_thecode = thecode;
+        private readonly string m_thecode = thecode;
         private int m_curr_index = 0;
         private List<Token> m_tokens = [];
         char? Peek(int offset = 0)
@@ -147,7 +144,12 @@ namespace Epsilon
         }
         bool IsPartOfName()
         {
-            return char.IsAsciiLetterOrDigit(Peek().Value) || Peek('_').HasValue;
+            char? peeked = Peek();
+            if (peeked.HasValue)
+            {
+                return char.IsAsciiLetterOrDigit(peeked.Value) || Peek('_').HasValue;
+            }
+            return false;
         }
         void SkipUntilNot(char c)
         {
@@ -174,9 +176,12 @@ namespace Epsilon
             m_tokens = [];
             StringBuilder buffer = new(); // this buffer is for multiple letter tokens
             int line = 1;
-            while (Peek().HasValue)
+            while (true)
             {
-                char curr_token = Peek().Value;
+                char? peeked = Peek();
+                if (!peeked.HasValue)
+                    break;
+                char curr_token = peeked.Value;
 
                 if (char.IsAsciiLetter(curr_token) || curr_token == '_')
                 {
@@ -187,7 +192,7 @@ namespace Epsilon
                         buffer.Append(Consume());
                     }
                     string word = buffer.ToString();
-                    if (macro.ContainsKey(word))
+                    if (macro.TryGetValue(word, out Macro value))
                     {
                         buffer.Clear();
                         List<string> inputs = [];
@@ -213,15 +218,17 @@ namespace Epsilon
                         inputs.Add(buffer.ToString());
                         buffer.Clear();
 
-                        if (inputs.Count != macro[word].inputs.Count)
+                        if (inputs.Count != value.inputs.Count)
                             throw new Exception("inputs does not match macro definition");
-                        string src = macro[word].src;
-                        for (int i = 0; i < macro[word].inputs.Count; i++)
+                        string src = value.src;
+                        for (int i = 0; i < value.inputs.Count; i++)
                         {
-                            src = Regex.Replace(macro[word].src, $@"\b{Regex.Escape(macro[word].inputs[i])}\b", inputs[i]);
+                            src = Regex.Replace(value.src, $@"\b{Regex.Escape(value.inputs[i])}\b", inputs[i]);
                         }
-                        Tokenizer temp = new(src);
-                        temp.macro = macro;
+                        Tokenizer temp = new(src)
+                        {
+                            macro = macro
+                        };
                         m_tokens.AddRange(temp.Tokenize());
                     }
                     else if (KeyWords.TryGetValue(word, out TokenType tt))
@@ -237,9 +244,14 @@ namespace Epsilon
                 else if (char.IsDigit(curr_token))
                 {
                     buffer.Append(Consume());
-                    while (Peek().HasValue && char.IsDigit(Peek().Value))
+
+                    while (true)
                     {
-                        buffer.Append(Consume());
+                        char? NextDigit = Peek();
+                        if (NextDigit.HasValue && char.IsDigit(NextDigit.Value))
+                            buffer.Append(Consume());
+                        else
+                            break;
                     }
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.IntLit, Line = line });
                     buffer.Clear();
@@ -285,11 +297,10 @@ namespace Epsilon
                     List<Token> macrovalue = temp.Tokenize();
                     for (int i = 0; i < macrovalue.Count; i++)
                     {
-                        if (macro.ContainsKey(macrovalue[i].Value))
+                        if (macro.TryGetValue(macrovalue[i].Value, out Macro value))
                         {
-                            Token t = macrovalue[i];
                             macrovalue.RemoveAt(i);
-                            macrovalue.InsertRange(i, macro[t.Value].value);
+                            macrovalue.InsertRange(i, value.value);
                         }
                     }
                     macro.Add(macroname, new() { src = MacroSrc, inputs = inputs, value = macrovalue });

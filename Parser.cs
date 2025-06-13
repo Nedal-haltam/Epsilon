@@ -44,11 +44,13 @@
         }
 
 
-        Token? TryConsumeError(TokenType type)
+        Token TryConsumeError(TokenType type)
         {
             if (!Peek(type).HasValue)
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error expected `{type}` on line: {Peek(-1).Value.Line}\n");
+                Token? peeked = Peek(-1);
+                string line = peeked.HasValue ? $" on line: {peeked.Value.Line}" : "";
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error expected `{type}`{line}\n");
                 Environment.Exit(1);
             }
             return Consume();
@@ -548,17 +550,6 @@
             TryConsumeError(TokenType.SemiColon);
             return stmts;
         }
-        NodeExpr ExprZero()
-        {
-            NodeExpr expr = new()
-            {
-                type = NodeExpr.NodeExprType.term
-            };
-            expr.term.type = NodeTerm.NodeTermType.intlit;
-            expr.term.intlit.intlit.Type = TokenType.Int;
-            expr.term.intlit.intlit.Value = "0";
-            return expr;
-        }
         Token Parsedimension()
         {
             Consume();
@@ -585,37 +576,6 @@
                     break;
                 }
                 TryConsumeError(TokenType.Comma);
-            }
-            return values;
-        }
-        List<NodeExpr> ParseArrayInit1D(int dim)
-        {
-            List<NodeExpr> values = ParseArrayInit(dim);
-            if (values.Count != dim)
-            {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error dimensions are not aligned on line: {Peek(-1).Value.Line}\n");
-                Environment.Exit(1);
-            }
-            return values;
-        }
-        List<List<NodeExpr>> ParseArrayInit2D(int dim1, int dim2)
-        {
-            List<List<NodeExpr>> values = [];
-            TryConsumeError(TokenType.OpenCurly);
-            for (int i = 0; i < dim1; i++)
-            {
-                values.Add(ParseArrayInit1D(dim2));
-                if (Peek(TokenType.CloseCurly).HasValue)
-                {
-                    Consume();
-                    break;
-                }
-                TryConsumeError(TokenType.Comma);
-            }
-            if (values.Count != dim1)
-            {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error dimensions are not aligned on line: {Peek(-1).Value.Line}\n");
-                Environment.Exit(1);
             }
             return values;
         }
@@ -909,7 +869,8 @@
             }
             else if (Peek(TokenType.Ident).HasValue && Peek(TokenType.OpenParen, 1).HasValue)
             {
-                if (Peek().HasValue && UserDefinedFunctions.ContainsKey(Peek().Value.Value))
+                Token? PotentialFunctionName = Peek();
+                if (PotentialFunctionName.HasValue && UserDefinedFunctions.ContainsKey(PotentialFunctionName.Value.Value))
                 {
                     Token CalledFunctionName = Consume();
                     TryConsumeError(TokenType.OpenParen);
@@ -939,7 +900,7 @@
                     }
                     return [stmt];
                 }
-                else if (Peek().HasValue && STD_FUNCTIONS.Contains(Peek().Value.Value))
+                else if (PotentialFunctionName.HasValue && STD_FUNCTIONS.Contains(PotentialFunctionName.Value.Value))
                 {
                     Token CalledFunctionName = Consume();
                     NodeStmtFunctionCall CalledFunction = new()
@@ -1002,8 +963,11 @@
                 }
                 else
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"function `{Peek().Value.Value}` is undefined\n");
-                    Environment.Exit(1);
+                    if (PotentialFunctionName.HasValue)
+                    {
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"function `{PotentialFunctionName.Value.Value}` is undefined\n");
+                        Environment.Exit(1);
+                    }
                     return [];
                 }
             }
