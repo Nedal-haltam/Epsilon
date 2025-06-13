@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Epsilon
 {
@@ -21,23 +24,25 @@ namespace Epsilon
 
         public struct FunctionAttributes
         {
-            public FunctionAttributes()
-            {
-                m_parameters = [];
-                m_vars = [];
-                m_scopes = [];
-                m_StackSize = 0;
-                m_scopestart = [];
-                m_scopeend = [];
-                m_DimensionsOfArrays = [];
-            }
-            public List<NodeTermIdent> m_parameters;
             public List<Var> m_vars;
             public readonly Stack<int> m_scopes;
             public int m_StackSize;
             public readonly Stack<string?> m_scopestart;
             public readonly Stack<string?> m_scopeend;
             public Dictionary<string, List<NodeTermIntLit>> m_DimensionsOfArrays;
+            public List<Var> m_parameters;
+            public string m_CurrentFunction;
+            public FunctionAttributes()
+            {
+                m_vars = [];
+                m_scopes = [];
+                m_StackSize = 0;
+                m_scopestart = [];
+                m_scopeend = [];
+                m_DimensionsOfArrays = [];
+                m_CurrentFunction = "";
+                m_parameters = [];
+            }
         }
         public FunctionAttributes LocalAttributes = new();
         public static string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
@@ -234,42 +239,53 @@ namespace Epsilon
             expr.binexpr.rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
             return expr;
         }
-        void GenArrayAddr(List<NodeExpr> indexes, Token ident, string second_temp_reg, string? DestReg = null)
+        void GenArrayAddrFrom_m_vars_(List<NodeExpr> indexes, Token ident, string BaseReg = "sp")
         {
-            // assuming `ident` is in m_vars
             m_outputcode.AppendLine($"# begin array address");
-            string reg = DestReg ?? $"{FirstTempReg}";
+            string reg = BaseReg == FirstTempReg ? SecondTempReg : FirstTempReg;
             List<NodeTermIntLit> dims = LocalAttributes.m_DimensionsOfArrays[ident.Value];
             Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
 
             // arr[i][j][k] = arr[index], s.t index = (i * dim[1] * dim[2]) + (j * dim[2]) + k
             // we get the address from GenExpr(index), then GenPop(reg)
             NodeExpr index = GenIndexExpr(ref indexes, ref dims, 0);
-            GenExpr(index, reg);
+            if (BaseReg != "sp")
+                GenPush(BaseReg);
+            GenExpr(new()
+            {
+                type = NodeExpr.NodeExprType.binExpr,
+                binexpr = new()
+                {
+                    type = NodeBinExpr.NodeBinExprType.mul,
+                    lhs = index,
+                    rhs = NodeExpr.Number("8"),
+                }
+            });
+            GenPop(reg);
+            if (BaseReg != "sp")
+                GenPop(BaseReg);
+            m_outputcode.AppendLine($"    SUB {reg}, {BaseReg}, {reg}");
+            if (BaseReg == "sp")
+            {
+                int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - 1;
+                m_outputcode.AppendLine($"    ADD {reg}, {reg}, {8 * relative_location}");
+            }
 
-            int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - 1;
-            m_outputcode.AppendLine($"    li {second_temp_reg}, 8");
-            m_outputcode.AppendLine($"    MUL {reg}, {reg}, {second_temp_reg}");
-            m_outputcode.AppendLine($"    li {second_temp_reg}, {8 * relative_location}");
-            m_outputcode.AppendLine($"    SUB {reg}, sp, {reg}");
-            m_outputcode.AppendLine($"    ADD {reg}, {reg}, {second_temp_reg}");
-            if (DestReg == null)
-                GenPush(reg);
+            GenPush(reg);
             m_outputcode.AppendLine($"# end array address");
         }
-        void GenTerm(NodeTerm term, string? DestReg = null)
+        void GenTerm(NodeTerm term)
         {
             if (term.type == NodeTerm.NodeTermType.intlit)
             {
-                string reg = DestReg ?? $"{FirstTempReg}";
+                string reg = FirstTempReg;
                 string sign = (term.Negative) ? "-" : "";
                 m_outputcode.AppendLine($"    LI {reg}, {sign}{term.intlit.intlit.Value}");
-                if (DestReg == null)
-                    GenPush(reg);
+                GenPush(reg);
             }
             else if (term.type == NodeTerm.NodeTermType.stringlit)
             {
-                string reg = DestReg ?? $"{FirstTempReg}";
+                string reg = FirstTempReg;
                 int index = StringLits.IndexOf(term.stringlit.stringlit.Value);
                 if (index == -1)
                 {
@@ -277,16 +293,14 @@ namespace Epsilon
                     index = StringLits.Count - 1;
                 }
                 m_outputcode.AppendLine($"    la {reg}, StringLits{index}");
-                if (DestReg == null)
-                    GenPush(reg);
+                GenPush(reg);
             }
             else if (term.type == NodeTerm.NodeTermType.functioncall)
             {
-                string reg = DestReg ?? $"{FirstTempReg}";
+                string reg = FirstTempReg;
                 GenStmtFunctionCall(new() { FunctionName = term.functioncall.FunctionName, parameters = term.functioncall.parameters }, true);
                 m_outputcode.AppendLine($"    mv {reg}, s0");
-                if (DestReg == null)
-                    GenPush(reg);
+                GenPush(reg);
             }
             else if (term.type == NodeTerm.NodeTermType.ident)
             {
@@ -296,51 +310,65 @@ namespace Epsilon
                 {
                     if (LocalAttributes.m_vars.Any(x => x.Value == ident.ident.Value))
                     {
-                        string reg = DestReg ?? $"{FirstTempReg}";
+                        string reg = FirstTempReg;
                         int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.ident.Value) - 1;
-                        m_outputcode.AppendLine($"    LD {reg}, {relative_location * 8}(sp)");
+
+                        if (ident.ByValue)
+                        {
+                            m_outputcode.AppendLine($"    LD {reg}, {relative_location * 8}(sp)");
+                        }
+                        else if (ident.ByRef)
+                        {
+                            m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location * 8}");
+                        }
+                        else
+                        {
+                            Shartilities.UNREACHABLE($"GenTerm_single_var_m_vars");
+                        }
+
                         if (term.Negative)
                             m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
-                        if (DestReg == null)
-                            GenPush(reg);
+                        GenPush(reg);
                     }
-                    else if (LocalAttributes.m_parameters.Any(x => x.ident.Value == ident.ident.Value))
+                    else
                     {
-                        string reg = DestReg ?? $"{FirstTempReg}";
-                        m_outputcode.AppendLine($"    mv {reg}, a{LocalAttributes.m_parameters.FindIndex(x => x.ident.Value == ident.ident.Value)}");
-                        if (term.Negative)
-                            m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
-                        if (DestReg == null)
-                            GenPush(reg);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.ident.Value}` is undeclared\n");
+                        Environment.Exit(1);
                     }
                 }
                 else
                 {
-                    string reg = DestReg ?? $"{SecondTempReg}";
-                    string reg_addr = reg == $"{FirstTempReg}" ? $"{SecondTempReg}" : $"{FirstTempReg}";
+                    string reg = FirstTempReg;
+                    string reg_addr = SecondTempReg;
                     if (LocalAttributes.m_vars.Any(x => x.Value == ident.ident.Value))
                     {
-                        m_outputcode.AppendLine($"# begin index");
-                        GenArrayAddr(ident.indexes, ident.ident, reg, reg_addr);
-                        m_outputcode.AppendLine($"# end index");
+                        if (LocalAttributes.m_parameters.Any(x => x.Value == ident.ident.Value))
+                        {
+                            int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.ident.Value) - 1;
+                            m_outputcode.AppendLine($"    LD {reg}, {relative_location * 8}(sp)");
+                            GenArrayAddrFrom_m_vars_(ident.indexes, ident.ident, reg);
+                        }
+                        else
+                        {
+                            GenArrayAddrFrom_m_vars_(ident.indexes, ident.ident);
+                        }
+                        GenPop(reg_addr);
 
-                        m_outputcode.AppendLine($"# begin data");
                         m_outputcode.AppendLine($"    LD {reg}, 0({reg_addr})");
                         if (term.Negative)
                             m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
-                        if (DestReg == null)
-                            GenPush(reg);
-                        m_outputcode.AppendLine($"# end data");
+                        GenPush(reg);
                     }
                     else
                     {
-                        Shartilities.TODO("array: GenTerm");
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.ident.Value}` is not declared\n");
+                        Environment.Exit(1);
                     }
                 }
             }
             else if (term.type == NodeTerm.NodeTermType.paren)
             {
-                GenExpr(term.paren.expr, DestReg);
+                GenExpr(term.paren.expr);
             }
             else
             {
@@ -348,12 +376,13 @@ namespace Epsilon
                 Environment.Exit(1);
             }
         }
-        void GenBinExpr(NodeBinExpr binExpr, string? DestReg = null)
+        void GenBinExpr(NodeBinExpr binExpr)
         {
-            string reg = DestReg ?? $"{FirstTempReg}";
+            string reg = FirstTempReg;
             string reg2 = reg == $"{SecondTempReg}" ? $"{FirstTempReg}" : $"{SecondTempReg}";
             GenExpr(binExpr.rhs);
-            GenExpr(binExpr.lhs, reg);
+            GenExpr(binExpr.lhs);
+            GenPop(reg);
             GenPop(reg2);
             switch (binExpr.type)
             {
@@ -398,18 +427,17 @@ namespace Epsilon
                     Environment.Exit(1);
                     return;
             }
-            if (DestReg == null)
-                GenPush(reg);
+            GenPush(reg);
         }
-        void GenExpr(NodeExpr expr, string? DestReg = null)
+        void GenExpr(NodeExpr expr)
         {
             if (expr.type == NodeExpr.NodeExprType.term)
             {
-                GenTerm(expr.term, DestReg);
+                GenTerm(expr.term);
             }
             else if (expr.type == NodeExpr.NodeExprType.binExpr)
             {
-                GenBinExpr(expr.binexpr, DestReg);
+                GenBinExpr(expr.binexpr);
             }
         }
 
@@ -451,32 +479,24 @@ namespace Epsilon
             }
             return null;
         }
-        //void GenArrayInit1D(List<NodeExpr> init)
-        //{
-        //    for (int i = 0; i < init.Count; i++)
-        //    {
-        //        GenExpr(init[i]);
-        //    }
-        //}
-        //void GenArrayInit2D(List<List<NodeExpr>> init)
-        //{
-        //    for (int i = 0; i < init.Count; i++)
-        //    {
-        //        GenArrayInit1D(init[i]);
-        //    }
-        //}
         void GenStmtDeclare(NodeStmtDeclare declare)
         {
             if (declare.type == NodeStmtDeclare.NodeStmtDeclareType.SingleVar)
             {
                 Token ident = declare.singlevar.ident;
-                if (LocalAttributes.m_vars.Any(x => x.Value == ident.Value) || LocalAttributes.m_parameters.Any(x => x.ident.Value == ident.Value))
+                if (LocalAttributes.m_vars.Any(x => x.Value == ident.Value))
                 {
                     Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{ident.Value}` is alread declared\n");
                     Environment.Exit(1);
                 }
                 else
                 {
+                    // TODO: you don't have to generate an expression
+                    // it may be this situation:
+                    // int x;
+                    // so you just allocate a space on the stack and update the stacksize
+                    // TODO: make a function name mayby `GenAllocate` that just updates the stack pointer and updates the stacksize without storing anything
+                    // and use in the array section below 
                     GenExpr(declare.singlevar.expr);
                     LocalAttributes.m_vars.Add(new(ident.Value, 1));
                 }
@@ -484,7 +504,7 @@ namespace Epsilon
             else if (declare.type == NodeStmtDeclare.NodeStmtDeclareType.Array)
             {
                 Token ident = declare.array.ident;
-                if (LocalAttributes.m_vars.Any(x => x.Value == ident.Value) || LocalAttributes.m_parameters.Any(x => x.ident.Value == ident.Value))
+                if (LocalAttributes.m_vars.Any(x => x.Value == ident.Value))
                 {
                     Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{ident.Value}` is alread declared\n");
                     Environment.Exit(1);
@@ -511,22 +531,6 @@ namespace Epsilon
                 }
             }
         }
-        void GenArrayAssign(NodeStmtAssignArray array)
-        {
-            if (LocalAttributes.m_vars.Any(x => x.Value == array.ident.Value))
-            {
-                string reg_addr = $"{FirstTempReg}";
-                string reg_data = $"{SecondTempReg}";
-                GenArrayAddr(array.indexes, array.ident, reg_data, null);
-                GenExpr(array.expr, reg_data);
-                GenPop(reg_addr);
-                m_outputcode.AppendLine($"    SD {reg_data}, 0({reg_addr})");
-            }
-            else
-            {
-                Shartilities.TODO("GenArrayAssign");
-            }
-        }
         void GenStmtAssign(NodeStmtAssign assign)
         {
             if (assign.type == NodeStmtAssign.NodeStmtAssignType.SingleVar)
@@ -535,13 +539,15 @@ namespace Epsilon
                 string reg = $"{FirstTempReg}";
                 if (LocalAttributes.m_vars.Any(x => x.Value == ident.Value))
                 {
-                    GenExpr(assign.singlevar.expr, reg);
+                    GenExpr(assign.singlevar.expr);
+                    GenPop(reg);
                     int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - 1;
                     m_outputcode.AppendLine($"    SD {reg}, {relative_location * 8}(sp)");
                 }
                 else
                 {
-                    Shartilities.TODO($"single: GenStmtAssign");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.Value}` is not declared\n");
+                    Environment.Exit(1);
                 }
             }
             else if (assign.type == NodeStmtAssign.NodeStmtAssignType.Array)
@@ -549,11 +555,28 @@ namespace Epsilon
                 Token ident = assign.array.ident;
                 if (LocalAttributes.m_vars.Any(x => x.Value == ident.Value))
                 {
-                    GenArrayAssign(assign.array);
+                    string reg_addr = $"{FirstTempReg}";
+                    string reg_data = $"{SecondTempReg}";
+                    if (LocalAttributes.m_parameters.Any(x => x.Value == ident.Value))
+                    {
+                        int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - 1;
+                        m_outputcode.AppendLine($"    LD {reg_addr}, {relative_location * 8}(sp)");
+                        GenArrayAddrFrom_m_vars_(assign.array.indexes, assign.array.ident, reg_addr);
+                    }
+                    else
+                    {
+                        GenArrayAddrFrom_m_vars_(assign.array.indexes, assign.array.ident);
+                    }
+                    GenExpr(assign.array.expr);
+                    GenPop(reg_data);
+                    GenPop(reg_addr);
+                    m_outputcode.AppendLine($"    SD {reg_data}, 0({reg_addr})");
                 }
                 else
                 {
-                    Shartilities.TODO($"array: GenStmtAssign");
+                    Shartilities.TODO($"this is what we want todo in GenStmtAssign");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.Value}` is not declared\n");
+                    Environment.Exit(1);
                 }
             }
         }
@@ -563,7 +586,8 @@ namespace Epsilon
             {
                 string reg = $"{FirstTempReg}";
                 string label = $"LABEL{m_labels_count++}_elifs";
-                GenExpr(elifs.elif.pred.cond, reg);
+                GenExpr(elifs.elif.pred.cond);
+                GenPop(reg);
                 m_outputcode.AppendLine($"    BEQZ {reg}, {label}");
                 GenScope(elifs.elif.pred.scope);
                 m_outputcode.AppendLine($"    J {label_end}");
@@ -591,7 +615,8 @@ namespace Epsilon
             string label = $"LABEL{m_labels_count++}_elifs";
 
             m_outputcode.AppendLine($"{label_start}:");
-            GenExpr(iff.pred.cond, reg);
+            GenExpr(iff.pred.cond);
+            GenPop(reg);
             m_outputcode.AppendLine($"    BEQZ {reg}, {label}");
             GenScope(iff.pred.scope);
             if (iff.elifs.HasValue)
@@ -629,7 +654,8 @@ namespace Epsilon
 
                 m_outputcode.AppendLine($"{label_start}:");
                 string reg = $"{FirstTempReg}";
-                GenExpr(forr.pred.cond.Value.cond, reg);
+                GenExpr(forr.pred.cond.Value.cond);
+                GenPop(reg);
                 m_outputcode.AppendLine($"    BEQZ {reg}, {label_end}");
                 m_outputcode.AppendLine($"# end condition");
                 LocalAttributes.m_scopestart.Push(label_update);
@@ -699,7 +725,8 @@ namespace Epsilon
 
             m_outputcode.AppendLine($"{label_start}:");
             string reg = $"{FirstTempReg}";
-            GenExpr(whilee.cond, reg);
+            GenExpr(whilee.cond);
+            GenPop(reg);
             m_outputcode.AppendLine($"    BEQZ {reg}, {label_end}");
             m_outputcode.AppendLine($"# end condition");
             LocalAttributes.m_scopestart.Push(label_start);
@@ -745,7 +772,8 @@ namespace Epsilon
             }
             for (int i = 0; i < Function.parameters.Count; i++)
             {
-                GenExpr(Function.parameters[i], $"a{i}");
+                GenExpr(Function.parameters[i]);
+                GenPop($"a{i}");
             }
             m_outputcode.AppendLine($"    call {Function.FunctionName.Value}");
             if (WillPushParams)
@@ -753,32 +781,57 @@ namespace Epsilon
                 GenPopMany(regs);
             }
         }
+        void GenReturnFromFunction(string FunctionName)
+        {
+            for (int i = 0; i < m_UserDefinedFunctions[FunctionName].parameters.Count; i++)
+            {
+                GenPop($"a{i}");
+                LocalAttributes.m_vars.Add(new(m_UserDefinedFunctions[FunctionName].parameters[i].Value, 1));
+            }
+            if (FunctionName != "main")
+            {
+                m_outputcode.AppendLine($"    LD ra, 0(sp)");
+                m_outputcode.AppendLine($"    ADDI sp, sp, 8");
+                m_outputcode.AppendLine($"    ret");
+            }
+        }
         void GenFunctionDefinition(string FunctionName)
         {
+            m_outputcode.AppendLine($"{FunctionName}:");
+            LocalAttributes = new()
+            {
+                m_CurrentFunction = FunctionName,
+                m_DimensionsOfArrays = m_UserDefinedFunctions[FunctionName].DimensionsOfArrays,
+                m_parameters = m_UserDefinedFunctions[FunctionName].parameters,
+            };
             NodeStmtFunction Function = m_UserDefinedFunctions[FunctionName];
 
-            m_outputcode.AppendLine($"{FunctionName}:");
 
-            m_outputcode.AppendLine($"    ADDI sp, sp, -8");
-            m_outputcode.AppendLine($"    SD ra, 0(sp)");
+            if (FunctionName != "main")
+            {
+                m_outputcode.AppendLine($"    ADDI sp, sp, -8");
+                m_outputcode.AppendLine($"    SD ra, 0(sp)");
+            }
+            for (int i = 0; i < m_UserDefinedFunctions[FunctionName].parameters.Count; i++)
+            {
+                GenPush($"a{i}");
+                LocalAttributes.m_vars.Add(new(m_UserDefinedFunctions[FunctionName].parameters[i].Value, 1));
+            }
             GenScope(Function.FunctionBody);
-            m_outputcode.AppendLine($"    li s0, 0");
-            m_outputcode.AppendLine($"    LD ra, 0(sp)");
-            m_outputcode.AppendLine($"    ADDI sp, sp, 8");
-            m_outputcode.AppendLine($"    ret");
+            GenReturnFromFunction(FunctionName);
         }
         void GenStmtExit(NodeStmtExit exit)
         {
             string reg = "a0";
-            GenExpr(exit.expr, reg);
+            GenExpr(exit.expr);
+            GenPop(reg);
             m_outputcode.AppendLine($"    call exit");
         }
         void GenStmtReturn(NodeStmtReturn returnn)
         {
-            GenExpr(returnn.expr, "s0");
-            m_outputcode.AppendLine($"    LD ra, 0(sp)");
-            m_outputcode.AppendLine($"    ADDI sp, sp, 8");
-            m_outputcode.AppendLine($"    ret");
+            GenExpr(returnn.expr);
+            GenPop("s0");
+            GenReturnFromFunction(LocalAttributes.m_CurrentFunction);
         }
         void GenStmt(NodeStmt stmt)
         {
@@ -877,7 +930,6 @@ namespace Epsilon
             m_outputcode.AppendLine($".equ SYS_EXIT, 93");
             m_outputcode.AppendLine($".section .text");
             m_outputcode.AppendLine($".globl main");
-            m_outputcode.AppendLine($"main:");
 
             if (!m_UserDefinedFunctions.ContainsKey("main"))
             {
@@ -885,24 +937,13 @@ namespace Epsilon
                 Environment.Exit(1);
             }
             // TODO: should resolve and generate global and keep them without resetting
-
-            LocalAttributes = new()
-            {
-                m_DimensionsOfArrays = m_UserDefinedFunctions["main"].DimensionsOfArrays,
-                m_parameters = m_UserDefinedFunctions["main"].parameters
-            };
-            GenScope(m_UserDefinedFunctions["main"].FunctionBody);
+            GenFunctionDefinition(m_UserDefinedFunctions["main"].FunctionName.Value);
             m_outputcode.AppendLine($"    ADDI a0, zero, 0");
             m_outputcode.AppendLine($"    call exit");
             for (int i = 0; i < CalledFunctions.Count; i++)
             {
-                if (m_UserDefinedFunctions.TryGetValue(CalledFunctions[i], out NodeStmtFunction value))
+                if (m_UserDefinedFunctions.ContainsKey(CalledFunctions[i]))
                 {
-                    LocalAttributes = new()
-                    {
-                        m_DimensionsOfArrays = value.DimensionsOfArrays,
-                        m_parameters = value.parameters
-                    };
                     GenFunctionDefinition(CalledFunctions[i]);
                 }
             }

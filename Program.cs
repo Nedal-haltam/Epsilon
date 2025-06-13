@@ -39,6 +39,7 @@ namespace Epsilon
         }
         static void Main(string[] args)
         {
+            //Compile("../../../main.e");
             if (!Shartilities.ShiftArgs(ref args, out string InputFilePath))
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, "no input file provided\n");

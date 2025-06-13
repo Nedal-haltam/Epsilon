@@ -190,7 +190,7 @@ namespace Epsilon
     public struct NodeStmtFunction
     {
         public Token FunctionName;
-        public List<NodeTermIdent> parameters;
+        public List<Var> parameters;
         public NodeStmtScope FunctionBody;
         public Dictionary<string, List<NodeTermIntLit>> DimensionsOfArrays;
     }
@@ -224,6 +224,27 @@ namespace Epsilon
         public NodeExprType type;
         public NodeTerm term;
         public NodeBinExpr binexpr;
+
+        public static NodeExpr Number(string num)
+        {
+            return new NodeExpr()
+            {
+                type = NodeExprType.term,
+                term = new()
+                {
+                    type = NodeTerm.NodeTermType.intlit,
+                    intlit = new()
+                    {
+                        intlit = new()
+                        {
+                            Type = TokenType.IntLit,
+                            Value = num,
+                            Line = -1,
+                        }
+                    }
+                }
+            };
+        }
     }
     public struct NodeTerm
     {
@@ -256,9 +277,37 @@ namespace Epsilon
     {
         public Token ident;
         public List<NodeExpr> indexes;
+        private bool m_ByValue = true;
+        private bool m_ByRef = false;
+        public bool ByValue
+        {
+            get
+            {
+                return m_ByValue;
+            }
+            set
+            {
+                m_ByValue = value;
+                m_ByRef = !value;
+            }
+        }
+        public bool ByRef
+        {
+            get
+            {
+                return m_ByRef;
+            }
+            set
+            {
+                m_ByRef = value;
+                m_ByValue = !value;
+            }
+        }
         public NodeTermIdent()
         {
             indexes = [];
+            m_ByValue = true;
+            m_ByRef = false;
         }
     }
     public class NodeTermParen

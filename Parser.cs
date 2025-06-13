@@ -1,4 +1,7 @@
-﻿namespace Epsilon
+﻿using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
+
+namespace Epsilon
 {
     class Parser(List<Token> tokens)
     {
@@ -182,6 +185,7 @@
                 {
                     term.ident.indexes.Add(Parseindex());
                 }
+                term.ident.ByRef = DimensionsOfArrays.ContainsKey(term.ident.ident.Value) && term.ident.indexes.Count == 0;
                 return term;
             }
             else if (Peek(TokenType.OpenParen).HasValue)
@@ -604,23 +608,6 @@
                 Token dim = Parsedimension();
                 DimensionsOfArrays[declare.ident.Value].Add(new() { intlit = dim });
             }
-            //if (peek(TokenType.Equal).HasValue)
-            //{
-            //    consume();
-            //    // TODO: support array initialization for an N-dimensional arrays
-            //    if (declare.dims.Count == 1)
-            //    {
-            //        int dim1 = Convert.ToInt32(declare.dims[0].intlit.Value);
-            //        ParseArrayInit1D(dim1).ForEach(x => declare.values.Add(x));
-            //    }
-            //    else if (declare.dims.Count == 2)
-            //    {
-            //        int dim1 = Convert.ToInt32(declare.dims[0].intlit.Value);
-            //        int dim2 = Convert.ToInt32(declare.dims[1].intlit.Value);
-            //        ParseArrayInit2D(dim1, dim2).ForEach(x => x.ForEach(y => declare.values.Add(y)));
-            //    }
-            //}
-
             TryConsumeError(TokenType.SemiColon);
             NodeStmt stmt = new()
             {
@@ -676,7 +663,6 @@
             if (IsStmtDeclare())
             {
                 Consume();
-
                 if (Peek(TokenType.OpenSquare, 1).HasValue)
                 {
                     return [ParseDeclareArray()];
@@ -789,13 +775,16 @@
                 };
                 return [stmt];
             }
-            else if (Peek(TokenType.func).HasValue)
+            else if (Peek(TokenType.func).HasValue)/////////////////////////
             {
+                Dictionary<string, List<NodeTermIntLit>> saved = new(DimensionsOfArrays);
+                DimensionsOfArrays.Clear();
                 Consume();
                 Token FunctionName = Consume();
-                List<NodeTermIdent> parameters = [];
+                List<Var> parameters = [];
                 TryConsumeError(TokenType.OpenParen);
                 if (!Peek(TokenType.CloseParen).HasValue)
+                {
                     do
                     {
                         if (!(Peek(TokenType.Int).HasValue && Peek(TokenType.Ident, 1).HasValue))
@@ -804,21 +793,39 @@
                             Environment.Exit(1);
                         }
                         Consume();
-                        // TODO: support arrays as parameters to functions
-                        parameters.Add(new()
+                        Token ident = Consume();
+                        Var parameter = new();
+                        parameter.Size = 1;
+                        if (Peek(TokenType.OpenSquare).HasValue)
                         {
-                            ident = Consume(),
-                            indexes = [],
-                        });
+                            if (DimensionsOfArrays.ContainsKey(ident.Value))
+                            {
+                                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: array `{ident.Value}` is alread delcared\n");
+                                Environment.Exit(1);
+                            }
+                            else
+                            {
+                                DimensionsOfArrays.Add(ident.Value, []);
+                            }
+                            while (Peek(TokenType.OpenSquare).HasValue)
+                            {
+                                Token dim = Parsedimension();
+                                DimensionsOfArrays[ident.Value].Add(new() { intlit = dim });
+                                parameter.Size *= (int)uint.Parse(dim.Value);
+                            }
+                        }
+                        // TODO later: support defaule values for parameters in a functions
+                        parameter.Value = ident.Value;
+
+                        parameters.Add(parameter);
                     } while (PeekAndConsume(TokenType.Comma).HasValue);
+                }
                 TryConsumeError(TokenType.CloseParen);
                 if (!Peek(TokenType.OpenCurly).HasValue)
                 {
                     Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: expected a scope for function `{FunctionName.Value}`\n");
                     Environment.Exit(1);
                 }
-                Dictionary<string, List<NodeTermIntLit>> saved = new(DimensionsOfArrays);
-                DimensionsOfArrays.Clear();
 
                 NodeStmtScope FunctionBody = ParseScope();
                 NodeStmtFunction Function = new()
@@ -826,7 +833,7 @@
                     FunctionName = FunctionName,
                     parameters = parameters,
                     FunctionBody = FunctionBody,
-                    DimensionsOfArrays = new(DimensionsOfArrays)
+                    DimensionsOfArrays = new(DimensionsOfArrays),
                 };
                 if (STD_FUNCTIONS.Contains(FunctionName.Value))
                 {
@@ -839,39 +846,7 @@
                 DimensionsOfArrays = saved;
                 return [];
             }
-            else if (Peek(TokenType.returnn).HasValue)
-            {
-                Consume();
-                NodeExpr expr = ExpectedExpression(ParseExpr());
-                TryConsumeError(TokenType.SemiColon);
-                NodeStmtReturn Return = new()
-                {
-                    expr = expr
-                };
-                NodeStmt stmt = new()
-                {
-                    type = NodeStmt.NodeStmtType.Return,
-                    Return = Return
-                };
-                return [stmt];
-            }
-            else if (IsStmtExit())
-            {
-                Consume();
-                Consume();
-                NodeStmtExit exit = new();
-                NodeExpr expr = ExpectedExpression(ParseExpr());
-                exit.expr = expr;
-                TryConsumeError(TokenType.CloseParen);
-                TryConsumeError(TokenType.SemiColon);
-                NodeStmt stmt = new()
-                {
-                    type = NodeStmt.NodeStmtType.Exit,
-                    Exit = exit
-                };
-                return [stmt];
-            }
-            else if (Peek(TokenType.Ident).HasValue && Peek(TokenType.OpenParen, 1).HasValue)
+            else if (Peek(TokenType.Ident).HasValue && Peek(TokenType.OpenParen, 1).HasValue)/////////////////////////
             {
                 Token? PotentialFunctionName = Peek();
                 if (PotentialFunctionName.HasValue && UserDefinedFunctions.ContainsKey(PotentialFunctionName.Value.Value))
@@ -975,9 +950,50 @@
                     return [];
                 }
             }
+
+            else if (Peek(TokenType.returnn).HasValue)
+            {
+                Consume();
+                NodeExpr expr = ExpectedExpression(ParseExpr());
+                TryConsumeError(TokenType.SemiColon);
+                NodeStmtReturn Return = new()
+                {
+                    expr = expr
+                };
+                NodeStmt stmt = new()
+                {
+                    type = NodeStmt.NodeStmtType.Return,
+                    Return = Return
+                };
+                return [stmt];
+            }
+            else if (IsStmtExit())
+            {
+                Consume();
+                Consume();
+                NodeStmtExit exit = new();
+                NodeExpr expr = ExpectedExpression(ParseExpr());
+                exit.expr = expr;
+                TryConsumeError(TokenType.CloseParen);
+                TryConsumeError(TokenType.SemiColon);
+                NodeStmt stmt = new()
+                {
+                    type = NodeStmt.NodeStmtType.Exit,
+                    Exit = exit
+                };
+                return [stmt];
+            }
             else
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: invalid statement `{Peek().Value.Value}`\n");
+                Token? peeked = Peek();
+                if (peeked.HasValue)
+                {
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: invalid statement `{peeked.Value.Value}`\n");
+                }
+                else
+                {
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: there is no statement to parse\n");
+                }
                 Environment.Exit(1);
                 return [];
             }
