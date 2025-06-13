@@ -243,6 +243,11 @@ namespace Epsilon
         {
             m_outputcode.AppendLine($"# begin array address");
             string reg = BaseReg == FirstTempReg ? SecondTempReg : FirstTempReg;
+            if (!LocalAttributes.m_DimensionsOfArrays.ContainsKey(ident.Value))
+            {
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{ident.Value}` is not declared as an array\n");
+                Environment.Exit(1);
+            }
             List<NodeTermIntLit> dims = LocalAttributes.m_DimensionsOfArrays[ident.Value];
             Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
 
@@ -759,6 +764,23 @@ namespace Epsilon
         }
         void GenStmtFunctionCall(NodeStmtFunctionCall Function, bool WillPushParams)
         {
+            if (m_UserDefinedFunctions.TryGetValue(Function.FunctionName.Value, out NodeStmtFunction CalledFunction))
+            {
+                if (CalledFunction.parameters.Count != Function.parameters.Count)
+                {
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: Function call to `{CalledFunction.FunctionName.Value}` is not valid, check function arity\n");
+                    Environment.Exit(1);
+                }
+            }
+            else if (STD_FUNCTIONS.Contains(Function.FunctionName.Value))
+            {
+
+            }
+            else
+            {
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: Function `{Function.FunctionName.Value}` is not defined\n");
+                Environment.Exit(1);
+            }
             if (!CalledFunctions.Contains(Function.FunctionName.Value))
                 CalledFunctions.Add(Function.FunctionName.Value);
             List<string> regs = [];
@@ -881,6 +903,7 @@ namespace Epsilon
                 Environment.Exit(1);
             }
         }
+        List<string> STD_FUNCTIONS = ["exit", "strlen", "itoa", "printf"];
         void GenStdFunctions()
         {
             m_outputcode.AppendLine($"exit:");
