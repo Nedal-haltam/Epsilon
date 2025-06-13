@@ -56,8 +56,6 @@ namespace Epsilon
                 return (Convert.ToInt32(imm1) != Convert.ToInt32(imm2) ? 1 : 0).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.lessthan)
                 return (Convert.ToInt32(imm1) < Convert.ToInt32(imm2) ? 1 : 0).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.greaterthan)
-                return (Convert.ToInt32(imm1) > Convert.ToInt32(imm2) ? 1 : 0).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.and)
                 return (Convert.ToInt32(imm1) & Convert.ToInt32(imm2)).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.or)
@@ -381,9 +379,6 @@ namespace Epsilon
                     break;
                 case NodeBinExpr.NodeBinExprType.lessthan:
                     m_outputcode.AppendLine($"    SLT {reg}, {reg}, {reg2}");
-                    break;
-                case NodeBinExpr.NodeBinExprType.greaterthan:
-                    m_outputcode.AppendLine($"    SGT {reg}, {reg}, {reg2}");
                     break;
                 case NodeBinExpr.NodeBinExprType.and:
                     m_outputcode.AppendLine($"    AND {reg}, {reg}, {reg2}");

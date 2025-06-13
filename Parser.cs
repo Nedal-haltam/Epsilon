@@ -99,8 +99,7 @@
                    Peek(TokenType.Srl).HasValue ||
                    Peek(TokenType.EqualEqual).HasValue ||
                    Peek(TokenType.NotEqual).HasValue ||
-                   Peek(TokenType.LessThan).HasValue ||
-                   Peek(TokenType.GreaterThan).HasValue;
+                   Peek(TokenType.LessThan).HasValue;
         }
         static NodeExpr ExpectedExpression(NodeExpr? expr)
         {
@@ -203,7 +202,7 @@
         {
             return type switch
             {
-                TokenType.EqualEqual or TokenType.NotEqual or TokenType.LessThan or TokenType.GreaterThan or TokenType.Xor or TokenType.Or or TokenType.And => 0,
+                TokenType.EqualEqual or TokenType.NotEqual or TokenType.LessThan or TokenType.Xor or TokenType.Or or TokenType.And => 0,
                 TokenType.Sll or TokenType.Srl => 1,
                 TokenType.Plus or TokenType.Minus => 2,
                 TokenType.mul => 3,
@@ -228,8 +227,6 @@
                 return NodeBinExpr.NodeBinExprType.notequal;
             if (op == TokenType.LessThan)
                 return NodeBinExpr.NodeBinExprType.lessthan;
-            if (op == TokenType.GreaterThan)
-                return NodeBinExpr.NodeBinExprType.greaterthan;
             if (op == TokenType.And)
                 return NodeBinExpr.NodeBinExprType.and;
             if (op == TokenType.Or)
