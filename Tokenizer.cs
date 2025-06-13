@@ -151,9 +151,15 @@ namespace Epsilon
             }
             return false;
         }
-        void SkipUntilNot(char c)
+        int SkipUntilNot(char c)
         {
-            while (Peek(c).HasValue) Consume();
+            int count = 0;
+            while (Peek(c).HasValue)
+            {
+                Consume();
+                count++;
+            }
+            return count;
         }
         StringBuilder ConsumeUntil(char c)
         {
@@ -256,9 +262,9 @@ namespace Epsilon
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.IntLit, Line = line });
                     buffer.Clear();
                 }
-                else if (Peek("#define"))
+                else if (Peek("#define "))
                 {
-                    ConsumeMany(7);
+                    ConsumeMany(8);
                     SkipUntilNot(' ');
                     while (Peek().HasValue && IsPartOfName())
                     {
