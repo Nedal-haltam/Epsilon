@@ -1,4 +1,4 @@
-func Print10sMultiple()
+func Print10sMultipleAndLengths()
 {
     int x = 1;
     int count = 0;
@@ -24,5 +24,5 @@ func foo(int a, int b)
 func main()
 {
     printf("return of foo is : %d\n", foo(123, 456));
-    Print10sMultiple();
+    Print10sMultipleAndLengths();
 }

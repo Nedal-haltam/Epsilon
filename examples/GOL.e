@@ -7,6 +7,19 @@
 #define glider_size 5
 #define iters 25
 
+func SlowDown()
+{
+    for (int i = 0; i < 1000; i = i + 1)
+    {
+        for (int j = 0; j < 1000; j = j + 1)
+        {
+            for (int k = 0; k < 25; k = k + 1)
+            {
+
+            }
+        }
+    }
+}
 func main()
 {
     int grid[SIZE][SIZE];
@@ -48,16 +61,7 @@ func main()
             }
             printf("\n");
         }
-        for (int i = 0; i < 1000; i = i + 1)
-        {
-            for (int j = 0; j < 1000; j = j + 1)
-            {
-                for (int k = 0; k < 25; k = k + 1)
-                {
-
-                }
-            }
-        }
+        SlowDown();
         COPY122
         for (int i = 0; i < SIZE; i = i + 1)
         {
