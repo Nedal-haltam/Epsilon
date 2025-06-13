@@ -1,7 +1,7 @@
 
 
-build:
-	dotnet build
+main:
+	dotnet .\bin\Debug\net8.0\Epsilon.dll .\main.e -o ..\assembly\risc-v\main.S
 
 examples: dummy
 	dotnet .\bin\Debug\net8.0\Epsilon.dll .\examples\basic.e -o ..\assembly\risc-v\examples\basic.S

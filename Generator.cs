@@ -64,7 +64,7 @@ namespace Epsilon
                 return (Convert.ToInt32(imm1) | Convert.ToInt32(imm2)).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.xor)
                 return (Convert.ToInt32(imm1) ^ Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.mult)
+            else if (op == NodeBinExpr.NodeBinExprType.mul)
                 return (Convert.ToInt32(imm1) * Convert.ToInt32(imm2)).ToString();
             Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid operation `{op}`\n");
             Environment.Exit(1);
@@ -82,13 +82,13 @@ namespace Epsilon
 
         void GenPush(string reg)
         {
-            m_outputcode.AppendLine($"    addi sp, sp, -8");
+            m_outputcode.AppendLine($"    ADDI sp, sp, -8");
             m_outputcode.AppendLine($"    SD {reg}, 0(sp)");
             LocalAttributes.m_StackSize++;
         }
         void GenPushMany(List<string> regs)
         {
-            m_outputcode.AppendLine($"    addi sp, sp, -{regs.Count * 8}");
+            m_outputcode.AppendLine($"    ADDI sp, sp, -{regs.Count * 8}");
             for (int i = 0; i < regs.Count; i++)
             {
                 m_outputcode.AppendLine($"    SD {regs[i]}, {8 * i}(sp)");
@@ -99,7 +99,7 @@ namespace Epsilon
         void GenPop(string reg)
         {
             m_outputcode.AppendLine($"    LD {reg}, 0(sp)");
-            m_outputcode.AppendLine($"    addi sp, sp, 8");
+            m_outputcode.AppendLine($"    ADDI sp, sp, 8");
             LocalAttributes.m_StackSize--;
         }
         void GenPopMany(List<string> regs)
@@ -108,13 +108,23 @@ namespace Epsilon
             {
                 m_outputcode.AppendLine($"    LD {regs[regs.Count - i - 1]}, {8 * (regs.Count - i - 1)}(sp)");
             }
-            m_outputcode.AppendLine($"    addi sp, sp, {regs.Count * 8}");
+            m_outputcode.AppendLine($"    ADDI sp, sp, {regs.Count * 8}");
             LocalAttributes.m_StackSize -= regs.Count;
         }
         void StackPopEndScope(int popcount)
         {
             if (popcount != 0)
-                m_outputcode.AppendLine($"    ADDI sp, sp, {8*popcount}");
+            {
+                if (8 * popcount >= 2048)
+                {
+                    m_outputcode.AppendLine($"    LI t0, {8 * popcount}");
+                    m_outputcode.AppendLine($"    ADD sp, sp, t0");
+                }
+                else
+                {
+                    m_outputcode.AppendLine($"    ADDI sp, sp, {8 * popcount}");
+                }
+            }
         }
         void BeginScope()
         {
@@ -178,7 +188,7 @@ namespace Epsilon
             expr.type = NodeExpr.NodeExprType.binExpr;
             expr.binexpr = new()
             {
-                type = NodeBinExpr.NodeBinExprType.mult,
+                type = NodeBinExpr.NodeBinExprType.mul,
                 lhs = new()
             };
             expr.binexpr.lhs.type = NodeExpr.NodeExprType.term;
@@ -218,7 +228,7 @@ namespace Epsilon
             expr.binexpr.lhs.type = NodeExpr.NodeExprType.binExpr;
             expr.binexpr.lhs.binexpr = new()
             {
-                type = NodeBinExpr.NodeBinExprType.mult,
+                type = NodeBinExpr.NodeBinExprType.mul,
                 lhs = indexes[i],
                 rhs = GenIndexExprMult(ref indexes, ref dims, i + 1)
             };
@@ -226,7 +236,7 @@ namespace Epsilon
             expr.binexpr.rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
             return expr;
         }
-        void GenArrayAddr(List<NodeExpr> indexes, Token ident, string? DestReg = null)
+        void GenArrayAddr(List<NodeExpr> indexes, Token ident, string second_temp_reg, string? DestReg = null)
         {
             // assuming `ident` is in m_vars
             m_outputcode.AppendLine($"# begin array address");
@@ -240,7 +250,11 @@ namespace Epsilon
             GenExpr(index, reg);
 
             int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - 1;
-            m_outputcode.AppendLine($"    ADDI {reg}, sp, {8*relative_location}");
+            m_outputcode.AppendLine($"    li {second_temp_reg}, 8");
+            m_outputcode.AppendLine($"    MUL {reg}, {reg}, {second_temp_reg}");
+            m_outputcode.AppendLine($"    li {second_temp_reg}, {8 * relative_location}");
+            m_outputcode.AppendLine($"    SUB {reg}, sp, {reg}");
+            m_outputcode.AppendLine($"    ADD {reg}, {reg}, {second_temp_reg}");
             if (DestReg == null)
                 GenPush(reg);
             m_outputcode.AppendLine($"# end array address");
@@ -251,7 +265,7 @@ namespace Epsilon
             {
                 string reg = DestReg ?? $"{FirstTempReg}";
                 string sign = (term.Negative) ? "-" : "";
-                m_outputcode.AppendLine($"    ADDI {reg}, zero, {sign}{term.intlit.intlit.Value}");
+                m_outputcode.AppendLine($"    LI {reg}, {sign}{term.intlit.intlit.Value}");
                 if (DestReg == null)
                     GenPush(reg);
             }
@@ -304,12 +318,12 @@ namespace Epsilon
                 }
                 else
                 {
-                    string reg_addr = $"{FirstTempReg}";
                     string reg = DestReg ?? $"{SecondTempReg}";
+                    string reg_addr = reg == $"{FirstTempReg}" ? $"{SecondTempReg}" : $"{FirstTempReg}";
                     if (LocalAttributes.m_vars.Any(x => x.Value == ident.ident.Value))
                     {
                         m_outputcode.AppendLine($"# begin index");
-                        GenArrayAddr(ident.indexes, ident.ident, reg_addr);
+                        GenArrayAddr(ident.indexes, ident.ident, reg, reg_addr);
                         m_outputcode.AppendLine($"# end index");
 
                         m_outputcode.AppendLine($"# begin data");
@@ -339,7 +353,7 @@ namespace Epsilon
         void GenBinExpr(NodeBinExpr binExpr, string? DestReg = null)
         {
             string reg = DestReg ?? $"{FirstTempReg}";
-            string reg2 = $"{SecondTempReg}";
+            string reg2 = reg == $"{SecondTempReg}" ? $"{FirstTempReg}" : $"{SecondTempReg}";
             GenExpr(binExpr.rhs);
             GenExpr(binExpr.lhs, reg);
             GenPop(reg2);
@@ -380,8 +394,9 @@ namespace Epsilon
                 case NodeBinExpr.NodeBinExprType.xor:
                     m_outputcode.AppendLine($"    XOR {reg}, {reg}, {reg2}");
                     break;
-                case NodeBinExpr.NodeBinExprType.mult:
+                case NodeBinExpr.NodeBinExprType.mul:
                     m_outputcode.AppendLine($"    MUL {reg}, {reg}, {reg2}");
+                    //m_outputcode.AppendLine($"    MULH {reg}, {reg}, {reg2}");
                     break;
                 default:
                     Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid binary operator `{binExpr.type}`\n");
@@ -507,7 +522,7 @@ namespace Epsilon
             {
                 string reg_addr = $"{FirstTempReg}";
                 string reg_data = $"{SecondTempReg}";
-                GenArrayAddr(array.indexes, array.ident);
+                GenArrayAddr(array.indexes, array.ident, reg_data, null);
                 GenExpr(array.expr, reg_data);
                 GenPop(reg_addr);
                 m_outputcode.AppendLine($"    SD {reg_data}, 0({reg_addr})");
@@ -554,7 +569,7 @@ namespace Epsilon
                 string reg = $"{FirstTempReg}";
                 string label = $"LABEL{m_labels_count++}_elifs";
                 GenExpr(elifs.elif.pred.cond, reg);
-                m_outputcode.AppendLine($"    BEQ {reg}, zero, {label}");
+                m_outputcode.AppendLine($"    BEQZ {reg}, {label}");
                 GenScope(elifs.elif.pred.scope);
                 m_outputcode.AppendLine($"    J {label_end}");
                 if (elifs.elif.elifs.HasValue)
@@ -582,7 +597,7 @@ namespace Epsilon
 
             m_outputcode.AppendLine($"{label_start}:");
             GenExpr(iff.pred.cond, reg);
-            m_outputcode.AppendLine($"    BEQ {reg}, zero, {label}");
+            m_outputcode.AppendLine($"    BEQZ {reg}, {label}");
             GenScope(iff.pred.scope);
             if (iff.elifs.HasValue)
             {
@@ -620,7 +635,7 @@ namespace Epsilon
                 m_outputcode.AppendLine($"{label_start}:");
                 string reg = $"{FirstTempReg}";
                 GenExpr(forr.pred.cond.Value.cond, reg);
-                m_outputcode.AppendLine($"    BEQ {reg}, zero, {label_end}");
+                m_outputcode.AppendLine($"    BEQZ {reg}, {label_end}");
                 m_outputcode.AppendLine($"# end condition");
                 LocalAttributes.m_scopestart.Push(label_update);
                 LocalAttributes.m_scopeend.Push(label_end);
@@ -690,7 +705,7 @@ namespace Epsilon
             m_outputcode.AppendLine($"{label_start}:");
             string reg = $"{FirstTempReg}";
             GenExpr(whilee.cond, reg);
-            m_outputcode.AppendLine($"    BEQ {reg}, zero, {label_end}");
+            m_outputcode.AppendLine($"    BEQZ {reg}, {label_end}");
             m_outputcode.AppendLine($"# end condition");
             LocalAttributes.m_scopestart.Push(label_start);
             LocalAttributes.m_scopeend.Push(label_end);
@@ -749,12 +764,12 @@ namespace Epsilon
 
             m_outputcode.AppendLine($"{FunctionName}:");
 
-            m_outputcode.AppendLine($"    addi sp, sp, -8");
+            m_outputcode.AppendLine($"    ADDI sp, sp, -8");
             m_outputcode.AppendLine($"    SD ra, 0(sp)");
             GenScope(Function.FunctionBody);
             m_outputcode.AppendLine($"    li s0, 0");
             m_outputcode.AppendLine($"    LD ra, 0(sp)");
-            m_outputcode.AppendLine($"    addi sp, sp, 8");
+            m_outputcode.AppendLine($"    ADDI sp, sp, 8");
             m_outputcode.AppendLine($"    ret");
         }
         void GenStmtExit(NodeStmtExit exit)
@@ -767,7 +782,7 @@ namespace Epsilon
         {
             GenExpr(returnn.expr, "s0");
             m_outputcode.AppendLine($"    LD ra, 0(sp)");
-            m_outputcode.AppendLine($"    addi sp, sp, 8");
+            m_outputcode.AppendLine($"    ADDI sp, sp, 8");
             m_outputcode.AppendLine($"    ret");
         }
         void GenStmt(NodeStmt stmt)
@@ -832,8 +847,8 @@ namespace Epsilon
                 m_outputcode.AppendLine($"strlen_loop:");
                 m_outputcode.AppendLine($"    lbu t1, 0(t0)");
                 m_outputcode.AppendLine($"    beqz t1, strlen_done");
-                m_outputcode.AppendLine($"    addi s0, s0, 1");
-                m_outputcode.AppendLine($"    addi t0, t0, 1");
+                m_outputcode.AppendLine($"    ADDI s0, s0, 1");
+                m_outputcode.AppendLine($"    ADDI t0, t0, 1");
                 m_outputcode.AppendLine($"    j strlen_loop");
                 m_outputcode.AppendLine($"strlen_done:");
                 m_outputcode.AppendLine($"    ret");
@@ -842,16 +857,16 @@ namespace Epsilon
             {
                 m_outputcode.AppendLine($"itoa:");
                 m_outputcode.AppendLine($"    mv t1, a0");
-                //m_outputcode.AppendLine($"    addi t2, a1, 32");
+                //m_outputcode.AppendLine($"    ADDI t2, a1, 32");
                 m_outputcode.AppendLine($"    la t2, itoaTempBuffer");
-                m_outputcode.AppendLine($"    addi t2, t2, 32");
+                m_outputcode.AppendLine($"    ADDI t2, t2, 32");
                 m_outputcode.AppendLine($"    sb zero, 0(t2)");
                 m_outputcode.AppendLine($"itoa_loop:");
                 m_outputcode.AppendLine($"    beqz t1, itoa_done");
                 m_outputcode.AppendLine($"    li t3, 10");
                 m_outputcode.AppendLine($"    rem t4, t1, t3");
-                m_outputcode.AppendLine($"    addi t4, t4, '0'");
-                m_outputcode.AppendLine($"    addi t2, t2, -1");
+                m_outputcode.AppendLine($"    ADDI t4, t4, '0'");
+                m_outputcode.AppendLine($"    ADDI t2, t2, -1");
                 m_outputcode.AppendLine($"    sb t4, 0(t2)");
                 m_outputcode.AppendLine($"    div t1, t1, t3");
                 m_outputcode.AppendLine($"    j itoa_loop");

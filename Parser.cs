@@ -90,6 +90,7 @@
         bool IsBinExpr()
         {
             return Peek(TokenType.Plus).HasValue ||
+                   Peek(TokenType.mul).HasValue ||
                    Peek(TokenType.Minus).HasValue ||
                    Peek(TokenType.And).HasValue ||
                    Peek(TokenType.Or).HasValue ||
@@ -205,6 +206,7 @@
                 TokenType.EqualEqual or TokenType.NotEqual or TokenType.LessThan or TokenType.GreaterThan or TokenType.Xor or TokenType.Or or TokenType.And => 0,
                 TokenType.Sll or TokenType.Srl => 1,
                 TokenType.Plus or TokenType.Minus => 2,
+                TokenType.mul => 3,
                 _ => null,
             };
         }
@@ -212,6 +214,8 @@
         {
             if (op == TokenType.Plus)
                 return NodeBinExpr.NodeBinExprType.add;
+            if (op == TokenType.mul)
+                return NodeBinExpr.NodeBinExprType.mul;
             if (op == TokenType.Minus)
                 return NodeBinExpr.NodeBinExprType.sub;
             if (op == TokenType.Sll)
