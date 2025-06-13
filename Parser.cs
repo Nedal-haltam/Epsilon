@@ -204,11 +204,15 @@
         {
             return type switch
             {
-                TokenType.EqualEqual or TokenType.NotEqual or TokenType.LessThan or TokenType.Xor or TokenType.Or or TokenType.And => 0,
-                TokenType.Sll or TokenType.Srl => 1,
-                TokenType.Plus or TokenType.Minus => 2,
-                TokenType.mul => 3,
-                _ => null,
+                TokenType.mul => 7,
+                TokenType.Plus or TokenType.Minus => 6,
+                TokenType.Sll or TokenType.Srl => 5,
+                TokenType.LessThan => 4,
+                TokenType.EqualEqual or TokenType.NotEqual => 3,
+                TokenType.And => 2,
+                TokenType.Xor => 1,
+                TokenType.Or => 0,
+               _ => null,
             };
         }
         static NodeBinExpr.NodeBinExprType GetOpType(TokenType op)
@@ -973,7 +977,7 @@
             }
             else
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: invalid statement\n");
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: invalid statement `{Peek().Value.Value}`\n");
                 Environment.Exit(1);
                 return [];
             }
