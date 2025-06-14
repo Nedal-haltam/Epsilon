@@ -5,3 +5,5 @@
 main
 main.S
 main.e
+/examples/risc-v/bin
+/tests/risc-v/bin
