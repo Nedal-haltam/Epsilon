@@ -3,7 +3,6 @@
 .section .text
 .globl main
 main:
-# begin scope
     LI t0, 10
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -134,7 +133,7 @@ main:
     SD t0, 0(sp)
     LD s0, 0(sp)
     ADDI sp, sp, 8
-# end scope
+    ADDI sp, sp, 168
     ADDI sp, sp, 168
     ADDI a0, zero, 0
     call exit
@@ -145,7 +144,6 @@ InitArray:
     SD a0, 0(sp)
     ADDI sp, sp, -8
     SD a1, 0(sp)
-# begin scope
 # begin forloop
 # begin scope
 # begin init
@@ -246,11 +244,7 @@ TEMP_LABEL1_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-# end scope
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 16
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
@@ -261,7 +255,6 @@ PrintArray:
     SD a0, 0(sp)
     ADDI sp, sp, -8
     SD a1, 0(sp)
-# begin scope
 # begin forloop
 # begin scope
 # begin init
@@ -363,11 +356,7 @@ TEMP_LABEL4_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-# end scope
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 16
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
@@ -380,7 +369,6 @@ MultiplyArray:
     SD a1, 0(sp)
     ADDI sp, sp, -8
     SD a2, 0(sp)
-# begin scope
 # begin forloop
 # begin scope
 # begin init
@@ -510,13 +498,7 @@ TEMP_LABEL7_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-# end scope
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
-    LD a2, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 24
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
@@ -529,7 +511,6 @@ Dot:
     SD a1, 0(sp)
     ADDI sp, sp, -8
     SD a2, 0(sp)
-# begin scope
 # begin forloop
 # begin scope
 # begin init
@@ -687,13 +668,7 @@ TEMP_LABEL10_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-# end scope
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
-    LD a2, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 24
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret

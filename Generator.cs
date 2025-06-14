@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using static System.Formats.Asn1.AsnWriter;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Epsilon
@@ -318,17 +319,13 @@ namespace Epsilon
                         string reg = FirstTempReg;
                         int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.ident.Value) - 1;
 
-                        if (ident.ByValue)
-                        {
-                            m_outputcode.AppendLine($"    LD {reg}, {relative_location * 8}(sp)");
-                        }
-                        else if (ident.ByRef)
+                        if (ident.ByRef && !LocalAttributes.m_parameters.Any(x => x.Value == ident.ident.Value))
                         {
                             m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location * 8}");
                         }
                         else
                         {
-                            Shartilities.UNREACHABLE($"GenTerm_single_var_m_vars");
+                            m_outputcode.AppendLine($"    LD {reg}, {relative_location * 8}(sp)");
                         }
 
                         if (term.Negative)
@@ -803,14 +800,14 @@ namespace Epsilon
                 GenPopMany(regs);
             }
         }
-        void GenReturnFromFunction(string FunctionName)
+        void GenReturnFromFunction()
         {
-            for (int i = 0; i < m_UserDefinedFunctions[FunctionName].parameters.Count; i++)
-            {
-                GenPop($"a{i}");
-                LocalAttributes.m_vars.Add(new(m_UserDefinedFunctions[FunctionName].parameters[i].Value, 1));
-            }
-            if (FunctionName != "main")
+            int stacksize = 0;
+            foreach (Var v in LocalAttributes.m_vars)
+                stacksize += v.Size;
+            Shartilities.Assert(stacksize == LocalAttributes.m_StackSize, $"stack sizes are not equal");
+            m_outputcode.AppendLine($"    ADDI sp, sp, {8 * stacksize}");
+            if (LocalAttributes.m_CurrentFunction != "main")
             {
                 m_outputcode.AppendLine($"    LD ra, 0(sp)");
                 m_outputcode.AppendLine($"    ADDI sp, sp, 8");
@@ -826,21 +823,24 @@ namespace Epsilon
                 m_DimensionsOfArrays = m_UserDefinedFunctions[FunctionName].DimensionsOfArrays,
                 m_parameters = m_UserDefinedFunctions[FunctionName].parameters,
             };
-            NodeStmtFunction Function = m_UserDefinedFunctions[FunctionName];
+            NodeStmtFunction Function = m_UserDefinedFunctions[LocalAttributes.m_CurrentFunction];
 
 
-            if (FunctionName != "main")
+            if (LocalAttributes.m_CurrentFunction != "main")
             {
                 m_outputcode.AppendLine($"    ADDI sp, sp, -8");
                 m_outputcode.AppendLine($"    SD ra, 0(sp)");
             }
-            for (int i = 0; i < m_UserDefinedFunctions[FunctionName].parameters.Count; i++)
+            for (int i = 0; i < m_UserDefinedFunctions[LocalAttributes.m_CurrentFunction].parameters.Count; i++)
             {
                 GenPush($"a{i}");
-                LocalAttributes.m_vars.Add(new(m_UserDefinedFunctions[FunctionName].parameters[i].Value, 1));
+                LocalAttributes.m_vars.Add(new(m_UserDefinedFunctions[LocalAttributes.m_CurrentFunction].parameters[i].Value, 1));
             }
-            GenScope(Function.FunctionBody);
-            GenReturnFromFunction(FunctionName);
+            foreach (NodeStmt stmt in Function.FunctionBody.stmts)
+            {
+                GenStmt(stmt);
+            }
+            GenReturnFromFunction();
         }
         void GenStmtExit(NodeStmtExit exit)
         {
@@ -853,7 +853,7 @@ namespace Epsilon
         {
             GenExpr(returnn.expr);
             GenPop("s0");
-            GenReturnFromFunction(LocalAttributes.m_CurrentFunction);
+            GenReturnFromFunction();
         }
         void GenStmt(NodeStmt stmt)
         {

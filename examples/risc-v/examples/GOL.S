@@ -3,7 +3,6 @@
 .section .text
 .globl main
 main:
-# begin scope
     ADDI sp, sp, -200
 # begin forloop
 # begin scope
@@ -1966,14 +1965,12 @@ TEMP_LABEL13_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-# end scope
     ADDI sp, sp, 400
     ADDI a0, zero, 0
     call exit
 SlowDown:
     ADDI sp, sp, -8
     SD ra, 0(sp)
-# begin scope
 # begin forloop
 # begin scope
 # begin init
@@ -2136,7 +2133,7 @@ TEMP_LABEL76_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-# end scope
+    ADDI sp, sp, 0
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret

@@ -3,7 +3,6 @@
 .section .text
 .globl main
 main:
-# begin scope
     la t0, StringLits0
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -33,7 +32,7 @@ main:
     ADDI sp, sp, 8
     call printf
     call Print10sMultipleAndLengths
-# end scope
+    ADDI sp, sp, 0
     ADDI a0, zero, 0
     call exit
 foo:
@@ -43,7 +42,6 @@ foo:
     SD a0, 0(sp)
     ADDI sp, sp, -8
     SD a1, 0(sp)
-# begin scope
 ########## b
     LD t0, 0(sp)
     ADDI sp, sp, -8
@@ -61,26 +59,17 @@ foo:
     SD t0, 0(sp)
     LD s0, 0(sp)
     ADDI sp, sp, 8
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 16
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
-# end scope
     ADDI sp, sp, 16
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
 Print10sMultipleAndLengths:
     ADDI sp, sp, -8
     SD ra, 0(sp)
-# begin scope
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -252,7 +241,6 @@ TEMP_LABEL1_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-# end scope
     ADDI sp, sp, 24
     LD ra, 0(sp)
     ADDI sp, sp, 8

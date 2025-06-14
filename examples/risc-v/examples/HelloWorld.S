@@ -3,7 +3,6 @@
 .section .text
 .globl main
 main:
-# begin scope
     la t0, StringLits0
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -15,7 +14,8 @@ main:
     SD t0, 0(sp)
     LD s0, 0(sp)
     ADDI sp, sp, 8
-# end scope
+    ADDI sp, sp, 0
+    ADDI sp, sp, 0
     ADDI a0, zero, 0
     call exit
 exit:

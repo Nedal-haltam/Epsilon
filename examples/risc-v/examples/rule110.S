@@ -3,7 +3,6 @@
 .section .text
 .globl main
 main:
-# begin scope
     LI t0, 100
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -231,7 +230,6 @@ TEMP_LABEL3_START:
 TEMP_LABEL4_END:
 # end scope
 # end whileloop
-# end scope
     ADDI sp, sp, 816
     ADDI a0, zero, 0
     call exit
@@ -242,7 +240,6 @@ display:
     SD a0, 0(sp)
     ADDI sp, sp, -8
     SD a1, 0(sp)
-# begin scope
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -353,12 +350,7 @@ TEMP_LABEL6_END:
     LD a0, 0(sp)
     ADDI sp, sp, 8
     call printf
-# end scope
-    ADDI sp, sp, 8
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 24
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
@@ -369,7 +361,6 @@ next:
     SD a0, 0(sp)
     ADDI sp, sp, -8
     SD a1, 0(sp)
-# begin scope
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -643,12 +634,7 @@ TEMP_LABEL10_START:
 TEMP_LABEL11_END:
 # end scope
 # end whileloop
-# end scope
-    ADDI sp, sp, 16
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 32
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
