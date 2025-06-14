@@ -15,6 +15,8 @@ examples: dummy
 	qemu-riscv64 ./examples/Print10sMultipleAndLengths
 	riscv64-linux-gnu-gcc -o ./examples/ManipulateArrays ./examples/ManipulateArrays.S -static
 	qemu-riscv64 ./examples/ManipulateArrays
+	riscv64-linux-gnu-gcc -o ./examples/Fib ./examples/Fib.S -static
+	qemu-riscv64 ./examples/Fib
 
 
 dummy:

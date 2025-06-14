@@ -9,5 +9,6 @@ examples: dummy
 	dotnet .\bin\Debug\net8.0\Epsilon.dll .\examples\GOL.e -o .\examples\risc-v\examples\GOL.S
 	dotnet .\bin\Debug\net8.0\Epsilon.dll .\examples\rule110.e -o .\examples\risc-v\examples\rule110.S
 	dotnet .\bin\Debug\net8.0\Epsilon.dll .\examples\ManipulateArrays.e -o .\examples\risc-v\examples\ManipulateArrays.S
+	dotnet .\bin\Debug\net8.0\Epsilon.dll .\examples\Fib.e -o .\examples\risc-v\examples\Fib.S
 
 dummy:
