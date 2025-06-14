@@ -14,6 +14,7 @@ run-main:
 	qemu-riscv64 ./main
 
 main: build-main run-main
+	
 
 EXAMPLES := HelloWorld GOL rule110 Fib
 

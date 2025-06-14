@@ -52,7 +52,7 @@ itoa_done:
     ret
 .section .data
 StringLits0:
-    .string "Hello World\n"
+    .string "Hello, World!\n"
 .section .bss
 itoaTempBuffer:     
     .space 32
