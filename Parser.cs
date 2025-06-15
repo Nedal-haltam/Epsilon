@@ -193,13 +193,22 @@ namespace Epsilon
                 Consume();
                 NodeExpr expr = ExpectedExpression(ParseExpr());
                 TryConsumeError(TokenType.CloseParen);
-                NodeTermParen paren = new()
+                if (IsExprIntLit(expr))
                 {
-                    expr = expr
-                };
-                term.type = NodeTerm.NodeTermType.paren;
-                term.paren = paren;
-                return term;
+                    term.type = NodeTerm.NodeTermType.intlit;
+                    term.intlit = expr.term.intlit;
+                    return term;
+                }
+                else
+                {
+                    NodeTermParen paren = new()
+                    {
+                        expr = expr
+                    };
+                    term.type = NodeTerm.NodeTermType.paren;
+                    term.paren = paren;
+                    return term;
+                }
             }
             return null;
         }
