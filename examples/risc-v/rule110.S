@@ -27,16 +27,22 @@ TEMP_LABEL0_START:
 # end condition
 # begin scope
 # begin array address
-    LI t0, 8
+########## i
+    LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-########## i
-    LD t0, 8(sp)
+    LI t0, 99
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SUB t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
     SUB t0, sp, t0
-    ADD t0, t0, 800
+    ADDI t0, t0, 800
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end array address
@@ -63,22 +69,28 @@ TEMP_LABEL1_END:
     ADDI sp, sp, 8
 # end forloop
 # begin array address
-    LI t0, 8
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LI t0, 2
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## n
-    LD t0, 816(sp)
+    LD t0, 808(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SUB t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 99
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SUB t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
     SUB t0, sp, t0
-    ADD t0, t0, 792
+    ADDI t0, t0, 792
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end array address
@@ -87,7 +99,7 @@ TEMP_LABEL1_END:
     ADDI sp, sp, 8
     SD t1, 0(t0)
 ########## base
-    ADDI a0, sp, 792
+    ADDI a0, sp, 0
 ########## n
     LD a1, 800(sp)
     call display
@@ -117,12 +129,12 @@ TEMP_LABEL3_START:
 # end condition
 # begin scope
 ########## base
-    ADDI a0, sp, 800
+    ADDI a0, sp, 8
 ########## n
     LD a1, 808(sp)
     call next
 ########## base
-    ADDI a0, sp, 800
+    ADDI a0, sp, 8
 ########## n
     LD a1, 808(sp)
     call display
@@ -175,11 +187,17 @@ LABEL7_START:
 # begin array address
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 8
+########## i
+    LD t0, 8(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-########## i
-    LD t1, 16(sp)
+    LI t0, 0
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SUB t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t1, 8
     LD t0, 0(sp)
     ADDI sp, sp, 8
     MUL t1, t1, t0
@@ -239,10 +257,16 @@ next:
 # begin array address
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 8
+    LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t1, 1
+    LI t0, 0
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SUB t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t1, 8
     LD t0, 0(sp)
     ADDI sp, sp, 8
     MUL t1, t1, t0
@@ -265,10 +289,16 @@ next:
 # begin array address
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 8
+    LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t1, 0
+    LI t0, 0
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SUB t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t1, 8
     LD t0, 0(sp)
     ADDI sp, sp, 8
     MUL t1, t1, t0
@@ -319,11 +349,17 @@ TEMP_LABEL10_START:
 # begin array address
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 8
+########## i
+    LD t0, 8(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-########## i
-    LD t1, 16(sp)
+    LI t0, 0
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SUB t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t1, 8
     LD t0, 0(sp)
     ADDI sp, sp, 8
     MUL t1, t1, t0
@@ -357,17 +393,23 @@ TEMP_LABEL10_START:
 # begin array address
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 8
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## i
-    LD t1, 24(sp)
-    LD t0, 0(sp)
+    LD t0, 16(sp)
+    LD t1, 0(sp)
     ADDI sp, sp, 8
-    SUB t1, t1, t0
+    SUB t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 0
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SUB t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t1, 8
     LD t0, 0(sp)
     ADDI sp, sp, 8
     MUL t1, t1, t0

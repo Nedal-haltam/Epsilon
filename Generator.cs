@@ -267,26 +267,40 @@ namespace Epsilon
             List<NodeTermIntLit> dims = LocalAttributes.m_DimensionsOfArrays[ident.Value];
             Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
 
-            NodeExpr index = GenIndexExpr(ref indexes, ref dims, 0);
+            NodeExpr IndexExpr = GenIndexExpr(ref indexes, ref dims, 0);
+            int index = LocalAttributes.m_vars.FindIndex(x => x.Value == ident.Value);
+            int Count = LocalAttributes.m_vars[index].Size / LocalAttributes.m_vars[index].TypeSize;
             if (BaseReg != "sp")
                 GenPush(BaseReg, 8);
-            GenExpr(new()
+
+            GenExpr(
+            new()
             {
                 type = NodeExpr.NodeExprType.BinExpr,
                 binexpr = new()
                 {
                     type = NodeBinExpr.NodeBinExprType.Mul,
-                    lhs = index,
-                    rhs = NodeExpr.Number(TypeSize.ToString(), -1),
+                    lhs = NodeExpr.Number(TypeSize.ToString(), -1),
+                    rhs = new()
+                    {
+                        type = NodeExpr.NodeExprType.BinExpr,
+                        binexpr = new()
+                        {
+                            type = NodeBinExpr.NodeBinExprType.Sub,
+                            lhs = NodeExpr.Number((Count - 1).ToString(), -1),
+                            rhs = IndexExpr,
+                        }
+                    },
                 }
-            }, reg, 8);
+            },
+            reg, 8);
             if (BaseReg != "sp")
                 GenPop(BaseReg, 8);
             m_outputcode.AppendLine($"    SUB {reg}, {BaseReg}, {reg}");
             if (BaseReg == "sp")
             {
                 int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - TypeSize;
-                m_outputcode.AppendLine($"    ADD {reg}, {reg}, {relative_location}");
+                m_outputcode.AppendLine($"    ADDI {reg}, {reg}, {relative_location}");
             }
 
             GenPush(reg, 8);
@@ -334,12 +348,13 @@ namespace Epsilon
                         string reg = DestReg ?? FirstTempReg;
                         int index = LocalAttributes.m_vars.FindIndex(x => x.Value == ident.ident.Value);
                         int TypeSize = LocalAttributes.m_vars[index].TypeSize;
+                        int Count = LocalAttributes.m_vars[index].Size / LocalAttributes.m_vars[index].TypeSize;
                         int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.ident.Value) - TypeSize;
 
                         if (ident.ByRef)
                         {
                             if (!LocalAttributes.m_parameters.Any(x => x.Value == ident.ident.Value))
-                                m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location}");
+                                m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location - (TypeSize * (Count - 1))}");
                             else
                                 m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
                         }
@@ -1025,8 +1040,8 @@ namespace Epsilon
                 m_outputcode.AppendLine($".section .bss");
                 m_outputcode.AppendLine($"itoaTempBuffer:     ");
                 m_outputcode.AppendLine($"    .space 32");
-                m_outputcode.AppendLine($".extern printf");
             }
+            //m_outputcode.AppendLine($".extern printf");
             return m_outputcode;
         }
     }

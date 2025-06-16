@@ -192,4 +192,3 @@ StringLits2:
 .section .bss
 itoaTempBuffer:     
     .space 32
-.extern printf
