@@ -15,9 +15,7 @@ main:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 0
     ADDI sp, sp, -8
-    SD t0, 0(sp)
 # begin whileloop
 # begin scope
 # begin condition
