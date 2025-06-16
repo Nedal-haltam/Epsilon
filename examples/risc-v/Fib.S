@@ -8,17 +8,9 @@ main:
     SD t0, 0(sp)
     call FibRecursive
 ########## n
-    LD t0, 0(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LD a0, 0(sp)
-    ADDI sp, sp, 8
     call FibIterative
-    LI t0, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD s0, 0(sp)
-    ADDI sp, sp, 8
+    LI s0, 0
     ADDI sp, sp, 8
     ADDI sp, sp, 8
     ADDI a0, zero, 0
@@ -41,17 +33,9 @@ TEMP_LABEL0_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     BEQZ t0, TEMP_LABEL1_END
 # end condition
 # begin scope
@@ -61,31 +45,15 @@ TEMP_LABEL0_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SUB t0, sp, t0
     ADD t0, t0, 240
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end array address
-    LI t0, -1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t1, -1
     LD t0, 0(sp)
     ADDI sp, sp, 8
     SD t1, 0(t0)
@@ -97,17 +65,9 @@ TEMP_LABEL2_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SD t0, 0(sp)
 # end update
     J TEMP_LABEL0_START
@@ -129,17 +89,9 @@ TEMP_LABEL3_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     BEQZ t0, TEMP_LABEL4_END
 # end condition
 # begin scope
@@ -149,21 +101,9 @@ TEMP_LABEL3_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SUB t0, sp, t0
     ADD t0, t0, 240
     ADDI sp, sp, -8
@@ -173,34 +113,18 @@ TEMP_LABEL3_START:
     SD a0, 0(sp)
     SD a1, 8(sp)
 ########## arr
-    ADDI t0, sp, 264
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    ADDI a0, sp, 264
 ########## i
-    LD t0, 24(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    LD a1, 24(sp)
     call _FibRecursive
     LD a1, 8(sp)
     LD a0, 0(sp)
     ADDI sp, sp, 16
-    mv t0, s0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
+    mv t1, s0
     LD t0, 0(sp)
     ADDI sp, sp, 8
     SD t1, 0(t0)
-    la t0, StringLits0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    la a0, StringLits0
 ########## arr
 # begin array address
     LI t0, 8
@@ -208,33 +132,17 @@ TEMP_LABEL3_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SUB t0, sp, t0
     ADD t0, t0, 240
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end array address
-    LD t1, 0(sp)
+    LD t0, 0(sp)
     ADDI sp, sp, 8
-    LD t0, 0(t1)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    LD a1, 0(t0)
     call printf
 # end scope
 # begin update
@@ -244,17 +152,9 @@ TEMP_LABEL5_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SD t0, 0(sp)
 # end update
     J TEMP_LABEL3_START
@@ -262,11 +162,7 @@ TEMP_LABEL4_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-    la t0, StringLits1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    la a0, StringLits1
     call printf
     ADDI sp, sp, 240
     LD ra, 0(sp)
@@ -301,31 +197,15 @@ TEMP_LABEL6_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     BEQZ t0, TEMP_LABEL7_END
 # end condition
 # begin scope
-    la t0, StringLits0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    la a0, StringLits0
 ########## a
-    LD t0, 24(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    LD a1, 24(sp)
     call printf
 ########## b
     LD t0, 16(sp)
@@ -333,31 +213,15 @@ TEMP_LABEL6_START:
     SD t0, 0(sp)
 ########## a
     LD t0, 32(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SD t0, 8(sp)
 ########## b
     LD t0, 16(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SD t0, 24(sp)
 ########## c
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SD t0, 16(sp)
 # end scope
 # begin update
@@ -367,17 +231,9 @@ TEMP_LABEL8_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SD t0, 0(sp)
 # end update
     J TEMP_LABEL6_START
@@ -385,11 +241,7 @@ TEMP_LABEL7_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-    la t0, StringLits1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    la a0, StringLits1
     call printf
     ADDI sp, sp, 32
     LD ra, 0(sp)
@@ -415,22 +267,10 @@ LABEL9_START:
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## i
-    LD t0, 24(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
+    LD t1, 24(sp)
     LD t0, 0(sp)
     ADDI sp, sp, 8
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    MUL t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
+    MUL t1, t1, t0
     LD t0, 0(sp)
     ADDI sp, sp, 8
     SUB t1, t0, t1
@@ -440,58 +280,34 @@ LABEL9_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     LD t0, 0(t1)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SNEZ t0, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     BEQZ t0, LABEL11_elifs
 # begin scope
 ########## arr
-    LD t0, 8(sp)
+    LD s0, 8(sp)
 # begin array address
     ADDI sp, sp, -8
-    SD t0, 0(sp)
+    SD s0, 0(sp)
     LI t0, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## i
     LD t0, 16(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    SUB t1, t0, t1
-    ADDI sp, sp, -8
-    SD t1, 0(sp)
-# end array address
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    LD t0, 0(t1)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LD s0, 0(sp)
     ADDI sp, sp, 8
+    SUB t0, s0, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+# end array address
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    LD s0, 0(t0)
     ADDI sp, sp, 16
     LD ra, 0(sp)
     ADDI sp, sp, 8
@@ -505,10 +321,6 @@ LABEL12_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     XOR t0, t0, t1
@@ -520,33 +332,17 @@ LABEL12_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 16(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SEQZ t0, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     OR t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     BEQZ t0, LABEL14_elifs
 # begin scope
 ########## i
-    LD t0, 0(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LD s0, 0(sp)
-    ADDI sp, sp, 8
     ADDI sp, sp, 16
     LD ra, 0(sp)
     ADDI sp, sp, 8
@@ -558,27 +354,15 @@ LABEL13_END:
     SD a0, 0(sp)
     SD a1, 8(sp)
 ########## arr
-    LD t0, 24(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LD a0, 24(sp)
     LI t0, 2
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## i
-    LD t0, 24(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
+    LD a1, 24(sp)
     LD t0, 0(sp)
     ADDI sp, sp, 8
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SUB t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    SUB a1, a1, t0
     call _FibRecursive
     LD a1, 8(sp)
     LD a0, 0(sp)
@@ -590,43 +374,23 @@ LABEL13_END:
     SD a0, 0(sp)
     SD a1, 8(sp)
 ########## arr
-    LD t0, 32(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LD a0, 32(sp)
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## i
-    LD t0, 32(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
+    LD a1, 32(sp)
     LD t0, 0(sp)
     ADDI sp, sp, 8
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SUB t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    SUB a1, a1, t0
     call _FibRecursive
     LD a1, 8(sp)
     LD a0, 0(sp)
     ADDI sp, sp, 16
-    mv t0, s0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
+    mv s0, s0
     LD t0, 0(sp)
     ADDI sp, sp, 8
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD s0, 0(sp)
-    ADDI sp, sp, 8
+    ADD s0, s0, t0
     ADDI sp, sp, 16
     LD ra, 0(sp)
     ADDI sp, sp, 8

@@ -3,17 +3,9 @@
 .section .text
 .globl main
 main:
-    la t0, StringLits0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    la a0, StringLits0
     call printf
-    LI t0, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD s0, 0(sp)
-    ADDI sp, sp, 8
+    LI s0, 0
     ADDI sp, sp, 0
     ADDI sp, sp, 0
     ADDI a0, zero, 0

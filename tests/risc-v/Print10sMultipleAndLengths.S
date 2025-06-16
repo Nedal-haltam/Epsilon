@@ -3,33 +3,17 @@
 .section .text
 .globl main
 main:
-    la t0, StringLits0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    la a0, StringLits0
     ADDI sp, sp, -16
     SD a0, 0(sp)
     SD a1, 8(sp)
-    LI t0, 123
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    LI t0, 456
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    LI a0, 123
+    LI a1, 456
     call foo
     LD a1, 8(sp)
     LD a0, 0(sp)
     ADDI sp, sp, 16
-    mv t0, s0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    mv a1, s0
     call printf
     call Print10sMultipleAndLengths
     ADDI sp, sp, 0
@@ -47,18 +31,10 @@ foo:
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## a
-    LD t0, 16(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
+    LD s0, 16(sp)
     LD t0, 0(sp)
     ADDI sp, sp, 8
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD s0, 0(sp)
-    ADDI sp, sp, 8
+    ADD s0, s0, t0
     ADDI sp, sp, 16
     LD ra, 0(sp)
     ADDI sp, sp, 8
@@ -93,10 +69,6 @@ TEMP_LABEL0_START:
     SD t0, 0(sp)
 ########## bound
     LD t0, 16(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     ADD t0, t0, t1
@@ -104,17 +76,9 @@ TEMP_LABEL0_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     BEQZ t0, TEMP_LABEL1_END
 # end condition
 # begin scope
@@ -123,19 +87,11 @@ TEMP_LABEL0_START:
     ADDI sp, sp, -8
     SD a0, 0(sp)
 ########## x
-    LD t0, 40(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LD a0, 40(sp)
     call itoa
     LD a0, 0(sp)
     ADDI sp, sp, 8
-    mv t0, s0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    mv a0, s0
     call strlen
     LD a0, 0(sp)
     ADDI sp, sp, 8
@@ -149,50 +105,22 @@ LABEL3_START:
     SD t0, 0(sp)
 ########## count
     LD t0, 32(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SNEZ t0, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     BEQZ t0, LABEL5_elifs
 # begin scope
-    la t0, StringLits1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    la a0, StringLits1
 ########## x
-    LD t0, 32(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a1, 0(sp)
-    ADDI sp, sp, 8
+    LD a1, 32(sp)
     call printf
-    la t0, StringLits2
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
+    la a0, StringLits2
 ########## len
-    LD t0, 0(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LD a1, 0(sp)
-    ADDI sp, sp, 8
     call printf
 ########## len
     LD t0, 0(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SD t0, 24(sp)
 # end scope
 LABEL5_elifs:
@@ -202,17 +130,9 @@ LABEL4_END:
     SD t0, 0(sp)
 ########## x
     LD t0, 40(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SD t0, 32(sp)
 # end scope
     ADDI sp, sp, 8
@@ -223,17 +143,9 @@ TEMP_LABEL2_START:
     SD t0, 0(sp)
 ########## i
     LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
     SD t0, 0(sp)
 # end update
     J TEMP_LABEL0_START

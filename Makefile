@@ -32,6 +32,7 @@ build-examples: clean-examples
 
 run-examples:
 	@for ex in $(EXAMPLES); do \
+		echo "-------------------------------------------------------------------"; \
 		echo "Building and running $$ex..."; \
 		riscv64-linux-gnu-gcc -o $(EXAMPLES_RISCV_BIN)/$$ex $(EXAMPLES_RISCV_ASSEMBLY)/$$ex.S -static || exit 1; \
 		qemu-riscv64 $(EXAMPLES_RISCV_BIN)/$$ex || exit 1; \
@@ -50,6 +51,7 @@ build-tests: clean-tests
 
 run-tests:
 	@for ex in $(TESTS); do \
+		echo "-------------------------------------------------------------------"; \
 		echo "Building and running $$ex..."; \
 		riscv64-linux-gnu-gcc -o $(TESTS_RISCV_BIN)/$$ex $(TESTS_RISCV_ASSEMBLY)/$$ex.S -static || exit 1; \
 		qemu-riscv64 $(TESTS_RISCV_BIN)/$$ex || exit 1; \
