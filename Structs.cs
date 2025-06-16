@@ -320,7 +320,7 @@ namespace Epsilon
     {
         public enum NodeBinExprType
         {
-            add, sub, mul, sll, srl, equalequal, notequal, lessthan, and, or, xor
+            add, sub, mul, rem, sll, srl, equalequal, notequal, lessthan, and, or, xor
         }
         public NodeBinExprType type;
         public NodeExpr lhs;

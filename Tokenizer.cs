@@ -19,33 +19,44 @@ namespace Epsilon
         CloseSquare,
         OpenCurly,
         CloseCurly,
+
         Comma,
+        Equal,
+        SemiColon,
+
         Plus,
         Minus,
+        mul,
+        rem,
+
         And,
         Or,
         Xor,
         Sll,
         Srl,
-        mul,
+
         EqualEqual,
         NotEqual,
-        Equal,
-        SemiColon,
+        LessThan,
+
         Int,
         Ident,
-        For,
-        While,
+
         If,
         Elif,
         Else,
+        For,
+        While,
+
         IntLit,
         stringlit,
-        Exit,
-        LessThan,
-        Break,
-        Continue,
+
         func,
+
+        Continue,
+        Break,
+
+        Exit,
         returnn,
     }
     class Tokenizer(string thecode)
@@ -390,6 +401,11 @@ namespace Epsilon
                 {
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.mul, Line = line});
+                }
+                else if (Peek('%').HasValue)
+                {
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.rem, Line = line});
                 }
                 else if (Peek('-').HasValue)
                 {

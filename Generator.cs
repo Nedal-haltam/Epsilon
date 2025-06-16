@@ -432,6 +432,9 @@ namespace Epsilon
                     m_outputcode.AppendLine($"    MUL {reg}, {reg}, {reg2}");
                     //m_outputcode.AppendLine($"    MULH {reg}, {reg}, {reg2}"); // for upper 64-bit of the multiplication
                     break;
+                case NodeBinExpr.NodeBinExprType.rem:
+                    m_outputcode.AppendLine($"    rem {reg}, {reg}, {reg2}");
+                    break;
                 default:
                     Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid binary operator `{binExpr.type}`\n");
                     Environment.Exit(1);
