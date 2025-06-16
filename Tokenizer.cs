@@ -41,6 +41,8 @@ namespace Epsilon
         LessThan,
 
         Auto,
+        Char,
+
         Ident,
 
         If,
@@ -65,6 +67,7 @@ namespace Epsilon
         readonly Dictionary<string, TokenType> KeyWords = new()
         {
             { "auto", TokenType.Auto},
+            { "char", TokenType.Char},
             { "if", TokenType.If},
             { "elif", TokenType.Elif},
             { "else", TokenType.Else},

@@ -1,9 +1,4 @@
-﻿
-
-
-using System.Runtime.InteropServices;
-
-namespace Epsilon
+﻿namespace Epsilon
 {
     public struct NodeProg
     {
@@ -40,23 +35,24 @@ namespace Epsilon
         public NodeStmtReturn Return;
         public NodeStmtExit Exit;
     }
+    public enum NodeStmtIdentifierType
+    {
+        SingleVar, Array
+    }
+    public enum NodeStmtDataType
+    {
+        Auto, Char
+    }
     public struct NodeStmtDeclare
     {
-        public enum NodeStmtDeclareType
-        {
-            SingleVar, Array
-        }
-        public NodeStmtDeclareType type;
+        public NodeStmtIdentifierType type;
+        public NodeStmtDataType datatype;
         public NodeStmtDeclareSingleVar singlevar;
         public NodeStmtDeclareArray array;
     }
     public struct NodeStmtAssign
     {
-        public enum NodeStmtAssignType
-        {
-            SingleVar, Array
-        }
-        public NodeStmtAssignType type;
+        public NodeStmtIdentifierType type;
         public NodeStmtAssignSingleVar singlevar;
         public NodeStmtAssignArray array;
     }

@@ -60,7 +60,7 @@ namespace Epsilon
         }
         bool IsStmtDeclare()
         {
-            return (Peek(TokenType.Auto).HasValue) &&
+            return (Peek(TokenType.Auto).HasValue || Peek(TokenType.Char).HasValue) &&
                    Peek(TokenType.Ident, 1).HasValue;
         }
         bool IsStmtAssign()
@@ -397,13 +397,8 @@ namespace Epsilon
         {
             if (IsStmtDeclare())
             {
-                Token vartype = Consume();
                 NodeStmtDeclareSingleVar declare = new();
-                if (vartype.Type != TokenType.Auto)
-                {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error Expected variable type on line: {vartype.Line}\n");
-                    Environment.Exit(1);
-                }
+                Token vartype = Consume();
                 declare.ident = Consume();
                 if (Peek(TokenType.Equal).HasValue)
                 {
@@ -424,7 +419,20 @@ namespace Epsilon
                 {
                     type = NodeForInit.NodeForInitType.Declare
                 };
-                forinit.declare.type = NodeStmtDeclare.NodeStmtDeclareType.SingleVar;
+                forinit.declare.type = NodeStmtIdentifierType.SingleVar;
+                if (vartype.Type == TokenType.Auto)
+                {
+                    forinit.declare.datatype = NodeStmtDataType.Auto;
+                }
+                else if (vartype.Type == TokenType.Char)
+                {
+                    forinit.declare.datatype = NodeStmtDataType.Char;
+                }
+                else
+                {
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Error data type `{vartype.Value}` is not supported\n");
+                    Environment.Exit(1);
+                }
                 forinit.declare.singlevar = declare;
                 return forinit;
             }
@@ -442,7 +450,7 @@ namespace Epsilon
                 {
                     type = NodeForInit.NodeForInitType.Assign
                 };
-                forinit.assign.type = NodeStmtAssign.NodeStmtAssignType.SingleVar;
+                forinit.assign.type = NodeStmtIdentifierType.SingleVar;
                 forinit.assign.singlevar = singlevar;
                 return forinit;
             }
@@ -487,7 +495,7 @@ namespace Epsilon
             singlevar.expr = expr;
             NodeStmtAssign assign = new()
             {
-                type = NodeStmtAssign.NodeStmtAssignType.SingleVar,
+                type = NodeStmtIdentifierType.SingleVar,
                 singlevar = singlevar
             };
             return assign;
@@ -521,6 +529,7 @@ namespace Epsilon
         }
         List<NodeStmt> ParseDeclareSingleVar()
         {
+            Token vartype = Consume();
             List<NodeStmt> stmts = [];
             do
             {
@@ -552,7 +561,20 @@ namespace Epsilon
                 {
                     type = NodeStmt.NodeStmtType.Declare
                 };
-                stmt.declare.type = NodeStmtDeclare.NodeStmtDeclareType.SingleVar;
+                stmt.declare.type = NodeStmtIdentifierType.SingleVar;
+                if (vartype.Type == TokenType.Auto)
+                {
+                    stmt.declare.datatype = NodeStmtDataType.Auto;
+                }
+                else if (vartype.Type == TokenType.Char)
+                {
+                    stmt.declare.datatype = NodeStmtDataType.Char;
+                }
+                else
+                {
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Error data type `{vartype.Value}` is not supported\n");
+                    Environment.Exit(1);
+                }
                 stmt.declare.singlevar = declare;
                 stmts.Add(stmt);
             } while (PeekAndConsume(TokenType.Comma).HasValue);
@@ -590,6 +612,7 @@ namespace Epsilon
         }
         NodeStmt ParseDeclareArray()
         {
+            Token vartype = Consume();
             NodeStmtDeclareArray declare = new()
             {
                 ident = Consume(),
@@ -614,7 +637,20 @@ namespace Epsilon
             {
                 type = NodeStmt.NodeStmtType.Declare
             };
-            stmt.declare.type = NodeStmtDeclare.NodeStmtDeclareType.Array;
+            stmt.declare.type = NodeStmtIdentifierType.Array;
+            if (vartype.Type == TokenType.Auto)
+            {
+                stmt.declare.datatype = NodeStmtDataType.Auto;
+            }
+            else if (vartype.Type == TokenType.Char)
+            {
+                stmt.declare.datatype = NodeStmtDataType.Char;
+            }
+            else
+            {
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Error data type `{vartype.Value}` is not supported\n");
+                Environment.Exit(1);
+            }
             stmt.declare.array = declare;
             return stmt;
         }
@@ -632,7 +668,7 @@ namespace Epsilon
             {
                 type = NodeStmt.NodeStmtType.Assign
             };
-            stmt.assign.type = NodeStmtAssign.NodeStmtAssignType.SingleVar;
+            stmt.assign.type = NodeStmtIdentifierType.SingleVar;
             stmt.assign.singlevar = singlevar;
             return stmt;
         }
@@ -655,7 +691,7 @@ namespace Epsilon
             {
                 type = NodeStmt.NodeStmtType.Assign
             };
-            stmt.assign.type = NodeStmtAssign.NodeStmtAssignType.Array;
+            stmt.assign.type = NodeStmtIdentifierType.Array;
             stmt.assign.array = array;
             return stmt;
         }
@@ -663,8 +699,7 @@ namespace Epsilon
         {
             if (IsStmtDeclare())
             {
-                Consume();
-                if (Peek(TokenType.OpenSquare, 1).HasValue)
+                if (Peek(TokenType.OpenSquare, 2).HasValue)
                 {
                     return [ParseDeclareArray()];
                 }
@@ -788,12 +823,12 @@ namespace Epsilon
                 {
                     do
                     {
-                        if (!(Peek(TokenType.Auto).HasValue && Peek(TokenType.Ident, 1).HasValue))
+                        if (!IsStmtDeclare())
                         {
                             Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: error in definition of function `{FunctionName.Value}`\n");
                             Environment.Exit(1);
                         }
-                        Consume();
+                        Token vartype = Consume();
                         Token ident = Consume();
                         Var parameter = new();
                         parameter.Size = 1;
@@ -817,7 +852,10 @@ namespace Epsilon
                         }
                         // TODO later: support defaule values for parameters in a functions
                         parameter.Value = ident.Value;
-
+                        if (vartype.Type == TokenType.Auto)
+                            parameter.Size = 8;
+                        else if (vartype.Type == TokenType.Char)
+                            parameter.Size = 1;
                         parameters.Add(parameter);
                     } while (PeekAndConsume(TokenType.Comma).HasValue);
                 }
