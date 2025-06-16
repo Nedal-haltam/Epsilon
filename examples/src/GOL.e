@@ -2,18 +2,18 @@
 
 
 #define SIZE 5
-#define COPY122 for (int ci = 0; ci < SIZE; ci = ci + 1) { for (int cj = 0; cj < SIZE; cj = cj + 1) { grid2[ci][cj] = grid[ci][cj]; } }
-#define COPY221 for (int ci = 0; ci < SIZE; ci = ci + 1) { for (int cj = 0; cj < SIZE; cj = cj + 1) { grid[ci][cj] = grid2[ci][cj]; } }
+#define COPY122 for (auto ci = 0; ci < SIZE; ci = ci + 1) { for (auto cj = 0; cj < SIZE; cj = cj + 1) { grid2[ci][cj] = grid[ci][cj]; } }
+#define COPY221 for (auto ci = 0; ci < SIZE; ci = ci + 1) { for (auto cj = 0; cj < SIZE; cj = cj + 1) { grid[ci][cj] = grid2[ci][cj]; } }
 #define glider_size 5
 #define iters 25
 
 func SlowDown()
 {
-    for (int i = 0; i < 1000; i = i + 1)
+    for (auto i = 0; i < 1000; i = i + 1)
     {
-        for (int j = 0; j < 1000; j = j + 1)
+        for (auto j = 0; j < 1000; j = j + 1)
         {
-            for (int k = 0; k < 25; k = k + 1)
+            for (auto k = 0; k < 25; k = k + 1)
             {
 
             }
@@ -22,18 +22,18 @@ func SlowDown()
 }
 func main()
 {
-    int grid[SIZE][SIZE];
-    for (int i = 0; i < SIZE; i = i + 1)
+    auto grid[SIZE][SIZE];
+    for (auto i = 0; i < SIZE; i = i + 1)
     {
-        for (int j = 0; j < SIZE; j = j + 1)
+        for (auto j = 0; j < SIZE; j = j + 1)
         {
             grid[i][j] = 0;
         }
     }
-    int grid2[SIZE][SIZE];
-    for (int i = 0; i < SIZE; i = i + 1)
+    auto grid2[SIZE][SIZE];
+    for (auto i = 0; i < SIZE; i = i + 1)
     {
-        for (int j = 0; j < SIZE; j = j + 1)
+        for (auto j = 0; j < SIZE; j = j + 1)
         {
             grid2[i][j] = 0;
         }
@@ -44,11 +44,11 @@ func main()
     grid[3][2] = 1;
     grid[3][3] = 1;
 
-    for (int iter = 0; iter < iters; iter = iter + 1)
+    for (auto iter = 0; iter < iters; iter = iter + 1)
     {
-        for (int i = 0; i < SIZE; i = i + 1)
+        for (auto i = 0; i < SIZE; i = i + 1)
         {
-            for (int j = 0; j < SIZE; j = j + 1)
+            for (auto j = 0; j < SIZE; j = j + 1)
             {
                 if (grid[i][j])
                 {
@@ -63,19 +63,19 @@ func main()
         }
         SlowDown();
         COPY122
-        for (int i = 0; i < SIZE; i = i + 1)
+        for (auto i = 0; i < SIZE; i = i + 1)
         {
-            for (int j = 0; j < SIZE; j = j + 1)
+            for (auto j = 0; j < SIZE; j = j + 1)
             {
-                int live = 0;
-                for (int dx = i - 1; dx < i + 2; dx = dx + 1)
+                auto live = 0;
+                for (auto dx = i - 1; dx < i + 2; dx = dx + 1)
                 {
-                    for (int dy = j - 1; dy < j + 2; dy = dy + 1)
+                    for (auto dy = j - 1; dy < j + 2; dy = dy + 1)
                     {
                         if ((dx != i) | (dy != j))
                         {
-                            int indexx = dx;
-                            int indexy = dy;
+                            auto indexx = dx;
+                            auto indexy = dy;
                             if (dx == -1)
                                 indexx = SIZE - 1;
                             else if (dx == SIZE)

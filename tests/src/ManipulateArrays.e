@@ -2,33 +2,33 @@
 #define SIZE 10
 
 
-func PrintArray(int xs[SIZE], int n)
+func PrintArray(auto xs[SIZE], auto n)
 {
-    for (int i = 0; i < n; i = i + 1)
+    for (auto i = 0; i < n; i = i + 1)
     {
         printf("xs[%d] = %d\n", i, xs[i]);
     }
 }
 
-func InitArray(int xs[SIZE], int n)
+func InitArray(auto xs[SIZE], auto n)
 {
-    for (int i = 0; i < n; i = i + 1)
+    for (auto i = 0; i < n; i = i + 1)
     {
         xs[i] = i + 1;
     }
 }
 
-func MultiplyArray(int xs[SIZE], int n, int value)
+func MultiplyArray(auto xs[SIZE], auto n, auto value)
 {
-    for (int i = 0; i < n; i = i + 1)
+    for (auto i = 0; i < n; i = i + 1)
     {
         xs[i] = xs[i] * value;
     }
 }
 
-func Dot(int a[SIZE], int b[SIZE], int n)
+func Dot(auto a[SIZE], auto b[SIZE], auto n)
 {
-    for (int i = 0; i < n; i = i + 1)
+    for (auto i = 0; i < n; i = i + 1)
     {
         a[i] = a[i] * b[i];
     }
@@ -36,15 +36,15 @@ func Dot(int a[SIZE], int b[SIZE], int n)
 
 func main()
 {
-    int n = SIZE;
-    int xs[SIZE];
+    auto n = SIZE;
+    auto xs[SIZE];
     InitArray(xs, n);
     PrintArray(xs, n);
     printf("-------------------------------------\n");
     MultiplyArray(xs, n, 7);
     PrintArray(xs, n);
     printf("-------------------------------------\n");
-    int ys[SIZE];
+    auto ys[SIZE];
     InitArray(ys, n);
     Dot(xs, ys, n);
     PrintArray(xs, n);

@@ -1,11 +1,11 @@
 func Print10sMultipleAndLengths()
 {
-    int x = 1;
-    int count = 0;
-    int bound = 1000;
-    for (int i = 1; i < bound + 1; i = i + 1)
+    auto x = 1;
+    auto count = 0;
+    auto bound = 1000;
+    for (auto i = 1; i < bound + 1; i = i + 1)
     {
-        int len = strlen(itoa(x));
+        auto len = strlen(itoa(x));
         if (count != len)
         {
             printf("number = %d\n", x);
@@ -16,7 +16,7 @@ func Print10sMultipleAndLengths()
     }
 }
 
-func foo(int a, int b)
+func foo(auto a, auto b)
 {
     return a + b;
 }

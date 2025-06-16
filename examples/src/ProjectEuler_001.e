@@ -1,8 +1,8 @@
 #define limit 1000
 func main()
 {
-    int ans = 0;
-    for (int i = 1; i < limit; i = i + 1)
+    auto ans = 0;
+    for (auto i = 1; i < limit; i = i + 1)
     {
         if (i % 3 == 0 | i % 5 == 0)
         {

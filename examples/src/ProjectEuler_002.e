@@ -1,10 +1,10 @@
 func main()
 {
-    int bound = 4000000;
-    int sum = 0;
-    int a = 0;
-    int b = 1;
-    int c;
+    auto bound = 4000000;
+    auto sum = 0;
+    auto a = 0;
+    auto b = 1;
+    auto c;
     while(1)
     {
         c = a + b;

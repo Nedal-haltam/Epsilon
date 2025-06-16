@@ -1,8 +1,8 @@
 
 #define SIZE 100
 
-func display(int base[SIZE], int n) {
-    int i  = 0;
+func display(auto base[SIZE], auto n) {
+    auto i  = 0;
     while (i < n) {
         if (base[i]) printf("#"); 
         else printf(".");
@@ -11,9 +11,9 @@ func display(int base[SIZE], int n) {
     printf("\n");
 }
 
-func next(int base[SIZE], int n) {
-    int state = base[0] | base[1] << 1;
-    int i  = 2;
+func next(auto base[SIZE], auto n) {
+    auto state = base[0] | base[1] << 1;
+    auto i  = 2;
     while (i < n) {
         state = state << 1;
         state = state | base[i];
@@ -23,14 +23,14 @@ func next(int base[SIZE], int n) {
     }
 }
 func main() {
-    int n = SIZE;
-    int base[SIZE];
-    for (int i = 0; i < n; i = i + 1)
+    auto n = SIZE;
+    auto base[SIZE];
+    for (auto i = 0; i < n; i = i + 1)
         base[i] = 0;
     base[n - 2] = 1;
 
     display(base, n);
-    int i = 0;
+    auto i = 0;
     while (i < n - 3) {
         next(base, n);
         display(base, n);

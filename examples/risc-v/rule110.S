@@ -1,4 +1,3 @@
-.equ SYS_EXIT, 93
 .section .text
 .globl main
 main:
@@ -414,7 +413,7 @@ TEMP_LABEL11_END:
     ADDI sp, sp, 8
     ret
 exit:
-    li a7, SYS_EXIT
+    li a7, 93
     ecall
     ret
 .section .data

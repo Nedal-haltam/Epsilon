@@ -60,7 +60,7 @@ namespace Epsilon
         }
         bool IsStmtDeclare()
         {
-            return (Peek(TokenType.Int).HasValue) &&
+            return (Peek(TokenType.Auto).HasValue) &&
                    Peek(TokenType.Ident, 1).HasValue;
         }
         bool IsStmtAssign()
@@ -399,7 +399,7 @@ namespace Epsilon
             {
                 Token vartype = Consume();
                 NodeStmtDeclareSingleVar declare = new();
-                if (vartype.Type != TokenType.Int)
+                if (vartype.Type != TokenType.Auto)
                 {
                     Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error Expected variable type on line: {vartype.Line}\n");
                     Environment.Exit(1);
@@ -788,7 +788,7 @@ namespace Epsilon
                 {
                     do
                     {
-                        if (!(Peek(TokenType.Int).HasValue && Peek(TokenType.Ident, 1).HasValue))
+                        if (!(Peek(TokenType.Auto).HasValue && Peek(TokenType.Ident, 1).HasValue))
                         {
                             Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: error in definition of function `{FunctionName.Value}`\n");
                             Environment.Exit(1);

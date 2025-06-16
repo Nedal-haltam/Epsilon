@@ -1,7 +1,7 @@
 
 
 #define SIZE 30
-func _FibRecursive(int arr[SIZE], int i)
+func _FibRecursive(auto arr[SIZE], auto i)
 {
     if (arr[i] != -1)
         return arr[i];
@@ -13,10 +13,10 @@ func _FibRecursive(int arr[SIZE], int i)
 
 func FibRecursive()
 {
-    int arr[SIZE];
-    for (int i = 0; i < SIZE; i = i + 1)
+    auto arr[SIZE];
+    for (auto i = 0; i < SIZE; i = i + 1)
         arr[i] = -1;
-    for (int i = 0; i < SIZE; i = i + 1)
+    for (auto i = 0; i < SIZE; i = i + 1)
     {
         arr[i] = _FibRecursive(arr, i);
         printf("%ld ", arr[i]);
@@ -24,11 +24,11 @@ func FibRecursive()
     printf("\n");
 }
 
-func FibIterative(int n)
+func FibIterative(auto n)
 {
-    int a = 0, b = 1;
-    int c;
-    for (int i = 0; i < n; i = i + 1)
+    auto a = 0, b = 1;
+    auto c;
+    for (auto i = 0; i < n; i = i + 1)
     {
         printf("%ld ", a);
         c = a + b;
@@ -40,7 +40,7 @@ func FibIterative(int n)
 
 func main()
 {
-    int n = SIZE;
+    auto n = SIZE;
     FibRecursive();
     FibIterative(n);
     return 0;

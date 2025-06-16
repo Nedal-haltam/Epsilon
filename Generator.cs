@@ -884,7 +884,7 @@ namespace Epsilon
         void GenStdFunctions()
         {
             m_outputcode.AppendLine($"exit:");
-            m_outputcode.AppendLine($"    li a7, SYS_EXIT");
+            m_outputcode.AppendLine($"    li a7, 93");
             m_outputcode.AppendLine($"    ecall");
             m_outputcode.AppendLine($"    ret");
             if (!m_UserDefinedFunctions.ContainsKey("strlen") && CalledFunctions.Contains("strlen"))
@@ -925,7 +925,6 @@ namespace Epsilon
         }
         public StringBuilder GenProg()
         {
-            m_outputcode.AppendLine($".equ SYS_EXIT, 93");
             m_outputcode.AppendLine($".section .text");
             m_outputcode.AppendLine($".globl main");
 

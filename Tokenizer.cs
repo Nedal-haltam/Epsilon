@@ -40,7 +40,7 @@ namespace Epsilon
         NotEqual,
         LessThan,
 
-        Int,
+        Auto,
         Ident,
 
         If,
@@ -64,7 +64,7 @@ namespace Epsilon
     {
         readonly Dictionary<string, TokenType> KeyWords = new()
         {
-            { "int", TokenType.Int},
+            { "auto", TokenType.Auto},
             { "if", TokenType.If},
             { "elif", TokenType.Elif},
             { "else", TokenType.Else},

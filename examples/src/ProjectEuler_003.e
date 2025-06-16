@@ -1,12 +1,12 @@
 func main()
 {
-    int n = 600851475143;
-    int number = n;
-    int ans;
+    auto n = 600851475143;
+    auto number = n;
+    auto ans;
     while ((n & 1) == 0)
         n = n >> 1;
 
-    for (int i = 3; i < n + 1; i = i + 1)
+    for (auto i = 3; i < n + 1; i = i + 1)
     {
         if (n % i == 0)
             ans = i;
