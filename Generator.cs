@@ -886,7 +886,7 @@ namespace Epsilon
             m_outputcode.AppendLine($"    li a7, SYS_EXIT");
             m_outputcode.AppendLine($"    ecall");
             m_outputcode.AppendLine($"    ret");
-            if (!m_UserDefinedFunctions.ContainsKey("strlen"))
+            if (!m_UserDefinedFunctions.ContainsKey("strlen") && CalledFunctions.Contains("strlen"))
             {
                 m_outputcode.AppendLine($"strlen:");
                 m_outputcode.AppendLine($"    mv t0, a0");
@@ -900,7 +900,7 @@ namespace Epsilon
                 m_outputcode.AppendLine($"strlen_done:");
                 m_outputcode.AppendLine($"    ret");
             }
-            if (!m_UserDefinedFunctions.ContainsKey("itoa"))
+            if (!m_UserDefinedFunctions.ContainsKey("itoa") && CalledFunctions.Contains("itoa"))
             {
                 m_outputcode.AppendLine($"itoa:");
                 m_outputcode.AppendLine($"    mv t1, a0");
@@ -948,16 +948,20 @@ namespace Epsilon
             }
 
             GenStdFunctions();
-            m_outputcode.AppendLine($".section .data");
+            if (StringLits.Count > 0)
+                m_outputcode.AppendLine($".section .data");
             for (int i = 0; i < StringLits.Count; i++)
             {
                 m_outputcode.AppendLine($"StringLits{i}:");
                 m_outputcode.AppendLine($"    .string \"{StringLits[i]}\"");
             }
-            m_outputcode.AppendLine($".section .bss");
-            m_outputcode.AppendLine($"itoaTempBuffer:     ");
-            m_outputcode.AppendLine($"    .space 32");
-            m_outputcode.AppendLine($".extern printf");
+            if (!m_UserDefinedFunctions.ContainsKey("itoa") && CalledFunctions.Contains("itoa"))
+            {
+                m_outputcode.AppendLine($".section .bss");
+                m_outputcode.AppendLine($"itoaTempBuffer:     ");
+                m_outputcode.AppendLine($"    .space 32");
+                m_outputcode.AppendLine($".extern printf");
+            }
             return m_outputcode;
         }
     }
