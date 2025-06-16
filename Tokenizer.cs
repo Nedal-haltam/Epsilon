@@ -28,6 +28,7 @@ namespace Epsilon
         Minus,
         mul,
         rem,
+        div,
 
         And,
         Or,
@@ -406,6 +407,11 @@ namespace Epsilon
                 {
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.rem, Line = line});
+                }
+                else if (Peek('/').HasValue)
+                {
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.div, Line = line});
                 }
                 else if (Peek('-').HasValue)
                 {

@@ -435,6 +435,9 @@ namespace Epsilon
                 case NodeBinExpr.NodeBinExprType.rem:
                     m_outputcode.AppendLine($"    rem {reg}, {reg}, {reg2}");
                     break;
+                case NodeBinExpr.NodeBinExprType.div:
+                    m_outputcode.AppendLine($"    div {reg}, {reg}, {reg2}");
+                    break;
                 default:
                     Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid binary operator `{binExpr.type}`\n");
                     Environment.Exit(1);

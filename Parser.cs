@@ -97,6 +97,7 @@ namespace Epsilon
             return Peek(TokenType.Plus).HasValue ||
                    Peek(TokenType.mul).HasValue ||
                    Peek(TokenType.rem).HasValue ||
+                   Peek(TokenType.div).HasValue ||
                    Peek(TokenType.Minus).HasValue ||
                    Peek(TokenType.And).HasValue ||
                    Peek(TokenType.Or).HasValue ||
@@ -218,7 +219,7 @@ namespace Epsilon
         {
             return type switch
             {
-                TokenType.mul or TokenType.rem => 7,
+                TokenType.mul or TokenType.rem or TokenType.div => 7,
                 TokenType.Plus or TokenType.Minus => 6,
                 TokenType.Sll or TokenType.Srl => 5,
                 TokenType.LessThan => 4,
@@ -237,6 +238,8 @@ namespace Epsilon
                 return NodeBinExpr.NodeBinExprType.mul;
             if (op == TokenType.rem)
                 return NodeBinExpr.NodeBinExprType.rem;
+            if (op == TokenType.div)
+                return NodeBinExpr.NodeBinExprType.div;
             if (op == TokenType.Minus)
                 return NodeBinExpr.NodeBinExprType.sub;
             if (op == TokenType.Sll)
