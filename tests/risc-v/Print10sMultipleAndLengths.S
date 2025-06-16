@@ -36,10 +36,6 @@ foo:
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
-    ADDI sp, sp, 16
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
-    ret
 Print10sMultipleAndLengths:
     ADDI sp, sp, -8
     SD ra, 0(sp)

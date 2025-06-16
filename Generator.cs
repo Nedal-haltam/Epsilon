@@ -786,7 +786,12 @@ namespace Epsilon
             Shartilities.Assert(stacksize == LocalAttributes.m_StackSize, $"stack sizes are not equal");
             if (stacksize > 0)
                 m_outputcode.AppendLine($"    ADDI sp, sp, {8 * stacksize}");
-            if (LocalAttributes.m_CurrentFunction != "main")
+            if (LocalAttributes.m_CurrentFunction == "main")
+            {
+                m_outputcode.AppendLine($"    ADDI a0, zero, 0");
+                m_outputcode.AppendLine($"    call exit");
+            }
+            else
             {
                 m_outputcode.AppendLine($"    LD ra, 0(sp)");
                 m_outputcode.AppendLine($"    ADDI sp, sp, 8");
@@ -819,7 +824,10 @@ namespace Epsilon
             {
                 GenStmt(stmt);
             }
-            GenReturnFromFunction();
+            if (Function.FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
+            {
+                GenReturnFromFunction();
+            }
         }
         void GenStmtExit(NodeStmtExit exit)
         {
@@ -935,8 +943,6 @@ namespace Epsilon
             }
             // TODO: should resolve and generate global and keep them without resetting
             GenFunctionDefinition(m_UserDefinedFunctions["main"].FunctionName.Value);
-            m_outputcode.AppendLine($"    ADDI a0, zero, 0");
-            m_outputcode.AppendLine($"    call exit");
             for (int i = 0; i < CalledFunctions.Count; i++)
             {
                 if (m_UserDefinedFunctions.ContainsKey(CalledFunctions[i]))

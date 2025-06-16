@@ -52,7 +52,6 @@ main:
     call printf
     LI s0, 0
     ADDI sp, sp, 168
-    ADDI sp, sp, 168
     ADDI a0, zero, 0
     call exit
 InitArray:

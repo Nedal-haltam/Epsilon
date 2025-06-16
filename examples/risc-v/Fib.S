@@ -10,7 +10,6 @@ main:
     call FibIterative
     LI s0, 0
     ADDI sp, sp, 8
-    ADDI sp, sp, 8
     ADDI a0, zero, 0
     call exit
 FibRecursive:
@@ -387,10 +386,6 @@ LABEL13_END:
     LD t0, 0(sp)
     ADDI sp, sp, 8
     ADD s0, s0, t0
-    ADDI sp, sp, 16
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
-    ret
     ADDI sp, sp, 16
     LD ra, 0(sp)
     ADDI sp, sp, 8
