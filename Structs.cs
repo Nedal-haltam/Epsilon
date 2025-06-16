@@ -219,13 +219,13 @@ namespace Epsilon
     {
         public enum NodeExprType
         {
-            term, binExpr
+            term, binExpr, none
         }
         public NodeExprType type;
         public NodeTerm term;
         public NodeBinExpr binexpr;
 
-        public static NodeExpr Number(string num)
+        public static NodeExpr Number(string num, int line)
         {
             return new NodeExpr()
             {

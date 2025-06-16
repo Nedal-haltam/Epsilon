@@ -423,11 +423,8 @@ namespace Epsilon
                 {
                     NodeExpr expr = new()
                     {
-                        type = NodeExpr.NodeExprType.term
+                        type = NodeExpr.NodeExprType.none
                     };
-                    expr.term.type = NodeTerm.NodeTermType.intlit;
-                    expr.term.intlit.intlit.Type = TokenType.IntLit;
-                    expr.term.intlit.intlit.Value = "0";
                     declare.expr = expr;
                 }
                 TryConsumeError(TokenType.SemiColon);
@@ -555,11 +552,8 @@ namespace Epsilon
                 {
                     NodeExpr expr = new()
                     {
-                        type = NodeExpr.NodeExprType.term
+                        type = NodeExpr.NodeExprType.none
                     };
-                    expr.term.type = NodeTerm.NodeTermType.intlit;
-                    expr.term.intlit.intlit.Type = TokenType.Int;
-                    expr.term.intlit.intlit.Value = "0";
                     declare.expr = expr;
                 }
                 NodeStmt stmt = new()

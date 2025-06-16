@@ -264,7 +264,7 @@ namespace Epsilon
                 {
                     type = NodeBinExpr.NodeBinExprType.mul,
                     lhs = index,
-                    rhs = NodeExpr.Number("8"),
+                    rhs = NodeExpr.Number("8", -1),
                 }
             }, reg);
             if (BaseReg != "sp")
@@ -455,6 +455,11 @@ namespace Epsilon
             else if (expr.type == NodeExpr.NodeExprType.binExpr)
             {
                 GenBinExpr(expr.binexpr, DestReg);
+            }
+            else if (expr.type == NodeExpr.NodeExprType.none)
+            {
+                m_outputcode.AppendLine($"    ADDI sp, sp, -8");
+                LocalAttributes.m_StackSize++;
             }
         }
 
