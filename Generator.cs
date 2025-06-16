@@ -462,45 +462,6 @@ namespace Epsilon
                 LocalAttributes.m_StackSize++;
             }
         }
-
-        string? GenImmedTerm(NodeTerm term)
-        {
-            if (term.type == NodeTerm.NodeTermType.intlit)
-            {
-                return term.intlit.intlit.Value;
-            }
-            else if (term.type == NodeTerm.NodeTermType.paren)
-            {
-                return GenImmedExpr(term.paren.expr);
-            }
-            else
-            {
-                return null;
-            }
-        }
-        string? GenImmedBinExpr(NodeBinExpr binExpr)
-        {
-            string? imm2 = GenImmedExpr(binExpr.rhs);
-            string? imm1 = GenImmedExpr(binExpr.lhs);
-            if (imm1 != null && imm2 != null)
-            {
-                return GetImmedOperation(imm1, imm2, binExpr.type);
-            }
-            return null;
-
-        }
-        string? GenImmedExpr(NodeExpr Iexpr)
-        {
-            if (Iexpr.type == NodeExpr.NodeExprType.term)
-            {
-                return GenImmedTerm(Iexpr.term);
-            }
-            else if (Iexpr.type == NodeExpr.NodeExprType.binExpr)
-            {
-                return GenImmedBinExpr(Iexpr.binexpr);
-            }
-            return null;
-        }
         void GenStmtDeclare(NodeStmtDeclare declare)
         {
             if (declare.type == NodeStmtDeclare.NodeStmtDeclareType.SingleVar)
