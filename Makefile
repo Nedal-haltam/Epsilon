@@ -22,7 +22,7 @@ run-main:
 main: build-main run-main
 	echo "finihshed main"
 
-EXAMPLES := HelloWorld GOL rule110 Fib
+EXAMPLES := HelloWorld GOL rule110 Fib ProjectEuler_001
 
 build-examples: clean-examples
 	@for ex in $(EXAMPLES); do \
