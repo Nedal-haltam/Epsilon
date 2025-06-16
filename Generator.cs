@@ -70,6 +70,10 @@ namespace Epsilon
                 return (Convert.ToInt32(imm1) ^ Convert.ToInt32(imm2)).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.Mul)
                 return (Convert.ToInt32(imm1) * Convert.ToInt32(imm2)).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.Div)
+                return (Convert.ToInt32(imm1) / Convert.ToInt32(imm2)).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.Rem)
+                return (Convert.ToInt32(imm1) % Convert.ToInt32(imm2)).ToString();
             Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid operation `{op}`\n");
             Environment.Exit(1);
             return "";
