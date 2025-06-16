@@ -46,6 +46,10 @@ TEMP_LABEL0_START:
     SD t0, 0(sp)
     LD t0, 0(sp)
     ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
@@ -108,6 +112,10 @@ TEMP_LABEL1_END:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SUB t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LD t0, 0(sp)
@@ -282,6 +290,10 @@ LABEL7_START:
     SD t0, 0(sp)
     LD t0, 0(sp)
     ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
@@ -377,6 +389,10 @@ next:
     SD t0, 0(sp)
     LD t0, 0(sp)
     ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
@@ -411,6 +427,10 @@ next:
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LD t0, 0(sp)
@@ -498,6 +518,10 @@ TEMP_LABEL10_START:
     SD t0, 0(sp)
     LD t0, 0(sp)
     ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
@@ -570,6 +594,10 @@ TEMP_LABEL10_START:
     SD t0, 0(sp)
     LD t0, 0(sp)
     ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
@@ -598,6 +626,10 @@ TEMP_LABEL10_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SRL t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LD t0, 0(sp)

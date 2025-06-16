@@ -370,7 +370,12 @@ namespace Epsilon
             }
             else if (term.type == NodeTerm.NodeTermType.paren)
             {
+                string reg = FirstTempReg;
                 GenExpr(term.paren.expr);
+                GenPop(reg);
+                if (term.Negative)
+                    m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
+                GenPush(reg);
             }
             else
             {

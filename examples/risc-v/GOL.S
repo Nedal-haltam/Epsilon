@@ -68,6 +68,10 @@ TEMP_LABEL3_START:
     LD t0, 8(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 5
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -228,6 +232,10 @@ TEMP_LABEL9_START:
     LD t0, 8(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 5
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -330,6 +338,10 @@ TEMP_LABEL7_END:
     LI t0, 2
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 5
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -377,6 +389,10 @@ TEMP_LABEL7_END:
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 3
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 5
@@ -428,6 +444,10 @@ TEMP_LABEL7_END:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 5
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -477,6 +497,10 @@ TEMP_LABEL7_END:
     LI t0, 2
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 5
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -524,6 +548,10 @@ TEMP_LABEL7_END:
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 3
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 5
@@ -660,6 +688,10 @@ LABEL21_START:
     SD t0, 0(sp)
 ########## j
     LD t0, 8(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 5
@@ -847,6 +879,10 @@ TEMP_LABEL27_START:
     LD t0, 8(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 5
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -889,6 +925,10 @@ TEMP_LABEL27_START:
     SD t0, 0(sp)
 ########## cj
     LD t0, 16(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 5
@@ -1164,6 +1204,10 @@ LABEL42_START:
     SNEZ t0, t0
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
 ########## i
     LD t0, 40(sp)
     ADDI sp, sp, -8
@@ -1178,6 +1222,10 @@ LABEL42_START:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SNEZ t0, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LD t0, 0(sp)
@@ -1331,6 +1379,10 @@ LABEL57_START:
     LD t0, 8(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 5
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1461,6 +1513,10 @@ LABEL60_START:
     LD t0, 16(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 5
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1521,6 +1577,10 @@ LABEL63_START:
     SNEZ t0, t0
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 2
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1534,6 +1594,10 @@ LABEL63_START:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SNEZ t0, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LD t0, 0(sp)
@@ -1553,6 +1617,10 @@ LABEL63_START:
     SD t0, 0(sp)
 ########## j
     LD t0, 16(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 5
@@ -1631,6 +1699,10 @@ LABEL66_START:
     SD t0, 0(sp)
 ########## j
     LD t0, 16(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 5
@@ -1798,6 +1870,10 @@ TEMP_LABEL72_START:
     LD t0, 8(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 5
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1840,6 +1916,10 @@ TEMP_LABEL72_START:
     SD t0, 0(sp)
 ########## cj
     LD t0, 16(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 5
