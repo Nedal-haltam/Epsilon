@@ -25,7 +25,7 @@ namespace Epsilon
     {
         public enum NodeStmtType
         {
-            declare, assign, If, For, While, Scope, Break, Continue, Function, Return, Exit
+            Declare, Assign, If, For, While, Scope, Break, Continue, Function, Return, Exit
         }
         public NodeStmtType type;
         public NodeStmtDeclare declare;
@@ -113,14 +113,14 @@ namespace Epsilon
     {
         public enum NodeIfElifsType
         {
-            elif, elsee
+            Elif, Else
         }
         public NodeIfElifsType type;
         public NodeElif elif;
         public NodeElse elsee;
         public NodeIfElifs()
         {
-            type = NodeIfElifsType.elsee;
+            type = NodeIfElifsType.Else;
             elif = new NodeElif();
             elsee = new NodeElse();
         }
@@ -157,7 +157,7 @@ namespace Epsilon
     {
         public enum NodeForInitType
         {
-            declare, assign
+            Declare, Assign
         }
         public NodeForInitType type;
         public NodeStmtDeclare declare;
@@ -219,7 +219,7 @@ namespace Epsilon
     {
         public enum NodeExprType
         {
-            term, binExpr, none
+            Term, BinExpr, None
         }
         public NodeExprType type;
         public NodeTerm term;
@@ -229,10 +229,10 @@ namespace Epsilon
         {
             return new NodeExpr()
             {
-                type = NodeExprType.term,
+                type = NodeExprType.Term,
                 term = new()
                 {
-                    type = NodeTerm.NodeTermType.intlit,
+                    type = NodeTerm.NodeTermType.IntLit,
                     intlit = new()
                     {
                         intlit = new()
@@ -250,7 +250,7 @@ namespace Epsilon
     {
         public enum NodeTermType
         {
-            intlit, stringlit, functioncall, ident, paren
+            IntLit, StringLit, FunctionCall, Ident, Paren
         }
         public NodeTermType type;
         public bool Negative;
@@ -320,7 +320,7 @@ namespace Epsilon
     {
         public enum NodeBinExprType
         {
-            add, sub, mul, rem, div, sll, srl, equalequal, notequal, lessthan, and, or, xor
+            Add, Sub, Mul, Rem, Div, Sll, Srl, EqualEqual, NotEqual, LessThan, And, Or, Xor
         }
         public NodeBinExprType type;
         public NodeExpr lhs;

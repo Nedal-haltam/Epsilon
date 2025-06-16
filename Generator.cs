@@ -48,27 +48,27 @@ namespace Epsilon
         public FunctionAttributes LocalAttributes = new();
         public static string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
         {
-            if (op == NodeBinExpr.NodeBinExprType.add)
+            if (op == NodeBinExpr.NodeBinExprType.Add)
                 return (Convert.ToInt32(imm1) + Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.sub)
+            else if (op == NodeBinExpr.NodeBinExprType.Sub)
                 return (Convert.ToInt32(imm1) - Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.sll)
+            else if (op == NodeBinExpr.NodeBinExprType.Sll)
                 return (Convert.ToInt32(imm1) << Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.srl)
+            else if (op == NodeBinExpr.NodeBinExprType.Srl)
                 return (Convert.ToInt32(imm1) >> Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.equalequal)
+            else if (op == NodeBinExpr.NodeBinExprType.EqualEqual)
                 return (Convert.ToInt32(imm1) == Convert.ToInt32(imm2) ? 1 : 0).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.notequal)
+            else if (op == NodeBinExpr.NodeBinExprType.NotEqual)
                 return (Convert.ToInt32(imm1) != Convert.ToInt32(imm2) ? 1 : 0).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.lessthan)
+            else if (op == NodeBinExpr.NodeBinExprType.LessThan)
                 return (Convert.ToInt32(imm1) < Convert.ToInt32(imm2) ? 1 : 0).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.and)
+            else if (op == NodeBinExpr.NodeBinExprType.And)
                 return (Convert.ToInt32(imm1) & Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.or)
+            else if (op == NodeBinExpr.NodeBinExprType.Or)
                 return (Convert.ToInt32(imm1) | Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.xor)
+            else if (op == NodeBinExpr.NodeBinExprType.Xor)
                 return (Convert.ToInt32(imm1) ^ Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.mul)
+            else if (op == NodeBinExpr.NodeBinExprType.Mul)
                 return (Convert.ToInt32(imm1) * Convert.ToInt32(imm2)).ToString();
             Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid operation `{op}`\n");
             Environment.Exit(1);
@@ -176,10 +176,10 @@ namespace Epsilon
             NodeExpr expr = new();
             if (i == dims.Count - 1)
             {
-                expr.type = NodeExpr.NodeExprType.term;
+                expr.type = NodeExpr.NodeExprType.Term;
                 expr.term = new()
                 {
-                    type = NodeTerm.NodeTermType.intlit,
+                    type = NodeTerm.NodeTermType.IntLit,
                     intlit = new()
                 };
                 expr.term.intlit.intlit = new() 
@@ -189,16 +189,16 @@ namespace Epsilon
                 };
                 return expr;
             }
-            expr.type = NodeExpr.NodeExprType.binExpr;
+            expr.type = NodeExpr.NodeExprType.BinExpr;
             expr.binexpr = new()
             {
-                type = NodeBinExpr.NodeBinExprType.mul,
+                type = NodeBinExpr.NodeBinExprType.Mul,
                 lhs = new()
             };
-            expr.binexpr.lhs.type = NodeExpr.NodeExprType.term;
+            expr.binexpr.lhs.type = NodeExpr.NodeExprType.Term;
             expr.binexpr.lhs.term = new()
             {
-                type = NodeTerm.NodeTermType.intlit,
+                type = NodeTerm.NodeTermType.IntLit,
                 intlit = new()
             };
             expr.binexpr.lhs.term.intlit.intlit = new() 
@@ -214,25 +214,25 @@ namespace Epsilon
             NodeExpr expr = new();
             if (i == dims.Count - 1)
             {
-                expr.type = NodeExpr.NodeExprType.term;
+                expr.type = NodeExpr.NodeExprType.Term;
                 expr.term = new()
                 {
-                    type = NodeTerm.NodeTermType.paren,
+                    type = NodeTerm.NodeTermType.Paren,
                     paren = new()
                 };
                 expr.term.paren.expr = indexes[^1];
                 return expr;
             }
-            expr.type = NodeExpr.NodeExprType.binExpr;
+            expr.type = NodeExpr.NodeExprType.BinExpr;
             expr.binexpr = new()
             {
-                type = NodeBinExpr.NodeBinExprType.add,
+                type = NodeBinExpr.NodeBinExprType.Add,
                 lhs = new()
             };
-            expr.binexpr.lhs.type = NodeExpr.NodeExprType.binExpr;
+            expr.binexpr.lhs.type = NodeExpr.NodeExprType.BinExpr;
             expr.binexpr.lhs.binexpr = new()
             {
-                type = NodeBinExpr.NodeBinExprType.mul,
+                type = NodeBinExpr.NodeBinExprType.Mul,
                 lhs = indexes[i],
                 rhs = GenIndexExprMult(ref indexes, ref dims, i + 1)
             };
@@ -259,10 +259,10 @@ namespace Epsilon
                 GenPush(BaseReg);
             GenExpr(new()
             {
-                type = NodeExpr.NodeExprType.binExpr,
+                type = NodeExpr.NodeExprType.BinExpr,
                 binexpr = new()
                 {
-                    type = NodeBinExpr.NodeBinExprType.mul,
+                    type = NodeBinExpr.NodeBinExprType.Mul,
                     lhs = index,
                     rhs = NodeExpr.Number("8", -1),
                 }
@@ -281,7 +281,7 @@ namespace Epsilon
         }
         void GenTerm(NodeTerm term, string? DestReg)
         {
-            if (term.type == NodeTerm.NodeTermType.intlit)
+            if (term.type == NodeTerm.NodeTermType.IntLit)
             {
                 string reg = DestReg ?? FirstTempReg;
                 string sign = (term.Negative) ? "-" : "";
@@ -289,7 +289,7 @@ namespace Epsilon
                 if (DestReg == null)
                     GenPush(reg);
             }
-            else if (term.type == NodeTerm.NodeTermType.stringlit)
+            else if (term.type == NodeTerm.NodeTermType.StringLit)
             {
                 string reg = DestReg ?? FirstTempReg;
                 int index = StringLits.IndexOf(term.stringlit.stringlit.Value);
@@ -302,7 +302,7 @@ namespace Epsilon
                 if (DestReg == null)
                     GenPush(reg);
             }
-            else if (term.type == NodeTerm.NodeTermType.functioncall)
+            else if (term.type == NodeTerm.NodeTermType.FunctionCall)
             {
                 string reg = DestReg ?? FirstTempReg;
                 GenStmtFunctionCall(new() { FunctionName = term.functioncall.FunctionName, parameters = term.functioncall.parameters }, true);
@@ -310,7 +310,7 @@ namespace Epsilon
                 if (DestReg == null)
                     GenPush(reg);
             }
-            else if (term.type == NodeTerm.NodeTermType.ident)
+            else if (term.type == NodeTerm.NodeTermType.Ident)
             {
                 m_outputcode.AppendLine($"########## {term.ident.ident.Value}");
                 NodeTermIdent ident = term.ident;
@@ -372,7 +372,7 @@ namespace Epsilon
                     }
                 }
             }
-            else if (term.type == NodeTerm.NodeTermType.paren)
+            else if (term.type == NodeTerm.NodeTermType.Paren)
             {
                 string reg = DestReg ?? FirstTempReg;
                 GenExpr(term.paren.expr, reg);
@@ -396,46 +396,46 @@ namespace Epsilon
             GenPop(reg2);
             switch (binExpr.type)
             {
-                case NodeBinExpr.NodeBinExprType.add:
+                case NodeBinExpr.NodeBinExprType.Add:
                     m_outputcode.AppendLine($"    ADD {reg}, {reg}, {reg2}");
                     break;
-                case NodeBinExpr.NodeBinExprType.sub:
+                case NodeBinExpr.NodeBinExprType.Sub:
                     m_outputcode.AppendLine($"    SUB {reg}, {reg}, {reg2}");
                     break;
-                case NodeBinExpr.NodeBinExprType.sll:
+                case NodeBinExpr.NodeBinExprType.Sll:
                     m_outputcode.AppendLine($"    SLL {reg}, {reg}, {reg2}");
                     break;
-                case NodeBinExpr.NodeBinExprType.srl:
+                case NodeBinExpr.NodeBinExprType.Srl:
                     m_outputcode.AppendLine($"    SRL {reg}, {reg}, {reg2}");
                     break;
-                case NodeBinExpr.NodeBinExprType.equalequal:
+                case NodeBinExpr.NodeBinExprType.EqualEqual:
                     m_outputcode.AppendLine($"    XOR {reg}, {reg}, {reg2}");
                     m_outputcode.AppendLine($"    SEQZ {reg}, {reg}");
                     break;
-                case NodeBinExpr.NodeBinExprType.notequal:
+                case NodeBinExpr.NodeBinExprType.NotEqual:
                     m_outputcode.AppendLine($"    XOR {reg}, {reg}, {reg2}");
                     m_outputcode.AppendLine($"    SNEZ {reg}, {reg}");
                     break;
-                case NodeBinExpr.NodeBinExprType.lessthan:
+                case NodeBinExpr.NodeBinExprType.LessThan:
                     m_outputcode.AppendLine($"    SLT {reg}, {reg}, {reg2}");
                     break;
-                case NodeBinExpr.NodeBinExprType.and:
+                case NodeBinExpr.NodeBinExprType.And:
                     m_outputcode.AppendLine($"    AND {reg}, {reg}, {reg2}");
                     break;
-                case NodeBinExpr.NodeBinExprType.or:
+                case NodeBinExpr.NodeBinExprType.Or:
                     m_outputcode.AppendLine($"    OR {reg}, {reg}, {reg2}");
                     break;
-                case NodeBinExpr.NodeBinExprType.xor:
+                case NodeBinExpr.NodeBinExprType.Xor:
                     m_outputcode.AppendLine($"    XOR {reg}, {reg}, {reg2}");
                     break;
-                case NodeBinExpr.NodeBinExprType.mul:
+                case NodeBinExpr.NodeBinExprType.Mul:
                     m_outputcode.AppendLine($"    MUL {reg}, {reg}, {reg2}");
                     //m_outputcode.AppendLine($"    MULH {reg}, {reg}, {reg2}"); // for upper 64-bit of the multiplication
                     break;
-                case NodeBinExpr.NodeBinExprType.rem:
+                case NodeBinExpr.NodeBinExprType.Rem:
                     m_outputcode.AppendLine($"    rem {reg}, {reg}, {reg2}");
                     break;
-                case NodeBinExpr.NodeBinExprType.div:
+                case NodeBinExpr.NodeBinExprType.Div:
                     m_outputcode.AppendLine($"    div {reg}, {reg}, {reg2}");
                     break;
                 default:
@@ -448,15 +448,15 @@ namespace Epsilon
         }
         void GenExpr(NodeExpr expr, string? DestReg)
         {
-            if (expr.type == NodeExpr.NodeExprType.term)
+            if (expr.type == NodeExpr.NodeExprType.Term)
             {
                 GenTerm(expr.term, DestReg);
             }
-            else if (expr.type == NodeExpr.NodeExprType.binExpr)
+            else if (expr.type == NodeExpr.NodeExprType.BinExpr)
             {
                 GenBinExpr(expr.binexpr, DestReg);
             }
-            else if (expr.type == NodeExpr.NodeExprType.none)
+            else if (expr.type == NodeExpr.NodeExprType.None)
             {
                 m_outputcode.AppendLine($"    ADDI sp, sp, -8");
                 LocalAttributes.m_StackSize++;
@@ -563,7 +563,7 @@ namespace Epsilon
         }
         void GenElifs(NodeIfElifs elifs, string label_end)
         {
-            if (elifs.type == NodeIfElifs.NodeIfElifsType.elif)
+            if (elifs.type == NodeIfElifs.NodeIfElifsType.Elif)
             {
                 string reg = $"{FirstTempReg}";
                 string label = $"LABEL{m_labels_count++}_elifs";
@@ -582,7 +582,7 @@ namespace Epsilon
                     m_outputcode.AppendLine($"{label}:");
                 }
             }
-            else if (elifs.type == NodeIfElifs.NodeIfElifsType.elsee)
+            else if (elifs.type == NodeIfElifs.NodeIfElifsType.Else)
             {
                 GenScope(elifs.elsee.scope);
             }
@@ -618,9 +618,9 @@ namespace Epsilon
             if (forr.pred.init.HasValue)
             {
                 m_outputcode.AppendLine($"# begin init");
-                if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.declare)
+                if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.Declare)
                     GenStmtDeclare(forr.pred.init.Value.declare);
-                else if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.assign)
+                else if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.Assign)
                     GenStmtAssign(forr.pred.init.Value.assign);
                 m_outputcode.AppendLine($"# end init");
             }
@@ -829,11 +829,11 @@ namespace Epsilon
         }
         void GenStmt(NodeStmt stmt)
         {
-            if (stmt.type == NodeStmt.NodeStmtType.declare)
+            if (stmt.type == NodeStmt.NodeStmtType.Declare)
             {
                 GenStmtDeclare(stmt.declare);
             }
-            else if (stmt.type == NodeStmt.NodeStmtType.assign)
+            else if (stmt.type == NodeStmt.NodeStmtType.Assign)
             {
                 GenStmtAssign(stmt.assign);
             }

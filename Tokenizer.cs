@@ -26,9 +26,9 @@ namespace Epsilon
 
         Plus,
         Minus,
-        mul,
-        rem,
-        div,
+        Mul,
+        Rem,
+        Div,
 
         And,
         Or,
@@ -50,15 +50,15 @@ namespace Epsilon
         While,
 
         IntLit,
-        stringlit,
+        StringLit,
 
-        func,
+        Func,
 
         Continue,
         Break,
 
         Exit,
-        returnn,
+        Return,
     }
     class Tokenizer(string thecode)
     {
@@ -72,8 +72,8 @@ namespace Epsilon
             { "while", TokenType.While},
             { "break", TokenType.Break},
             { "continue", TokenType.Continue},
-            { "func", TokenType.func},
-            { "return", TokenType.returnn},
+            { "func", TokenType.Func},
+            { "return", TokenType.Return},
             { "exit", TokenType.Exit},
         };
         private readonly string m_thecode = thecode;
@@ -356,7 +356,7 @@ namespace Epsilon
                     Consume();
                     buffer.Append(ConsumeUntil('\"'));
                     Consume();
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.stringlit, Line = line });
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.StringLit, Line = line });
                 }
                 else if (Peek('(').HasValue)
                 {
@@ -401,17 +401,17 @@ namespace Epsilon
                 else if (Peek('*').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.mul, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Mul, Line = line});
                 }
                 else if (Peek('%').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.rem, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Rem, Line = line});
                 }
                 else if (Peek('/').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.div, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Div, Line = line});
                 }
                 else if (Peek('-').HasValue)
                 {
