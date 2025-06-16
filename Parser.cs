@@ -305,15 +305,7 @@ namespace Epsilon
                         string constant1 = expr.lhs.term.intlit.intlit.Value;
                         string constant2 = expr.rhs.term.intlit.intlit.Value;
                         string value = Generator.GetImmedOperation(constant1, constant2, expr.type);
-                        NodeTerm term = new()
-                        {
-                            type = NodeTerm.NodeTermType.intlit
-                        };
-                        term.intlit.intlit.Value = value;
-                        term.intlit.intlit.Type = TokenType.IntLit;
-                        term.intlit.intlit.Line = expr.lhs.term.intlit.intlit.Line;
-                        exprlhs.type = NodeExpr.NodeExprType.term;
-                        exprlhs.term = term;
+                        exprlhs = NodeExpr.Number(value, expr.lhs.term.intlit.intlit.Line);
                     }
                     else
                     {
