@@ -255,7 +255,7 @@ namespace Epsilon
             expr.binexpr.rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
             return expr;
         }
-        void GenArrayAddrFrom_m_vars_(List<NodeExpr> indexes, Token ident, string BaseReg = "sp")
+        void GenArrayAddrFrom_m_vars_(List<NodeExpr> indexes, Token ident, int TypeSize, string BaseReg = "sp")
         {
             m_outputcode.AppendLine($"# begin array address");
             string reg = BaseReg == FirstTempReg ? SecondTempReg : FirstTempReg;
@@ -277,7 +277,7 @@ namespace Epsilon
                 {
                     type = NodeBinExpr.NodeBinExprType.Mul,
                     lhs = index,
-                    rhs = NodeExpr.Number("8", -1),
+                    rhs = NodeExpr.Number(TypeSize.ToString(), -1),
                 }
             }, reg, 8);
             if (BaseReg != "sp")
@@ -285,7 +285,7 @@ namespace Epsilon
             m_outputcode.AppendLine($"    SUB {reg}, {BaseReg}, {reg}");
             if (BaseReg == "sp")
             {
-                int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - 8;
+                int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - TypeSize;
                 m_outputcode.AppendLine($"    ADD {reg}, {reg}, {relative_location}");
             }
 
@@ -370,20 +370,20 @@ namespace Epsilon
                     string reg_addr = reg == FirstTempReg ? SecondTempReg : FirstTempReg;
                     if (LocalAttributes.m_vars.Any(x => x.Value == ident.ident.Value))
                     {
+                        int index = LocalAttributes.m_vars.FindIndex(x => x.Value == ident.ident.Value);
+                        int TypeSize = LocalAttributes.m_vars[index].TypeSize;
                         if (LocalAttributes.m_parameters.Any(x => x.Value == ident.ident.Value))
                         {
                             int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.ident.Value) - 8;
                             m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
-                            GenArrayAddrFrom_m_vars_(ident.indexes, ident.ident, reg);
+                            GenArrayAddrFrom_m_vars_(ident.indexes, ident.ident, TypeSize, reg);
                         }
                         else
                         {
-                            GenArrayAddrFrom_m_vars_(ident.indexes, ident.ident);
+                            GenArrayAddrFrom_m_vars_(ident.indexes, ident.ident, TypeSize);
                         }
                         GenPop(reg_addr, 8);
 
-                        int index = LocalAttributes.m_vars.FindIndex(x => x.Value == ident.ident.Value);
-                        int TypeSize = LocalAttributes.m_vars[index].TypeSize;
                         if (TypeSize == 1)
                             m_outputcode.AppendLine($"    LB {reg}, 0({reg_addr})");
                         else if (TypeSize == 8)
@@ -513,7 +513,7 @@ namespace Epsilon
                     else if (declare.datatype == NodeStmtDataType.Char)
                     {
                         GenExpr(declare.singlevar.expr, null, 1);
-                        LocalAttributes.m_vars.Add(new(ident.Value, 1, 8));
+                        LocalAttributes.m_vars.Add(new(ident.Value, 1, 1));
                     }
                 }
             }
@@ -568,11 +568,9 @@ namespace Epsilon
                     GenExpr(assign.singlevar.expr, reg, TypeSize);
                     int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value);
                     if (TypeSize == 1)
-                        m_outputcode.AppendLine($"    SB {reg}, {relative_location - 1}(sp)");
-                    else if (TypeSize == 8)
-                        m_outputcode.AppendLine($"    SD {reg}, {relative_location - 8}(sp)");
-                    else
-                        Shartilities.UNREACHABLE("");
+                        m_outputcode.AppendLine($"    SB {reg}, {relative_location - TypeSize}(sp)");
+                    if (TypeSize == 8)
+                        m_outputcode.AppendLine($"    SD {reg}, {relative_location - TypeSize}(sp)");
                 }
                 else
                 {
@@ -587,18 +585,18 @@ namespace Epsilon
                 {
                     string reg_addr = $"{FirstTempReg}";
                     string reg_data = $"{SecondTempReg}";
+                    int index = LocalAttributes.m_vars.FindIndex(x => x.Value == ident.Value);
+                    int TypeSize = LocalAttributes.m_vars[index].TypeSize;
                     if (LocalAttributes.m_parameters.Any(x => x.Value == ident.Value))
                     {
                         int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - 8;
                         m_outputcode.AppendLine($"    LD {reg_addr}, {relative_location}(sp)");
-                        GenArrayAddrFrom_m_vars_(assign.array.indexes, assign.array.ident, reg_addr);
+                        GenArrayAddrFrom_m_vars_(assign.array.indexes, assign.array.ident, TypeSize, reg_addr);
                     }
                     else
                     {
-                        GenArrayAddrFrom_m_vars_(assign.array.indexes, assign.array.ident);
+                        GenArrayAddrFrom_m_vars_(assign.array.indexes, assign.array.ident, TypeSize);
                     }
-                    int index = LocalAttributes.m_vars.FindIndex(x => x.Value == ident.Value);
-                    int TypeSize = LocalAttributes.m_vars[index].TypeSize;
 
                     GenExpr(assign.array.expr, reg_data, TypeSize);
                     GenPop(reg_addr, 8);
