@@ -1,4 +1,3 @@
-.equ SYS_WRITE, 64
 .equ SYS_EXIT, 93
 .section .text
 .globl main
@@ -6,8 +5,6 @@ main:
     la a0, StringLits0
     call printf
     LI s0, 0
-    ADDI sp, sp, 0
-    ADDI sp, sp, 0
     ADDI a0, zero, 0
     call exit
 exit:

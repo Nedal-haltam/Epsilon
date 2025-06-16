@@ -1,4 +1,3 @@
-.equ SYS_WRITE, 64
 .equ SYS_EXIT, 93
 .section .text
 .globl main
@@ -16,7 +15,6 @@ main:
     mv a1, s0
     call printf
     call Print10sMultipleAndLengths
-    ADDI sp, sp, 0
     ADDI a0, zero, 0
     call exit
 foo:

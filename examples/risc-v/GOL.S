@@ -1,4 +1,3 @@
-.equ SYS_WRITE, 64
 .equ SYS_EXIT, 93
 .section .text
 .globl main
@@ -1409,7 +1408,6 @@ TEMP_LABEL76_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-    ADDI sp, sp, 0
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret

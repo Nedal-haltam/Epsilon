@@ -784,7 +784,8 @@ namespace Epsilon
             foreach (Var v in LocalAttributes.m_vars)
                 stacksize += v.Size;
             Shartilities.Assert(stacksize == LocalAttributes.m_StackSize, $"stack sizes are not equal");
-            m_outputcode.AppendLine($"    ADDI sp, sp, {8 * stacksize}");
+            if (stacksize > 0)
+                m_outputcode.AppendLine($"    ADDI sp, sp, {8 * stacksize}");
             if (LocalAttributes.m_CurrentFunction != "main")
             {
                 m_outputcode.AppendLine($"    LD ra, 0(sp)");
@@ -924,8 +925,6 @@ namespace Epsilon
         }
         public StringBuilder GenProg()
         {
-
-            m_outputcode.AppendLine($".equ SYS_WRITE, 64");
             m_outputcode.AppendLine($".equ SYS_EXIT, 93");
             m_outputcode.AppendLine($".section .text");
             m_outputcode.AppendLine($".globl main");

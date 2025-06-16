@@ -1,4 +1,3 @@
-.equ SYS_WRITE, 64
 .equ SYS_EXIT, 93
 .section .text
 .globl main
