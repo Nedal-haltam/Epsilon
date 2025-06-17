@@ -5,32 +5,32 @@ main:
     ADDI sp, sp, -8
     SD t0, 0(sp)
     ADDI sp, sp, -80
+    ADDI sp, sp, -80
 ########## xs
-    ADDI a0, sp, 0
+    ADDI a0, sp, 80
 ########## n
-    LD a1, 80(sp)
+    LD a1, 160(sp)
     call InitArray
 ########## xs
-    ADDI a0, sp, 0
+    ADDI a0, sp, 80
 ########## n
-    LD a1, 80(sp)
+    LD a1, 160(sp)
     call PrintArray
     la a0, StringLits0
     call printf
 ########## xs
-    ADDI a0, sp, 0
+    ADDI a0, sp, 80
 ########## n
-    LD a1, 80(sp)
+    LD a1, 160(sp)
     LI a2, 7
     call MultiplyArray
 ########## xs
-    ADDI a0, sp, 0
+    ADDI a0, sp, 80
 ########## n
-    LD a1, 80(sp)
+    LD a1, 160(sp)
     call PrintArray
     la a0, StringLits0
     call printf
-    ADDI sp, sp, -80
 ########## ys
     ADDI a0, sp, 0
 ########## n

@@ -56,7 +56,6 @@
         public NodeStmtAssignSingleVar singlevar;
         public NodeStmtAssignArray array;
     }
-
     public struct NodeStmtDeclareSingleVar
     {
         public Token ident;
@@ -86,10 +85,6 @@
             indexes = [];
         }
     }
-
-
-
-
     public class NodeStmtIF
     {
         public NodeIfPredicate pred;
@@ -130,14 +125,6 @@
     {
         public NodeStmtScope scope;
     }
-
-
-
-
-
-
-
-
     public struct NodeStmtFor
     {
         public NodeForPredicate pred;
@@ -167,13 +154,11 @@
     {
         public List<NodeStmtAssign> udpates;
     }
-
     public struct NodeStmtWhile
     {
         public NodeExpr cond;
         public NodeStmtScope scope;
     }
-
     public struct NodeStmtBreak
     {
         public Token breakk;
@@ -182,7 +167,6 @@
     {
         public Token continuee;
     }
-
     public struct NodeStmtFunction
     {
         public Token FunctionName;
@@ -190,29 +174,26 @@
         public NodeStmtScope FunctionBody;
         public Dictionary<string, List<NodeTermIntLit>> DimensionsOfArrays;
     }
-
     public struct NodeStmtReturn
     {
         public NodeExpr expr;
     }
-
     public struct NodeStmtFunctionCall
     {
         public Token FunctionName;
         public List<NodeExpr> parameters;
     }
-
     public struct NodeStmtExit
     {
         public NodeExpr expr;
     }
-
-
-
-
-
     public struct NodeExpr
     {
+        public NodeExpr()
+        {
+            type = NodeExprType.None;
+            binexpr = new();
+        }
         public enum NodeExprType
         {
             Term, BinExpr, None
@@ -310,8 +291,6 @@
     {
         public NodeExpr expr;
     }
-
-
     public class NodeBinExpr 
     {
         public enum NodeBinExprType

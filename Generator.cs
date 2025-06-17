@@ -984,7 +984,7 @@ namespace Epsilon
             m_outputcode.AppendLine($"    li a7, 93");
             m_outputcode.AppendLine($"    ecall");
             m_outputcode.AppendLine($"    ret");
-            if (!m_UserDefinedFunctions.ContainsKey("strlen") && CalledFunctions.Contains("strlen"))
+            if (CalledFunctions.Contains("strlen"))
             {
                 m_outputcode.AppendLine($"strlen:");
                 m_outputcode.AppendLine($"    mv t0, a0");
@@ -998,7 +998,7 @@ namespace Epsilon
                 m_outputcode.AppendLine($"strlen_done:");
                 m_outputcode.AppendLine($"    ret");
             }
-            if (!m_UserDefinedFunctions.ContainsKey("itoa") && CalledFunctions.Contains("itoa"))
+            if (CalledFunctions.Contains("itoa"))
             {
                 m_outputcode.AppendLine($"itoa:");
                 m_outputcode.AppendLine($"    mv t1, a0");

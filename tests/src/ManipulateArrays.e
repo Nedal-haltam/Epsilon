@@ -37,14 +37,13 @@ func Dot(auto a[SIZE], auto b[SIZE], auto n)
 func main()
 {
     auto n = SIZE;
-    auto xs[SIZE];
+    auto xs[SIZE], ys[SIZE];
     InitArray(xs, n);
     PrintArray(xs, n);
     printf("-------------------------------------\n");
     MultiplyArray(xs, n, 7);
     PrintArray(xs, n);
     printf("-------------------------------------\n");
-    auto ys[SIZE];
     InitArray(ys, n);
     Dot(xs, ys, n);
     PrintArray(xs, n);
