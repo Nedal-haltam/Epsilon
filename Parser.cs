@@ -362,6 +362,7 @@ namespace Epsilon
             else if (IsStmtAssign())
             {
                 NodeStmt stmt = ParseAssign();
+                TryConsumeError(TokenType.SemiColon);
                 if (stmt.type != NodeStmt.NodeStmtType.Assign)
                     Shartilities.UNREACHABLE("");
                 forinit.type = NodeForInit.NodeForInitType.Assign;
@@ -373,16 +374,12 @@ namespace Epsilon
         }
         NodeForCond? ParseForCond()
         {
-            NodeForCond? forcond;
+            NodeForCond? forcond = null;
             NodeExpr? cond = ParseExpr();
-            if (!cond.HasValue)
-            {
-                forcond = null;
-            }
-            else
+            if (cond.HasValue)
             {
                 forcond = new()
-                { 
+                {
                     cond = cond.Value
                 };
             }
@@ -396,33 +393,21 @@ namespace Epsilon
             TryConsumeError(TokenType.CloseParen);
             return cond;
         }
-        NodeStmtAssign? ParseStmtUpdate()
+        NodeStmtAssign? ParseForUpdateStmt()
         {
             if (!IsStmtAssign())
                 return null;
-            NodeStmtAssignSingleVar singlevar = new()
-            {
-                ident = Consume()
-            };
-            Consume();
-            NodeExpr expr = ExpectedExpression(ParseExpr());
-            singlevar.expr = expr;
-            NodeStmtAssign assign = new()
-            {
-                type = NodeStmtIdentifierType.SingleVar,
-                singlevar = singlevar
-            };
-            return assign;
+            NodeStmt stmt = ParseAssign();
+            if (stmt.type != NodeStmt.NodeStmtType.Assign)
+                return null;
+            return stmt.assign;
         }
         NodeForUpdate ParseForUpdate()
         {
-            NodeForUpdate forupdate = new()
-            {
-                udpates = []
-            };
+            NodeForUpdate forupdate = new();
             do
             {
-                NodeStmtAssign? update = ParseStmtUpdate();
+                NodeStmtAssign? update = ParseForUpdateStmt();
                 if (!update.HasValue)
                     break;
                 forupdate.updates.Add(update.Value);
@@ -553,7 +538,6 @@ namespace Epsilon
                 Shartilities.UNREACHABLE("");
             }
             stmt.assign.type = IdentifierType;
-            TryConsumeError(TokenType.SemiColon);
             return stmt;
         }
         List<NodeStmt> ParseStmt()
@@ -564,7 +548,9 @@ namespace Epsilon
             }
             else if (IsStmtAssign())
             {
-                return [ParseAssign()];
+                NodeStmt stmt = ParseAssign();
+                TryConsumeError(TokenType.SemiColon);
+                return [stmt];
             }
             else if (IsStmtIF())
             {
