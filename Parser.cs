@@ -344,63 +344,28 @@ namespace Epsilon
         }
         NodeForInit? ParseForInit()
         {
+            NodeForInit forinit = new();
             if (IsStmtDeclare())
             {
-                NodeStmtDeclareSingleVar declare = new();
-                Token vartype = Consume();
-                declare.ident = Consume();
-                if (Peek(TokenType.Equal).HasValue)
+                List<NodeStmt> stmt = ParseDeclare();
+                if (stmt.Count > 1)
                 {
-                    Consume();
-                    NodeExpr expr = ExpectedExpression(ParseExpr());
-                    declare.expr = expr;
-                }
-                else
-                {
-                    NodeExpr expr = new()
-                    {
-                        type = NodeExpr.NodeExprType.None
-                    };
-                    declare.expr = expr;
-                }
-                TryConsumeError(TokenType.SemiColon);
-                NodeForInit forinit = new()
-                {
-                    type = NodeForInit.NodeForInitType.Declare
-                };
-                forinit.declare.type = NodeStmtIdentifierType.SingleVar;
-                if (vartype.Type == TokenType.Auto)
-                {
-                    forinit.declare.datatype = NodeStmtDataType.Auto;
-                }
-                else if (vartype.Type == TokenType.Char)
-                {
-                    forinit.declare.datatype = NodeStmtDataType.Char;
-                }
-                else
-                {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Error data type `{vartype.Value}` is not supported\n");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"cannot declare more than one variable in `for-loops`\n");
                     Environment.Exit(1);
                 }
-                forinit.declare.singlevar = declare;
+                if (stmt[0].type != NodeStmt.NodeStmtType.Declare)
+                    Shartilities.UNREACHABLE("");
+                forinit.type = NodeForInit.NodeForInitType.Declare;
+                forinit.declare = stmt[0].declare;
                 return forinit;
             }
             else if (IsStmtAssign())
             {
-                NodeStmtAssignSingleVar singlevar = new()
-                {
-                    ident = Consume()
-                };
-                Consume();
-                NodeExpr expr = ExpectedExpression(ParseExpr());
-                singlevar.expr = expr;
-                TryConsumeError(TokenType.SemiColon);
-                NodeForInit forinit = new()
-                {
-                    type = NodeForInit.NodeForInitType.Assign
-                };
-                forinit.assign.type = NodeStmtIdentifierType.SingleVar;
-                forinit.assign.singlevar = singlevar;
+                NodeStmt stmt = ParseAssign();
+                if (stmt.type != NodeStmt.NodeStmtType.Assign)
+                    Shartilities.UNREACHABLE("");
+                forinit.type = NodeForInit.NodeForInitType.Assign;
+                forinit.assign = stmt.assign;
                 return forinit;
             }
             TryConsumeError(TokenType.SemiColon);
