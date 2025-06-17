@@ -346,7 +346,9 @@ namespace Epsilon
                     {
                         string reg = DestReg ?? FirstTempReg;
                         int index = LocalAttributes.m_vars.FindIndex(x => x.Value == ident.ident.Value);
-                        int TypeSize = LocalAttributes.m_vars[index].TypeSize;
+                        int TypeSize = 
+                            LocalAttributes.m_DimensionsOfArrays.ContainsKey(LocalAttributes.m_vars[index].Value) && 
+                            LocalAttributes.m_parameters.Any(x => x.Value == LocalAttributes.m_vars[index].Value) ? 8 : LocalAttributes.m_vars[index].TypeSize;
                         int Count = LocalAttributes.m_vars[index].Size / LocalAttributes.m_vars[index].TypeSize;
                         int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.ident.Value) - TypeSize;
 
