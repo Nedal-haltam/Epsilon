@@ -8,7 +8,7 @@ TESTS_SRC_PATH=./tests/src
 TESTS_RISCV_ASSEMBLY=./tests/risc-v
 TESTS_RISCV_BIN=./tests/risc-v/bin
 
-all: main tests examples
+all: tests examples
 	echo "finihshed all"
 
 
@@ -22,7 +22,7 @@ run-main:
 main: build-main run-main
 	echo "finihshed main"
 
-EXAMPLES := HelloWorld GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003
+EXAMPLES := HelloWorld GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 ProjectEuler_004
 
 build-examples: clean-examples
 	@for ex in $(EXAMPLES); do \
