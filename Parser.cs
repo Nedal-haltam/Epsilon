@@ -425,7 +425,7 @@ namespace Epsilon
                 NodeStmtAssign? update = ParseStmtUpdate();
                 if (!update.HasValue)
                     break;
-                forupdate.udpates.Add(update.Value);
+                forupdate.updates.Add(update.Value);
             } while (PeekAndConsume(TokenType.Comma).HasValue);
             TryConsumeError(TokenType.CloseParen);
             return forupdate;

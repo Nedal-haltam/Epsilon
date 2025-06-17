@@ -711,18 +711,18 @@ namespace Epsilon
                 LocalAttributes.m_scopeend.Pop();
                 m_outputcode.AppendLine($"# begin update");
                 m_outputcode.AppendLine($"{label_update}:");
-                if (forr.pred.udpate.udpates.Count != 0)
+                if (forr.pred.udpate.updates.Count != 0)
                 {
-                    for (int i = 0; i < forr.pred.udpate.udpates.Count; i++)
+                    for (int i = 0; i < forr.pred.udpate.updates.Count; i++)
                     {
-                        GenStmtAssign(forr.pred.udpate.udpates[i]);
+                        GenStmtAssign(forr.pred.udpate.updates[i]);
                     }
                 }
                 m_outputcode.AppendLine($"# end update");
                 m_outputcode.AppendLine($"    J {label_start}");
                 m_outputcode.AppendLine($"{label_end}:");
             }
-            else if (forr.pred.udpate.udpates.Count != 0)
+            else if (forr.pred.udpate.updates.Count != 0)
             {
                 string label_start = $"TEMP_LABEL{m_labels_count++}_START";
                 string label_end = $"TEMP_LABEL{m_labels_count++}_END";
@@ -736,9 +736,9 @@ namespace Epsilon
                 LocalAttributes.m_scopeend.Pop();
                 m_outputcode.AppendLine($"# begin update");
                 m_outputcode.AppendLine($"{label_update}:");
-                for (int i = 0; i < forr.pred.udpate.udpates.Count; i++)
+                for (int i = 0; i < forr.pred.udpate.updates.Count; i++)
                 {
-                    GenStmtAssign(forr.pred.udpate.udpates[i]);
+                    GenStmtAssign(forr.pred.udpate.updates[i]);
                 }
                 m_outputcode.AppendLine($"# end update");
                 m_outputcode.AppendLine($"    J {label_start}");

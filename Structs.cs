@@ -152,7 +152,11 @@
     }
     public struct NodeForUpdate
     {
-        public List<NodeStmtAssign> udpates;
+        public NodeForUpdate()
+        {
+            updates = [];
+        }
+        public List<NodeStmtAssign> updates;
     }
     public struct NodeStmtWhile
     {
