@@ -365,14 +365,14 @@ namespace Epsilon
                 {
                     Consume();
                     buffer.Append(ConsumeUntil('\''));
-                    if (buffer.Length > 1)
-                    {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"Error expected a single character between single quotes but got `{buffer}` on line {line}\n");
-                        Environment.Exit(1);
-                    }
                     if (buffer.Length == 0)
                     {
                         Shartilities.Log(Shartilities.LogType.ERROR, $"empty character is assigned on line {line}\n");
+                        Environment.Exit(1);
+                    }
+                    if (buffer.Length != 1)
+                    {
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Error expected a single character between single quotes but got `{buffer}` on line {line}\n");
                         Environment.Exit(1);
                     }
                     Consume();
