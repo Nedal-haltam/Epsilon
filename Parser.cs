@@ -831,6 +831,7 @@ namespace Epsilon
                         Token vartype = Consume();
                         Token ident = Consume();
                         Var parameter = new();
+
                         parameter.Size = 1;
                         if (Peek(TokenType.OpenSquare).HasValue)
                         {
@@ -850,12 +851,17 @@ namespace Epsilon
                                 parameter.Size *= (int)uint.Parse(dim.Value);
                             }
                         }
-                        // TODO later: support defaule values for parameters in a functions
-                        parameter.Value = ident.Value;
+                        int TypeSize = 0;
                         if (vartype.Type == TokenType.Auto)
-                            parameter.Size = 8;
+                            TypeSize = 8;
                         else if (vartype.Type == TokenType.Char)
-                            parameter.Size = 1;
+                            TypeSize = 1;
+                        else
+                            Shartilities.UNREACHABLE("");
+
+                        parameter.Value = ident.Value;
+                        parameter.TypeSize = TypeSize;
+                        parameter.Size *= TypeSize;
                         parameters.Add(parameter);
                     } while (PeekAndConsume(TokenType.Comma).HasValue);
                 }

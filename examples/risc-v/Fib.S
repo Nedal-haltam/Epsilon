@@ -41,18 +41,12 @@ TEMP_LABEL0_START:
     LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 29
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SUB t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
-    SUB t0, sp, t0
-    ADDI t0, t0, 240
+    ADD t0, sp, t0
+    ADDI t0, t0, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end array address
@@ -103,18 +97,12 @@ TEMP_LABEL3_START:
     LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 29
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SUB t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
-    SUB t0, sp, t0
-    ADDI t0, t0, 240
+    ADD t0, sp, t0
+    ADDI t0, t0, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end array address
@@ -140,18 +128,12 @@ TEMP_LABEL3_START:
     LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 29
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SUB t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
-    SUB t0, sp, t0
-    ADDI t0, t0, 240
+    ADD t0, sp, t0
+    ADDI t0, t0, 8
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end array address
@@ -280,19 +262,13 @@ LABEL9_START:
     LD t0, 16(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 0
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SUB t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LI t1, 8
     LD t0, 0(sp)
     ADDI sp, sp, 8
     MUL t1, t1, t0
     LD t0, 0(sp)
     ADDI sp, sp, 8
-    SUB t1, t0, t1
+    ADD t1, t0, t1
     ADDI sp, sp, -8
     SD t1, 0(sp)
 # end array address
@@ -314,19 +290,13 @@ LABEL9_START:
     LD t0, 8(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 0
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SUB t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
     LD s0, 0(sp)
     ADDI sp, sp, 8
-    SUB t0, s0, t0
+    ADD t0, s0, t0
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end array address

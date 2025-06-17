@@ -180,9 +180,16 @@ namespace Epsilon
             for (int i = 0; i < LocalAttributes.m_vars.Count; i++)
             {
                 if (LocalAttributes.m_vars[i].Value == name)
+                {
                     break;
+                }
                 else
-                    size += LocalAttributes.m_vars[i].Size;
+                {
+                    if (LocalAttributes.m_DimensionsOfArrays.ContainsKey(LocalAttributes.m_vars[i].Value) && LocalAttributes.m_parameters.Any(x => x.Value == LocalAttributes.m_vars[i].Value))
+                        size += 8;
+                    else
+                        size += LocalAttributes.m_vars[i].Size;
+                }
             }
             return size;
         }
@@ -255,7 +262,7 @@ namespace Epsilon
             expr.binexpr.rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
             return expr;
         }
-        void GenArrayAddrFrom_m_vars_(List<NodeExpr> indexes, Token ident, int TypeSize, string BaseReg = "sp")
+        void GenArrayAddrFrom_m_vars(List<NodeExpr> indexes, Token ident, int TypeSize, string BaseReg = "sp")
         {
             m_outputcode.AppendLine($"# begin array address");
             string reg = BaseReg == FirstTempReg ? SecondTempReg : FirstTempReg;
@@ -269,7 +276,7 @@ namespace Epsilon
 
             NodeExpr IndexExpr = GenIndexExpr(ref indexes, ref dims, 0);
             int index = LocalAttributes.m_vars.FindIndex(x => x.Value == ident.Value);
-            int Count = LocalAttributes.m_vars[index].Size / LocalAttributes.m_vars[index].TypeSize;
+            int Count = LocalAttributes.m_vars[index].Size / TypeSize;
             if (BaseReg != "sp")
                 GenPush(BaseReg, 8);
 
@@ -281,25 +288,17 @@ namespace Epsilon
                 {
                     type = NodeBinExpr.NodeBinExprType.Mul,
                     lhs = NodeExpr.Number(TypeSize.ToString(), -1),
-                    rhs = new()
-                    {
-                        type = NodeExpr.NodeExprType.BinExpr,
-                        binexpr = new()
-                        {
-                            type = NodeBinExpr.NodeBinExprType.Sub,
-                            lhs = NodeExpr.Number((Count - 1).ToString(), -1),
-                            rhs = IndexExpr,
-                        }
-                    },
+                    rhs = IndexExpr,
                 }
             },
             reg, 8);
+
             if (BaseReg != "sp")
                 GenPop(BaseReg, 8);
-            m_outputcode.AppendLine($"    SUB {reg}, {BaseReg}, {reg}");
+            m_outputcode.AppendLine($"    ADD {reg}, {BaseReg}, {reg}");
             if (BaseReg == "sp")
             {
-                int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - TypeSize;
+                int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - LocalAttributes.m_vars[index].Size;
                 m_outputcode.AppendLine($"    ADDI {reg}, {reg}, {relative_location}");
             }
 
@@ -391,11 +390,11 @@ namespace Epsilon
                         {
                             int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.ident.Value) - 8;
                             m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
-                            GenArrayAddrFrom_m_vars_(ident.indexes, ident.ident, TypeSize, reg);
+                            GenArrayAddrFrom_m_vars(ident.indexes, ident.ident, TypeSize, reg);
                         }
                         else
                         {
-                            GenArrayAddrFrom_m_vars_(ident.indexes, ident.ident, TypeSize);
+                            GenArrayAddrFrom_m_vars(ident.indexes, ident.ident, TypeSize);
                         }
                         GenPop(reg_addr, 8);
 
@@ -606,11 +605,11 @@ namespace Epsilon
                     {
                         int relative_location = LocalAttributes.m_StackSize - VariableLocationm_vars(ident.Value) - 8;
                         m_outputcode.AppendLine($"    LD {reg_addr}, {relative_location}(sp)");
-                        GenArrayAddrFrom_m_vars_(assign.array.indexes, assign.array.ident, TypeSize, reg_addr);
+                        GenArrayAddrFrom_m_vars(assign.array.indexes, ident, TypeSize, reg_addr);
                     }
                     else
                     {
-                        GenArrayAddrFrom_m_vars_(assign.array.indexes, assign.array.ident, TypeSize);
+                        GenArrayAddrFrom_m_vars(assign.array.indexes, ident, TypeSize);
                     }
 
                     GenExpr(assign.array.expr, reg_data, TypeSize);
@@ -858,7 +857,12 @@ namespace Epsilon
         {
             int stacksize = 0;
             foreach (Var v in LocalAttributes.m_vars)
-                stacksize += v.Size;
+            {
+                if (LocalAttributes.m_parameters.Any(x => x.Value == v.Value) && LocalAttributes.m_DimensionsOfArrays.ContainsKey(v.Value))
+                    stacksize += 8;
+                else
+                    stacksize += v.Size;
+            }
             Shartilities.Assert(stacksize == LocalAttributes.m_StackSize, $"stack sizes are not equal");
             if (stacksize > 0)
                 m_outputcode.AppendLine($"    ADDI sp, sp, {stacksize}");
@@ -891,10 +895,19 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    ADDI sp, sp, -8");
                 m_outputcode.AppendLine($"    SD ra, 0(sp)");
             }
-            for (int i = 0; i < m_UserDefinedFunctions[LocalAttributes.m_CurrentFunction].parameters.Count; i++)
+            for (int i = 0; i < Function.parameters.Count; i++)
             {
-                GenPush($"a{i}", 8);
-                LocalAttributes.m_vars.Add(new(m_UserDefinedFunctions[LocalAttributes.m_CurrentFunction].parameters[i].Value, 8, 8));
+                int TypeSize = Function.parameters[i].TypeSize;
+                int Size = Function.parameters[i].Size;
+                if (Function.DimensionsOfArrays.ContainsKey(Function.parameters[i].Value))
+                {
+                    GenPush($"a{i}", 8);
+                }
+                else
+                {
+                    GenPush($"a{i}", TypeSize);
+                }
+                LocalAttributes.m_vars.Add(new(Function.parameters[i].Value, Size, TypeSize));
             }
             foreach (NodeStmt stmt in Function.FunctionBody.stmts)
             {
