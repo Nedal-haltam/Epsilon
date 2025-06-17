@@ -41,7 +41,7 @@ run-examples:
 examples: build-examples run-examples
 
 
-TESTS := Print10sMultipleAndLengths ManipulateArrays
+TESTS := Print10sMultipleAndLengths ManipulateArrays CharacterArrays
 
 build-tests: clean-tests
 	@for ex in $(TESTS); do \
