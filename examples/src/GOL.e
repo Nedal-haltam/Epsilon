@@ -2,8 +2,6 @@
 
 
 #define SIZE 5
-#define COPY122 for (auto ci = 0; ci < SIZE; ci = ci + 1) { for (auto cj = 0; cj < SIZE; cj = cj + 1) { grid2[ci][cj] = grid[ci][cj]; } }
-#define COPY221 for (auto ci = 0; ci < SIZE; ci = ci + 1) { for (auto cj = 0; cj < SIZE; cj = cj + 1) { grid[ci][cj] = grid2[ci][cj]; } }
 #define glider_size 5
 #define iters 25
 
@@ -20,6 +18,18 @@ func SlowDown()
         }
     }
 }
+
+func Copy(auto src[SIZE][SIZE], auto dst[SIZE][SIZE])
+{
+    for (auto i = 0; i < SIZE; i = i + 1)
+    {
+        for (auto j = 0; j < SIZE; j = j + 1)
+        {
+            dst[i][j] = src[i][j];
+        }
+    }
+}
+
 func main()
 {
     auto grid[SIZE][SIZE];
@@ -62,7 +72,7 @@ func main()
             printf("\n");
         }
         SlowDown();
-        COPY122
+        Copy(grid, grid2);
         for (auto i = 0; i < SIZE; i = i + 1)
         {
             for (auto j = 0; j < SIZE; j = j + 1)
@@ -102,6 +112,6 @@ func main()
                 }
             }
         }
-        COPY221
+        Copy(grid2, grid);
     }
 }
