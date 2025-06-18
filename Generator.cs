@@ -36,6 +36,8 @@ namespace Epsilon
         public Stack<string?> m_scopeend = new();
         public List<Var> m_parameters = [];
         public string m_CurrentFunction = "NO_FUNCTION_NAME";
+        readonly List<string> STD_FUNCTIONS = ["exit", "strlen", "itoa", "printf"];
+
 
         void GenPush(string reg, int size)
         {
@@ -188,9 +190,11 @@ namespace Epsilon
 
             GenExpr(
                 NodeExpr.BinExpr(
-                    NodeBinExpr.NodeBinExprType.Mul, 
-                    NodeExpr.Number(var.TypeSize.ToString(), -1), 
-                    IndexExpr), reg, 8);
+                    NodeBinExpr.NodeBinExprType.Mul,
+                    NodeExpr.Number(var.TypeSize.ToString(), -1),
+                    IndexExpr), 
+                reg, 8
+            );
 
             if (BaseReg != "sp")
                 GenPop(BaseReg, 8);
@@ -264,7 +268,7 @@ namespace Epsilon
                             else if (TypeSize == 8)
                                 m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
                             else
-                                Shartilities.UNREACHABLE("");
+                                Shartilities.UNREACHABLE("GenTerm:Ident:SingleVar");
                         }
 
                         if (term.Negative)
@@ -286,7 +290,6 @@ namespace Epsilon
                     if (index != -1)
                     {
                         Var var = m_vars[index];
-                        int TypeSize = var.TypeSize;
                         if (var.IsParameter)
                         {
                             int relative_location = m_StackSize - VariableLocation(ident.ident.Value) - 8;
@@ -299,12 +302,12 @@ namespace Epsilon
                         }
                         GenPop(reg_addr, 8);
 
-                        if (TypeSize == 1)
+                        if (var.TypeSize == 1)
                             m_outputcode.AppendLine($"    LB {reg}, 0({reg_addr})");
-                        else if (TypeSize == 8)
+                        else if (var.TypeSize == 8)
                             m_outputcode.AppendLine($"    LD {reg}, 0({reg_addr})");
                         else
-                            Shartilities.UNREACHABLE("");
+                            Shartilities.UNREACHABLE("No valid size");
 
                         if (term.Negative)
                             m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
@@ -407,6 +410,8 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    ADDI sp, sp, -{size}");
                 m_StackSize += size;
             }
+            else
+                Shartilities.UNREACHABLE("no valid expression");
         }
         void GenStmtDeclare(NodeStmtDeclare declare)
         {
@@ -430,6 +435,8 @@ namespace Epsilon
                         GenExpr(declare.singlevar.expr, null, 1);
                         m_vars.Add(new(ident.Value, 1, 1, false, false));
                     }
+                    else
+                        Shartilities.UNREACHABLE("not valid data type");
                 }
             }
             else if (declare.type == NodeStmtIdentifierType.Array)
@@ -468,6 +475,8 @@ namespace Epsilon
                     m_vars.Add(new(ident.Value, SizePerVar * count, SizePerVar, true, false));
                 }
             }
+            else
+                Shartilities.UNREACHABLE("not valid identifier type");
         }
         void GenStmtAssign(NodeStmtAssign assign)
         {
@@ -479,13 +488,12 @@ namespace Epsilon
                 if (index != -1)
                 {
                     Var var = m_vars[index];
-                    int TypeSize = var.TypeSize;
-                    GenExpr(assign.singlevar.expr, reg, TypeSize);
+                    GenExpr(assign.singlevar.expr, reg, var.TypeSize);
                     int relative_location = m_StackSize - VariableLocation(ident.Value);
-                    if (TypeSize == 1)
-                        m_outputcode.AppendLine($"    SB {reg}, {relative_location - TypeSize}(sp)");
-                    if (TypeSize == 8)
-                        m_outputcode.AppendLine($"    SD {reg}, {relative_location - TypeSize}(sp)");
+                    if (var.TypeSize == 1)
+                        m_outputcode.AppendLine($"    SB {reg}, {relative_location - var.TypeSize}(sp)");
+                    if (var.TypeSize == 8)
+                        m_outputcode.AppendLine($"    SD {reg}, {relative_location - var.TypeSize}(sp)");
                 }
                 else
                 {
@@ -502,7 +510,6 @@ namespace Epsilon
                     string reg_addr = m_FirstTempReg;
                     string reg_data = m_SecondTempReg;
                     Var var = m_vars[index];
-                    int TypeSize = var.TypeSize;
                     if (var.IsParameter)
                     {
                         int relative_location = m_StackSize - VariableLocation(ident.Value) - 8;
@@ -514,15 +521,15 @@ namespace Epsilon
                         GenArrayAddrFrom_m_vars(assign.array.indexes, var);
                     }
 
-                    GenExpr(assign.array.expr, reg_data, TypeSize);
+                    GenExpr(assign.array.expr, reg_data, var.TypeSize);
                     GenPop(reg_addr, 8);
 
-                    if (TypeSize == 1)
+                    if (var.TypeSize == 1)
                         m_outputcode.AppendLine($"    SB {reg_data}, 0({reg_addr})");
-                    else if (TypeSize == 8)
+                    else if (var.TypeSize == 8)
                         m_outputcode.AppendLine($"    SD {reg_data}, 0({reg_addr})");
                     else
-                        Shartilities.UNREACHABLE("");
+                        Shartilities.UNREACHABLE("not valid size");
                 }
                 else
                 {
@@ -530,6 +537,8 @@ namespace Epsilon
                     Environment.Exit(1);
                 }
             }
+            else
+                Shartilities.UNREACHABLE("not valid identifier type");
         }
         void GenElifs(NodeIfElifs elifs, string label_end)
         {
@@ -556,6 +565,8 @@ namespace Epsilon
             {
                 GenScope(elifs.elsee.scope);
             }
+            else
+                Shartilities.UNREACHABLE("GenElifs");
         }
         string GenStmtIF(NodeStmtIF iff)
         {
@@ -592,6 +603,8 @@ namespace Epsilon
                     GenStmtDeclare(forr.pred.init.Value.declare);
                 else if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.Assign)
                     GenStmtAssign(forr.pred.init.Value.assign);
+                else
+                    Shartilities.UNREACHABLE("not valid for init statement");
                 m_outputcode.AppendLine($"# end init");
             }
             if (forr.pred.cond.HasValue)
@@ -719,6 +732,7 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: Function `{Function.FunctionName.Value}` is not defined\n");
                 Environment.Exit(1);
             }
+
             if (!m_CalledFunctions.Contains(Function.FunctionName.Value))
                 m_CalledFunctions.Add(Function.FunctionName.Value);
             List<string> regs = [];
@@ -880,7 +894,6 @@ namespace Epsilon
                 Environment.Exit(1);
             }
         }
-        List<string> STD_FUNCTIONS = ["exit", "strlen", "itoa", "printf"];
         void GenStdFunctions()
         {
             m_outputcode.AppendLine($"exit:");
