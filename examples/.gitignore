@@ -3,6 +3,5 @@
 !.gitignore
 !*.S
 !*/
-!*.e
-risc-v/main.S
 !Makefile
+!*.e
