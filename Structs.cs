@@ -1,4 +1,6 @@
-﻿namespace Epsilon
+﻿using static Epsilon.NodeBinExpr;
+
+namespace Epsilon
 {
     public struct NodeProg
     {
@@ -205,7 +207,19 @@
         public NodeExprType type;
         public NodeTerm term;
         public NodeBinExpr binexpr;
-
+        public static NodeExpr BinExpr(NodeBinExprType type, NodeExpr lhs, NodeExpr rhs)
+        {
+            return new()
+            {
+                type = NodeExprType.BinExpr,
+                binexpr = new()
+                {
+                    type = type,
+                    lhs = lhs,
+                    rhs = rhs,
+                },
+            };
+        }
         public static NodeExpr Number(string num, int line)
         {
             return new NodeExpr()

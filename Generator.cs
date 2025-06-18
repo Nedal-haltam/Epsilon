@@ -166,63 +166,38 @@ namespace Epsilon
                     }
                 };
             }
-            return new()
-            {
-                type = NodeExpr.NodeExprType.BinExpr,
-                binexpr = new()
-                {
-                    type = NodeBinExpr.NodeBinExprType.Add,
-                    lhs = new()
-                    {
-                        type = NodeExpr.NodeExprType.BinExpr,
-                        binexpr = new()
-                        {
-                            type = NodeBinExpr.NodeBinExprType.Mul,
-                            lhs = indexes[i],
-                            rhs = GenIndexExprMult(ref indexes, ref dims, i + 1),
-                        }
-                    },
-                    rhs = GenIndexExpr(ref indexes, ref dims, i + 1),
-                }
-            };
+            NodeExpr lhs = NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Mul, indexes[i], GenIndexExprMult(ref indexes, ref dims, i + 1));
+            NodeExpr rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
+            return NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Add, lhs, rhs);
         }
-        void GenArrayAddrFrom_m_vars(List<NodeExpr> indexes, Token ident, int TypeSize, string BaseReg = "sp")
+        void GenArrayAddrFrom_m_vars(List<NodeExpr> indexes, Var var, string BaseReg = "sp")
         {
             m_outputcode.AppendLine($"# begin array address");
             string reg = BaseReg == m_FirstTempReg ? m_SecondTempReg : m_FirstTempReg;
-            if (!m_DimensionsOfArrays.ContainsKey(ident.Value))
+            if (!var.IsArray)
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{ident.Value}` is not declared as an array\n");
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{var.Value}` is not declared as an array\n");
                 Environment.Exit(1);
             }
-            List<NodeTermIntLit> dims = m_DimensionsOfArrays[ident.Value];
+            List<NodeTermIntLit> dims = m_DimensionsOfArrays[var.Value];
             Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
 
             NodeExpr IndexExpr = GenIndexExpr(ref indexes, ref dims, 0);
-            int index = m_vars.FindIndex(x => x.Value == ident.Value);
-            int Count = m_vars[index].Size / TypeSize;
             if (BaseReg != "sp")
                 GenPush(BaseReg, 8);
 
             GenExpr(
-            new()
-            {
-                type = NodeExpr.NodeExprType.BinExpr,
-                binexpr = new()
-                {
-                    type = NodeBinExpr.NodeBinExprType.Mul,
-                    lhs = NodeExpr.Number(TypeSize.ToString(), -1),
-                    rhs = IndexExpr,
-                }
-            },
-            reg, 8);
+                NodeExpr.BinExpr(
+                    NodeBinExpr.NodeBinExprType.Mul, 
+                    NodeExpr.Number(var.TypeSize.ToString(), -1), 
+                    IndexExpr), reg, 8);
 
             if (BaseReg != "sp")
                 GenPop(BaseReg, 8);
             m_outputcode.AppendLine($"    ADD {reg}, {BaseReg}, {reg}");
             if (BaseReg == "sp")
             {
-                int relative_location = m_StackSize - VariableLocation(ident.Value) - m_vars[index].Size;
+                int relative_location = m_StackSize - VariableLocation(var.Value) - var.Size;
                 m_outputcode.AppendLine($"    ADDI {reg}, {reg}, {relative_location}");
             }
 
@@ -316,11 +291,11 @@ namespace Epsilon
                         {
                             int relative_location = m_StackSize - VariableLocation(ident.ident.Value) - 8;
                             m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
-                            GenArrayAddrFrom_m_vars(ident.indexes, ident.ident, TypeSize, reg);
+                            GenArrayAddrFrom_m_vars(ident.indexes, var, reg);
                         }
                         else
                         {
-                            GenArrayAddrFrom_m_vars(ident.indexes, ident.ident, TypeSize);
+                            GenArrayAddrFrom_m_vars(ident.indexes, var);
                         }
                         GenPop(reg_addr, 8);
 
@@ -532,11 +507,11 @@ namespace Epsilon
                     {
                         int relative_location = m_StackSize - VariableLocation(ident.Value) - 8;
                         m_outputcode.AppendLine($"    LD {reg_addr}, {relative_location}(sp)");
-                        GenArrayAddrFrom_m_vars(assign.array.indexes, ident, TypeSize, reg_addr);
+                        GenArrayAddrFrom_m_vars(assign.array.indexes, var, reg_addr);
                     }
                     else
                     {
-                        GenArrayAddrFrom_m_vars(assign.array.indexes, ident, TypeSize);
+                        GenArrayAddrFrom_m_vars(assign.array.indexes, var);
                     }
 
                     GenExpr(assign.array.expr, reg_data, TypeSize);
