@@ -122,22 +122,16 @@ namespace Epsilon
             }
             EndScope();
         }
-        int VariableLocationm_vars(string name)
+        int VariableLocation(string name)
         {
             int size = 0;
-            for (int i = 0; i < m_vars.Count; i++)
+            int index = m_vars.FindIndex(x => x.Value == name);
+            for (int i = 0; i < index; i++)
             {
-                if (m_vars[i].Value == name)
-                {
-                    break;
-                }
+                if (m_vars[i].IsArray && m_vars[i].IsParameter)
+                    size += 8;
                 else
-                {
-                    if (m_vars[i].IsArray && m_vars[i].IsParameter)
-                        size += 8;
-                    else
-                        size += m_vars[i].Size;
-                }
+                    size += m_vars[i].Size;
             }
             return size;
         }
@@ -246,7 +240,7 @@ namespace Epsilon
             m_outputcode.AppendLine($"    ADD {reg}, {BaseReg}, {reg}");
             if (BaseReg == "sp")
             {
-                int relative_location = m_StackSize - VariableLocationm_vars(ident.Value) - m_vars[index].Size;
+                int relative_location = m_StackSize - VariableLocation(ident.Value) - m_vars[index].Size;
                 m_outputcode.AppendLine($"    ADDI {reg}, {reg}, {relative_location}");
             }
 
@@ -297,7 +291,7 @@ namespace Epsilon
                         string reg = DestReg ?? m_FirstTempReg;
                         int TypeSize = var.IsArray && var.IsParameter ? 8 : var.TypeSize;
                         int Count = var.Size / var.TypeSize;
-                        int relative_location = m_StackSize - VariableLocationm_vars(var.Value) - TypeSize;
+                        int relative_location = m_StackSize - VariableLocation(var.Value) - TypeSize;
 
                         if (ident.ByRef)
                         {
@@ -338,7 +332,7 @@ namespace Epsilon
                         int TypeSize = var.TypeSize;
                         if (var.IsParameter)
                         {
-                            int relative_location = m_StackSize - VariableLocationm_vars(ident.ident.Value) - 8;
+                            int relative_location = m_StackSize - VariableLocation(ident.ident.Value) - 8;
                             m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
                             GenArrayAddrFrom_m_vars(ident.indexes, ident.ident, TypeSize, reg);
                         }
@@ -530,7 +524,7 @@ namespace Epsilon
                     Var var = m_vars[index];
                     int TypeSize = var.TypeSize;
                     GenExpr(assign.singlevar.expr, reg, TypeSize);
-                    int relative_location = m_StackSize - VariableLocationm_vars(ident.Value);
+                    int relative_location = m_StackSize - VariableLocation(ident.Value);
                     if (TypeSize == 1)
                         m_outputcode.AppendLine($"    SB {reg}, {relative_location - TypeSize}(sp)");
                     if (TypeSize == 8)
@@ -554,7 +548,7 @@ namespace Epsilon
                     int TypeSize = var.TypeSize;
                     if (var.IsParameter)
                     {
-                        int relative_location = m_StackSize - VariableLocationm_vars(ident.Value) - 8;
+                        int relative_location = m_StackSize - VariableLocation(ident.Value) - 8;
                         m_outputcode.AppendLine($"    LD {reg_addr}, {relative_location}(sp)");
                         GenArrayAddrFrom_m_vars(assign.array.indexes, ident, TypeSize, reg_addr);
                     }
