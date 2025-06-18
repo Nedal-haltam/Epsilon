@@ -137,41 +137,20 @@ namespace Epsilon
         }
         static NodeExpr GenIndexExprMult(ref List<NodeExpr> indexes, ref List<NodeTermIntLit> dims, int i)
         {
-            NodeExpr expr = new();
             if (i == dims.Count - 1)
             {
-                expr.type = NodeExpr.NodeExprType.Term;
-                expr.term = new()
-                {
-                    type = NodeTerm.NodeTermType.IntLit,
-                    intlit = new()
-                };
-                expr.term.intlit.intlit = new() 
-                { 
-                    Type = TokenType.IntLit, 
-                    Value = dims[^1].intlit.Value
-                };
-                return expr;
+                return NodeExpr.Number(dims[^1].intlit.Value, -1);
             }
-            expr.type = NodeExpr.NodeExprType.BinExpr;
-            expr.binexpr = new()
+            return new()
             {
-                type = NodeBinExpr.NodeBinExprType.Mul,
-                lhs = new()
+                type = NodeExpr.NodeExprType.BinExpr,
+                binexpr = new()
+                {
+                    type = NodeBinExpr.NodeBinExprType.Mul,
+                    lhs = NodeExpr.Number(dims[i].intlit.Value, -1),
+                    rhs = GenIndexExprMult(ref indexes, ref dims, i + 1),
+                },
             };
-            expr.binexpr.lhs.type = NodeExpr.NodeExprType.Term;
-            expr.binexpr.lhs.term = new()
-            {
-                type = NodeTerm.NodeTermType.IntLit,
-                intlit = new()
-            };
-            expr.binexpr.lhs.term.intlit.intlit = new() 
-            { 
-                Type = TokenType.IntLit, 
-                Value = dims[i].intlit.Value
-            };
-            expr.binexpr.rhs = GenIndexExprMult(ref indexes, ref dims, i + 1);
-            return expr;
         }
         static NodeExpr GenIndexExpr(ref List<NodeExpr> indexes, ref List<NodeTermIntLit> dims, int i)
         {
