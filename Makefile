@@ -8,8 +8,13 @@ TESTS_SRC_PATH=./tests/src
 TESTS_RISCV_ASSEMBLY=./tests/risc-v
 TESTS_RISCV_BIN=./tests/risc-v/bin
 
+.PHONY:	all build-main run-main main \
+		examples build-examples run-examples \
+		tests build-tests run-tests \
+		clean clean-examples clean-tests
+
 all: tests examples
-	echo "finihshed all"
+	@echo "✅ Built successfully."
 
 
 build-main:
@@ -20,7 +25,7 @@ run-main:
 	qemu-riscv64 ./main
 
 main: build-main run-main
-	echo "finihshed main"
+	@echo "✅ Built main successfully."
 
 EXAMPLES := HelloWorld GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 ProjectEuler_004
 
@@ -60,13 +65,16 @@ run-tests:
 tests: build-tests run-tests
 
 clean-examples:
+	@echo "🧹 Cleaning up examples"
 	rm -rf $(EXAMPLES_RISCV_ASSEMBLY)
 	mkdir $(EXAMPLES_RISCV_ASSEMBLY)
 	mkdir $(EXAMPLES_RISCV_BIN)
 
 clean-tests:
+	@echo "🧹 Cleaning up tests"
 	rm -rf $(TESTS_RISCV_ASSEMBLY)
 	mkdir $(TESTS_RISCV_ASSEMBLY)
 	mkdir $(TESTS_RISCV_BIN)
 
 clean: clean-examples clean-tests
+	@echo "🧹 Cleaning up all"
