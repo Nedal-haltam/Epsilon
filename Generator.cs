@@ -13,7 +13,7 @@ namespace Epsilon
         public string Value { get; set; } = value;
         public int Size { get; set; } = size;
     }
-    class Generator
+    class RISCVGenerator
     {
         public readonly string m_FirstTempReg = "t0";
         public readonly string m_SecondTempReg = "t1";
@@ -32,41 +32,7 @@ namespace Epsilon
         public Dictionary<string, List<NodeTermIntLit>> m_DimensionsOfArrays = [];
         public List<Var> m_parameters = [];
         public string m_CurrentFunction = "NO_FUNCTION_NAME";
-        public static string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
-        {
-            if (op == NodeBinExpr.NodeBinExprType.Add)
-                return (Convert.ToInt32(imm1) + Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Sub)
-                return (Convert.ToInt32(imm1) - Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Sll)
-                return (Convert.ToInt32(imm1) << Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Srl)
-                return (Convert.ToInt32(imm1) >> Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.EqualEqual)
-                return (Convert.ToInt32(imm1) == Convert.ToInt32(imm2) ? 1 : 0).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.NotEqual)
-                return (Convert.ToInt32(imm1) != Convert.ToInt32(imm2) ? 1 : 0).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.LessThan)
-                return (Convert.ToInt32(imm1) < Convert.ToInt32(imm2) ? 1 : 0).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.And)
-                return (Convert.ToInt32(imm1) & Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Or)
-                return (Convert.ToInt32(imm1) | Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Xor)
-                return (Convert.ToInt32(imm1) ^ Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Mul)
-                return (Convert.ToInt32(imm1) * Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Div)
-                return (Convert.ToInt32(imm1) / Convert.ToInt32(imm2)).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Rem)
-                return (Convert.ToInt32(imm1) % Convert.ToInt32(imm2)).ToString();
-            Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid operation `{op}`\n");
-            Environment.Exit(1);
-            return "";
-        }
-    }
-    class RISCVGenerator : Generator
-    {
+
         public RISCVGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> UserDefinedFunctions)
         {
             m_prog = prog;
@@ -192,7 +158,7 @@ namespace Epsilon
                 expr.term.intlit.intlit = new() 
                 { 
                     Type = TokenType.IntLit, 
-                    Value = $"{dims[^1].intlit.Value}" 
+                    Value = dims[^1].intlit.Value
                 };
                 return expr;
             }
@@ -211,7 +177,7 @@ namespace Epsilon
             expr.binexpr.lhs.term.intlit.intlit = new() 
             { 
                 Type = TokenType.IntLit, 
-                Value = $"{dims[i].intlit.Value}" 
+                Value = dims[i].intlit.Value
             };
             expr.binexpr.rhs = GenIndexExprMult(ref indexes, ref dims, i + 1);
             return expr;
@@ -560,7 +526,7 @@ namespace Epsilon
             if (assign.type == NodeStmtIdentifierType.SingleVar)
             {
                 Token ident = assign.singlevar.ident;
-                string reg = $"{m_FirstTempReg}";
+                string reg = m_FirstTempReg;
                 if (m_vars.Any(x => x.Value == ident.Value))
                 {
                     int index = m_vars.FindIndex(x => x.Value == ident.Value);
@@ -584,8 +550,8 @@ namespace Epsilon
                 Token ident = assign.array.ident;
                 if (m_vars.Any(x => x.Value == ident.Value))
                 {
-                    string reg_addr = $"{m_FirstTempReg}";
-                    string reg_data = $"{m_SecondTempReg}";
+                    string reg_addr = m_FirstTempReg;
+                    string reg_data = m_SecondTempReg;
                     int index = m_vars.FindIndex(x => x.Value == ident.Value);
                     int TypeSize = m_vars[index].TypeSize;
                     if (m_parameters.Any(x => x.Value == ident.Value))
@@ -620,7 +586,7 @@ namespace Epsilon
         {
             if (elifs.type == NodeIfElifs.NodeIfElifsType.Elif)
             {
-                string reg = $"{m_FirstTempReg}";
+                string reg = m_FirstTempReg;
                 string label = $"LABEL{m_labels_count++}_elifs";
                 GenExpr(elifs.elif.pred.cond, reg, 8);
                 m_outputcode.AppendLine($"    BEQZ {reg}, {label}");
@@ -644,7 +610,7 @@ namespace Epsilon
         }
         string GenStmtIF(NodeStmtIF iff)
         {
-            string reg = $"{m_FirstTempReg}";
+            string reg = m_FirstTempReg;
             string label_start = $"LABEL{m_labels_count++}_START";
             string label_end = $"LABEL{m_labels_count++}_END";
             string label = $"LABEL{m_labels_count++}_elifs";
@@ -687,7 +653,7 @@ namespace Epsilon
                 string label_update = $"TEMP_LABEL{m_labels_count++}_START";
 
                 m_outputcode.AppendLine($"{label_start}:");
-                string reg = $"{m_FirstTempReg}";
+                string reg = m_FirstTempReg;
                 GenExpr(forr.pred.cond.Value.cond, reg, 8);
                 m_outputcode.AppendLine($"    BEQZ {reg}, {label_end}");
                 m_outputcode.AppendLine($"# end condition");
@@ -757,7 +723,7 @@ namespace Epsilon
             string label_end = $"TEMP_LABEL{m_labels_count++}_END";
 
             m_outputcode.AppendLine($"{label_start}:");
-            string reg = $"{m_FirstTempReg}";
+            string reg = m_FirstTempReg;
             GenExpr(whilee.cond, reg, 8);
             m_outputcode.AppendLine($"    BEQZ {reg}, {label_end}");
             m_outputcode.AppendLine($"# end condition");

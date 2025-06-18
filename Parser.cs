@@ -16,6 +16,38 @@ namespace Epsilon
         public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
         public List<string> STD_FUNCTIONS = ["printf", "strlen", "itoa"];
 
+        public string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
+        {
+            if (op == NodeBinExpr.NodeBinExprType.Add)
+                return (Convert.ToInt32(imm1) + Convert.ToInt32(imm2)).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.Sub)
+                return (Convert.ToInt32(imm1) - Convert.ToInt32(imm2)).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.Sll)
+                return (Convert.ToInt32(imm1) << Convert.ToInt32(imm2)).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.Srl)
+                return (Convert.ToInt32(imm1) >> Convert.ToInt32(imm2)).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.EqualEqual)
+                return (Convert.ToInt32(imm1) == Convert.ToInt32(imm2) ? 1 : 0).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.NotEqual)
+                return (Convert.ToInt32(imm1) != Convert.ToInt32(imm2) ? 1 : 0).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.LessThan)
+                return (Convert.ToInt32(imm1) < Convert.ToInt32(imm2) ? 1 : 0).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.And)
+                return (Convert.ToInt32(imm1) & Convert.ToInt32(imm2)).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.Or)
+                return (Convert.ToInt32(imm1) | Convert.ToInt32(imm2)).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.Xor)
+                return (Convert.ToInt32(imm1) ^ Convert.ToInt32(imm2)).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.Mul)
+                return (Convert.ToInt32(imm1) * Convert.ToInt32(imm2)).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.Div)
+                return (Convert.ToInt32(imm1) / Convert.ToInt32(imm2)).ToString();
+            else if (op == NodeBinExpr.NodeBinExprType.Rem)
+                return (Convert.ToInt32(imm1) % Convert.ToInt32(imm2)).ToString();
+            Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid operation `{op}`\n");
+            Environment.Exit(1);
+            return "";
+        }
         Token? Peek(int offset = 0) => 0 <= m_curr_index + offset && m_curr_index + offset < m_tokens.Count ? m_tokens[m_curr_index + offset] : null;
         Token ? Peek(TokenType type, int offset = 0)
         {
@@ -253,7 +285,7 @@ namespace Epsilon
                     {
                         string constant1 = expr.lhs.term.intlit.intlit.Value;
                         string constant2 = expr.rhs.term.intlit.intlit.Value;
-                        string value = Generator.GetImmedOperation(constant1, constant2, expr.type);
+                        string value = GetImmedOperation(constant1, constant2, expr.type);
                         exprlhs = NodeExpr.Number(value, expr.lhs.term.intlit.intlit.Line);
                     }
                     else
