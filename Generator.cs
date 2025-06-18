@@ -8,38 +8,34 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Epsilon
 {
-    public struct Var(string value, int size, int TypeSize)
-    {
+    public struct Var(string value, int size, int TypeSize, bool IsArray, bool IsParameter)
+    {                                                     
         public int TypeSize { get; set; } = TypeSize;
         public string Value { get; set; } = value;
         public int Size { get; set; } = size;
+        public bool IsParameter = IsParameter;
+        public bool IsArray = IsArray;
     }
-    class RISCVGenerator
+    class RISCVGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> UserDefinedFunctions)
     {
         public readonly string m_FirstTempReg = "t0";
         public readonly string m_SecondTempReg = "t1";
-        public NodeProg m_prog;
         public readonly StringBuilder m_outputcode = new();
         public int m_labels_count = 0;
-        public Dictionary<string, NodeStmtFunction> m_UserDefinedFunctions = [];
         public readonly List<string> m_CalledFunctions = [];
         public List<string> m_StringLits = [];
 
+        public NodeProg m_prog = prog;
+        public Dictionary<string, NodeStmtFunction> m_UserDefinedFunctions = UserDefinedFunctions;
+
+        public Dictionary<string, List<NodeTermIntLit>> m_DimensionsOfArrays = Arraydims;
         public List<Var> m_vars = [];
         public Stack<int> m_scopes = [];
         public int m_StackSize;
         public Stack<string?> m_scopestart = new();
         public Stack<string?> m_scopeend = new();
-        public Dictionary<string, List<NodeTermIntLit>> m_DimensionsOfArrays = [];
         public List<Var> m_parameters = [];
         public string m_CurrentFunction = "NO_FUNCTION_NAME";
-
-        public RISCVGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> UserDefinedFunctions)
-        {
-            m_prog = prog;
-            m_DimensionsOfArrays = Arraydims;
-            m_UserDefinedFunctions = UserDefinedFunctions;
-        }
 
         void GenPush(string reg, int size)
         {
@@ -137,7 +133,7 @@ namespace Epsilon
                 }
                 else
                 {
-                    if (m_DimensionsOfArrays.ContainsKey(m_vars[i].Value) && m_parameters.Any(x => x.Value == m_vars[i].Value))
+                    if (m_vars[i].IsArray && m_vars[i].IsParameter)
                         size += 8;
                     else
                         size += m_vars[i].Size;
@@ -294,19 +290,18 @@ namespace Epsilon
                 NodeTermIdent ident = term.ident;
                 if (ident.indexes.Count == 0)
                 {
-                    if (m_vars.Any(x => x.Value == ident.ident.Value))
+                    int index = m_vars.FindIndex(x => x.Value == ident.ident.Value);
+                    if (index != -1)
                     {
+                        Var var = m_vars[index];
                         string reg = DestReg ?? m_FirstTempReg;
-                        int index = m_vars.FindIndex(x => x.Value == ident.ident.Value);
-                        int TypeSize = 
-                            m_DimensionsOfArrays.ContainsKey(m_vars[index].Value) && 
-                            m_parameters.Any(x => x.Value == m_vars[index].Value) ? 8 : m_vars[index].TypeSize;
-                        int Count = m_vars[index].Size / m_vars[index].TypeSize;
-                        int relative_location = m_StackSize - VariableLocationm_vars(ident.ident.Value) - TypeSize;
+                        int TypeSize = var.IsArray && var.IsParameter ? 8 : var.TypeSize;
+                        int Count = var.Size / var.TypeSize;
+                        int relative_location = m_StackSize - VariableLocationm_vars(var.Value) - TypeSize;
 
                         if (ident.ByRef)
                         {
-                            if (!m_parameters.Any(x => x.Value == ident.ident.Value))
+                            if (!var.IsParameter)
                                 m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location - (TypeSize * (Count - 1))}");
                             else
                                 m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
@@ -336,11 +331,12 @@ namespace Epsilon
                 {
                     string reg = DestReg ?? m_FirstTempReg;
                     string reg_addr = reg == m_FirstTempReg ? m_SecondTempReg : m_FirstTempReg;
-                    if (m_vars.Any(x => x.Value == ident.ident.Value))
+                    int index = m_vars.FindIndex(x => x.Value == ident.ident.Value);
+                    if (index != -1)
                     {
-                        int index = m_vars.FindIndex(x => x.Value == ident.ident.Value);
-                        int TypeSize = m_vars[index].TypeSize;
-                        if (m_parameters.Any(x => x.Value == ident.ident.Value))
+                        Var var = m_vars[index];
+                        int TypeSize = var.TypeSize;
+                        if (var.IsParameter)
                         {
                             int relative_location = m_StackSize - VariableLocationm_vars(ident.ident.Value) - 8;
                             m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
@@ -476,12 +472,12 @@ namespace Epsilon
                     if (declare.datatype == NodeStmtDataType.Auto)
                     {
                         GenExpr(declare.singlevar.expr, null, 8);
-                        m_vars.Add(new(ident.Value, 8, 8));
+                        m_vars.Add(new(ident.Value, 8, 8, false, false));
                     }
                     else if (declare.datatype == NodeStmtDataType.Char)
                     {
                         GenExpr(declare.singlevar.expr, null, 1);
-                        m_vars.Add(new(ident.Value, 1, 1));
+                        m_vars.Add(new(ident.Value, 1, 1, false, false));
                     }
                 }
             }
@@ -518,7 +514,7 @@ namespace Epsilon
 
                     m_outputcode.AppendLine($"    ADDI sp, sp, -{SizePerVar * count}");
                     m_StackSize += SizePerVar * count;
-                    m_vars.Add(new(ident.Value, SizePerVar * count, SizePerVar));
+                    m_vars.Add(new(ident.Value, SizePerVar * count, SizePerVar, true, false));
                 }
             }
         }
@@ -528,11 +524,11 @@ namespace Epsilon
             {
                 Token ident = assign.singlevar.ident;
                 string reg = m_FirstTempReg;
-                if (m_vars.Any(x => x.Value == ident.Value))
+                int index = m_vars.FindIndex(x => x.Value == ident.Value);
+                if (index != -1)
                 {
-                    int index = m_vars.FindIndex(x => x.Value == ident.Value);
-                    int TypeSize = m_vars[index].TypeSize;
-
+                    Var var = m_vars[index];
+                    int TypeSize = var.TypeSize;
                     GenExpr(assign.singlevar.expr, reg, TypeSize);
                     int relative_location = m_StackSize - VariableLocationm_vars(ident.Value);
                     if (TypeSize == 1)
@@ -549,13 +545,14 @@ namespace Epsilon
             else if (assign.type == NodeStmtIdentifierType.Array)
             {
                 Token ident = assign.array.ident;
-                if (m_vars.Any(x => x.Value == ident.Value))
+                int index = m_vars.FindIndex(x => x.Value == ident.Value);
+                if (index != -1)
                 {
                     string reg_addr = m_FirstTempReg;
                     string reg_data = m_SecondTempReg;
-                    int index = m_vars.FindIndex(x => x.Value == ident.Value);
-                    int TypeSize = m_vars[index].TypeSize;
-                    if (m_parameters.Any(x => x.Value == ident.Value))
+                    Var var = m_vars[index];
+                    int TypeSize = var.TypeSize;
+                    if (var.IsParameter)
                     {
                         int relative_location = m_StackSize - VariableLocationm_vars(ident.Value) - 8;
                         m_outputcode.AppendLine($"    LD {reg_addr}, {relative_location}(sp)");
@@ -808,7 +805,7 @@ namespace Epsilon
             int stacksize = 0;
             foreach (Var v in m_vars)
             {
-                if (m_parameters.Any(x => x.Value == v.Value) && m_DimensionsOfArrays.ContainsKey(v.Value))
+                if (v.IsParameter && v.IsArray)
                     stacksize += 8;
                 else
                     stacksize += v.Size;
@@ -856,15 +853,12 @@ namespace Epsilon
             {
                 int TypeSize = Function.parameters[i].TypeSize;
                 int Size = Function.parameters[i].Size;
-                if (Function.DimensionsOfArrays.ContainsKey(Function.parameters[i].Value))
-                {
+                bool IsArray = Function.DimensionsOfArrays.ContainsKey(Function.parameters[i].Value);
+                if (IsArray)
                     GenPush($"a{i}", 8);
-                }
                 else
-                {
                     GenPush($"a{i}", TypeSize);
-                }
-                m_vars.Add(new(Function.parameters[i].Value, Size, TypeSize));
+                m_vars.Add(new(Function.parameters[i].Value, Size, TypeSize, IsArray, true));
             }
             foreach (NodeStmt stmt in Function.FunctionBody.stmts)
             {
