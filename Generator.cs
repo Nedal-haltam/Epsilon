@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using static System.Formats.Asn1.AsnWriter;
@@ -765,11 +766,7 @@ namespace Epsilon
                     Environment.Exit(1);
                 }
             }
-            else if (STD_FUNCTIONS.Contains(Function.FunctionName.Value))
-            {
-
-            }
-            else
+            else if (!STD_FUNCTIONS.Contains(Function.FunctionName.Value))
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: Function `{Function.FunctionName.Value}` is not defined\n");
                 Environment.Exit(1);
@@ -821,7 +818,7 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    ADDI sp, sp, {stacksize}");
             if (m_CurrentFunction == "main")
             {
-                m_outputcode.AppendLine($"    ADDI a0, zero, 0");
+                m_outputcode.AppendLine($"    mv a0, s0");
                 m_outputcode.AppendLine($"    call exit");
             }
             else
@@ -875,6 +872,7 @@ namespace Epsilon
             }
             if (Function.FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
             {
+                m_outputcode.AppendLine($"    mv s0, zero");
                 GenReturnFromFunction();
             }
         }

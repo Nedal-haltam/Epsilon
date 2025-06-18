@@ -10,7 +10,7 @@ main:
     call FibIterative
     LI s0, 0
     ADDI sp, sp, 8
-    ADDI a0, zero, 0
+    mv a0, s0
     call exit
 FibRecursive:
     ADDI sp, sp, -8
@@ -161,6 +161,7 @@ TEMP_LABEL4_END:
 # end forloop
     la a0, StringLits1
     call printf
+    mv s0, zero
     ADDI sp, sp, 240
     LD ra, 0(sp)
     ADDI sp, sp, 8
@@ -238,6 +239,7 @@ TEMP_LABEL7_END:
 # end forloop
     la a0, StringLits1
     call printf
+    mv s0, zero
     ADDI sp, sp, 32
     LD ra, 0(sp)
     ADDI sp, sp, 8

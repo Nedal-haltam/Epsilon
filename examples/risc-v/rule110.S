@@ -140,8 +140,9 @@ TEMP_LABEL3_START:
 TEMP_LABEL4_END:
 # end scope
 # end whileloop
+    mv s0, zero
     ADDI sp, sp, 816
-    ADDI a0, zero, 0
+    mv a0, s0
     call exit
 display:
     ADDI sp, sp, -8
@@ -220,6 +221,7 @@ TEMP_LABEL6_END:
 # end whileloop
     la a0, StringLits2
     call printf
+    mv s0, zero
     ADDI sp, sp, 24
     LD ra, 0(sp)
     ADDI sp, sp, 8
@@ -408,6 +410,7 @@ TEMP_LABEL10_START:
 TEMP_LABEL11_END:
 # end scope
 # end whileloop
+    mv s0, zero
     ADDI sp, sp, 32
     LD ra, 0(sp)
     ADDI sp, sp, 8

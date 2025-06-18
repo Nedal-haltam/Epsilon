@@ -1023,8 +1023,9 @@ TEMP_LABEL13_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
+    mv s0, zero
     ADDI sp, sp, 400
-    ADDI a0, zero, 0
+    mv a0, s0
     call exit
 SlowDown:
     ADDI sp, sp, -8
@@ -1143,6 +1144,7 @@ TEMP_LABEL64_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
+    mv s0, zero
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
@@ -1298,6 +1300,7 @@ TEMP_LABEL73_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
+    mv s0, zero
     ADDI sp, sp, 16
     LD ra, 0(sp)
     ADDI sp, sp, 8

@@ -96,7 +96,7 @@ TEMP_LABEL1_END:
     call printf
     LI s0, 0
     ADDI sp, sp, 40
-    ADDI a0, zero, 0
+    mv a0, s0
     call exit
 exit:
     li a7, 93

@@ -14,7 +14,8 @@ main:
     mv a1, s0
     call printf
     call Print10sMultipleAndLengths
-    ADDI a0, zero, 0
+    mv s0, zero
+    mv a0, s0
     call exit
 foo:
     ADDI sp, sp, -8
@@ -146,6 +147,7 @@ TEMP_LABEL1_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
+    mv s0, zero
     ADDI sp, sp, 24
     LD ra, 0(sp)
     ADDI sp, sp, 8

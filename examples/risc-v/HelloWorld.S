@@ -4,7 +4,7 @@ main:
     la a0, StringLits0
     call printf
     LI s0, 0
-    ADDI a0, zero, 0
+    mv a0, s0
     call exit
 exit:
     li a7, 93

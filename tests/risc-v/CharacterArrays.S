@@ -12,7 +12,7 @@ main:
     call printf
     call PointerTest
     LI s0, 0
-    ADDI a0, zero, 0
+    mv a0, s0
     call exit
 CharArrayTest:
     ADDI sp, sp, -8
@@ -85,6 +85,7 @@ TEMP_LABEL1_END:
 ########## arr
     ADDI a1, sp, 0
     call printf
+    mv s0, zero
     ADDI sp, sp, 27
     LD ra, 0(sp)
     ADDI sp, sp, 8
@@ -104,6 +105,7 @@ PointerTest:
     call printf
     la a0, StringLits4
     call printf
+    mv s0, zero
     ADDI sp, sp, 8
     LD ra, 0(sp)
     ADDI sp, sp, 8
@@ -269,6 +271,7 @@ TEMP_LABEL7_END:
 ########## chars
     LD a1, 0(sp)
     call printf
+    mv s0, zero
     ADDI sp, sp, 8
     LD ra, 0(sp)
     ADDI sp, sp, 8
