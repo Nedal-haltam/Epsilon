@@ -154,34 +154,37 @@ namespace Epsilon
         }
         static NodeExpr GenIndexExpr(ref List<NodeExpr> indexes, ref List<NodeTermIntLit> dims, int i)
         {
-            NodeExpr expr = new();
             if (i == dims.Count - 1)
             {
-                expr.type = NodeExpr.NodeExprType.Term;
-                expr.term = new()
+                return new()
                 {
-                    type = NodeTerm.NodeTermType.Paren,
-                    paren = new()
+                    type = NodeExpr.NodeExprType.Term,
+                    term = new()
+                    {
+                        type = NodeTerm.NodeTermType.Paren,
+                        paren = new() { expr = indexes[^1] },
+                    }
                 };
-                expr.term.paren.expr = indexes[^1];
-                return expr;
             }
-            expr.type = NodeExpr.NodeExprType.BinExpr;
-            expr.binexpr = new()
+            return new()
             {
-                type = NodeBinExpr.NodeBinExprType.Add,
-                lhs = new()
+                type = NodeExpr.NodeExprType.BinExpr,
+                binexpr = new()
+                {
+                    type = NodeBinExpr.NodeBinExprType.Add,
+                    lhs = new()
+                    {
+                        type = NodeExpr.NodeExprType.BinExpr,
+                        binexpr = new()
+                        {
+                            type = NodeBinExpr.NodeBinExprType.Mul,
+                            lhs = indexes[i],
+                            rhs = GenIndexExprMult(ref indexes, ref dims, i + 1),
+                        }
+                    },
+                    rhs = GenIndexExpr(ref indexes, ref dims, i + 1),
+                }
             };
-            expr.binexpr.lhs.type = NodeExpr.NodeExprType.BinExpr;
-            expr.binexpr.lhs.binexpr = new()
-            {
-                type = NodeBinExpr.NodeBinExprType.Mul,
-                lhs = indexes[i],
-                rhs = GenIndexExprMult(ref indexes, ref dims, i + 1)
-            };
-
-            expr.binexpr.rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
-            return expr;
         }
         void GenArrayAddrFrom_m_vars(List<NodeExpr> indexes, Token ident, int TypeSize, string BaseReg = "sp")
         {
