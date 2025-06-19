@@ -14,7 +14,7 @@ namespace Epsilon
         private int m_curr_index = 0;
         public Dictionary<string, List<NodeTermIntLit>> DimensionsOfArrays = [];
         public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
-        public List<string> STD_FUNCTIONS = ["printf", "strlen", "itoa"];
+        public List<string> STD_FUNCTIONS = ["exit", "strlen", "itoa", "printf"];
 
         public string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
         {
@@ -675,9 +675,9 @@ namespace Epsilon
                 DimensionsOfArrays.Clear();
                 Consume();
                 Token FunctionName = Consume();
-                if (STD_FUNCTIONS.Contains(FunctionName.Value))
+                if (STD_FUNCTIONS.Contains(FunctionName.Value) || UserDefinedFunctions.ContainsKey(FunctionName.Value))
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"cannot define function `{FunctionName.Value}`\n");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"function with the name `{FunctionName.Value}` is already defined\n");
                     Environment.Exit(1);
                 }
                 List<Var> parameters = [];
