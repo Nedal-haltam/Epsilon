@@ -187,8 +187,7 @@ namespace Epsilon
         }
         public struct Macro
         {
-            public List<string> inputs;
-            public List<Token> value;
+            public List<Token> tokens;
             public string src;
         }
         private Dictionary<string, Macro> macro = [];
@@ -215,42 +214,7 @@ namespace Epsilon
                     string word = buffer.ToString();
                     if (macro.TryGetValue(word, out Macro value))
                     {
-                        buffer.Clear();
-                        List<string> inputs = [];
-                        if (Peek('(').HasValue)
-                        {
-                            Consume();
-                            while (!Peek(')').HasValue)
-                            {
-                                if (Peek(',').HasValue)
-                                {
-                                    if (string.IsNullOrEmpty(buffer.ToString()) || string.IsNullOrWhiteSpace(buffer.ToString()))
-                                        throw new Exception("invalid macro input");
-                                    inputs.Add(buffer.ToString());
-                                    buffer.Clear();
-                                }
-                                else
-                                {
-                                    buffer.Append(Consume());
-                                }
-                            }
-                            Consume();
-                        }
-                        inputs.Add(buffer.ToString());
-                        buffer.Clear();
-
-                        if (inputs.Count != value.inputs.Count)
-                            throw new Exception("inputs does not match macro definition");
-                        string src = value.src;
-                        for (int i = 0; i < value.inputs.Count; i++)
-                        {
-                            src = Regex.Replace(value.src, $@"\b{Regex.Escape(value.inputs[i])}\b", inputs[i]);
-                        }
-                        Tokenizer temp = new(src)
-                        {
-                            macro = macro
-                        };
-                        m_tokens.AddRange(temp.Tokenize());
+                        m_tokens.AddRange(value.tokens);
                     }
                     else if (KeyWords.TryGetValue(word, out TokenType tt))
                     {
@@ -288,43 +252,13 @@ namespace Epsilon
                     string macroname = buffer.ToString();
                     buffer.Clear();
                     SkipUntilNot(' ');
-                    List<string> inputs = [];
-                    if (Peek('(').HasValue)
-                    {
-                        Consume();
-                        while (!Peek(')').HasValue)
-                        {
-                            if (Peek(',').HasValue)
-                            {
-                                if (string.IsNullOrEmpty(buffer.ToString()) || string.IsNullOrWhiteSpace(buffer.ToString()))
-                                    throw new Exception("invalid macro input");
-                                inputs.Add(buffer.ToString());
-                                buffer.Clear();
-                            }
-                            else
-                            {
-                                buffer.Append(Consume());
-                            }
-                        }
-                        Consume();
-                    }
-                    inputs.Add(buffer.ToString());
-                    buffer.Clear();
 
                     buffer.Append(ConsumeUntil('\n'));
                     Consume();
                     string MacroSrc = buffer.ToString();
                     Tokenizer temp = new(MacroSrc);
                     List<Token> macrovalue = temp.Tokenize();
-                    for (int i = 0; i < macrovalue.Count; i++)
-                    {
-                        if (macro.TryGetValue(macrovalue[i].Value, out Macro value))
-                        {
-                            macrovalue.RemoveAt(i);
-                            macrovalue.InsertRange(i, value.value);
-                        }
-                    }
-                    macro.Add(macroname, new() { src = MacroSrc, inputs = inputs, value = macrovalue });
+                    macro.Add(macroname, new() { src = MacroSrc, tokens = macrovalue });
                 }
                 else if (IsComment())
                 {
