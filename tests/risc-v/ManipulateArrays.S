@@ -82,23 +82,19 @@ TEMP_LABEL0_START:
     BEQZ t0, TEMP_LABEL1_END
 # end condition
 # begin scope
-    LD t0, 16(sp)
 # begin array address
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
 ########## i
-    LD t0, 8(sp)
+    LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t1, 8
-    LD t0, 0(sp)
+    LI t0, 8
+    LD t1, 0(sp)
     ADDI sp, sp, 8
-    MUL t1, t1, t0
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    ADD t1, t0, t1
+    MUL t0, t0, t1
+    LD t1, 16(sp)
+    ADD t0, t1, t0
     ADDI sp, sp, -8
-    SD t1, 0(sp)
+    SD t0, 0(sp)
 # end array address
     LI t0, 1
     ADDI sp, sp, -8
@@ -166,21 +162,17 @@ TEMP_LABEL3_START:
 ########## i
     LD a1, 0(sp)
 ########## xs
-    LD a2, 16(sp)
 # begin array address
-    ADDI sp, sp, -8
-    SD a2, 0(sp)
 ########## i
-    LD t0, 8(sp)
+    LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
-    LD a2, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, a2, t0
+    LD t1, 16(sp)
+    ADD t0, t1, t0
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end array address
@@ -241,43 +233,35 @@ TEMP_LABEL6_START:
     BEQZ t0, TEMP_LABEL7_END
 # end condition
 # begin scope
-    LD t0, 24(sp)
 # begin array address
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
 ########## i
-    LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t1, 8
     LD t0, 0(sp)
-    ADDI sp, sp, 8
-    MUL t1, t1, t0
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    ADD t1, t0, t1
-    ADDI sp, sp, -8
-    SD t1, 0(sp)
-# end array address
-########## value
-    LD t0, 16(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## xs
-    LD t1, 40(sp)
-# begin array address
-    ADDI sp, sp, -8
-    SD t1, 0(sp)
-########## i
-    LD t0, 24(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
+    LD t1, 24(sp)
+    ADD t0, t1, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+# end array address
+########## value
+    LD t0, 16(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## xs
+# begin array address
+########## i
+    LD t0, 16(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
+    MUL t0, t0, t1
+    LD t1, 40(sp)
     ADD t0, t1, t0
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -344,42 +328,34 @@ TEMP_LABEL9_START:
     BEQZ t0, TEMP_LABEL10_END
 # end condition
 # begin scope
-    LD t0, 24(sp)
 # begin array address
+########## i
+    LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LI t0, 8
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    MUL t0, t0, t1
+    LD t1, 24(sp)
+    ADD t0, t1, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+# end array address
+########## b
+# begin array address
 ########## i
     LD t0, 8(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t1, 8
-    LD t0, 0(sp)
+    LI t0, 8
+    LD t1, 0(sp)
     ADDI sp, sp, 8
-    MUL t1, t1, t0
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    ADD t1, t0, t1
-    ADDI sp, sp, -8
-    SD t1, 0(sp)
-# end array address
-########## b
-    LD t0, 24(sp)
-# begin array address
+    MUL t0, t0, t1
+    LD t1, 24(sp)
+    ADD t0, t1, t0
     ADDI sp, sp, -8
     SD t0, 0(sp)
-########## i
-    LD t0, 16(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t1, 8
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    MUL t1, t1, t0
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    ADD t1, t0, t1
-    ADDI sp, sp, -8
-    SD t1, 0(sp)
 # end array address
     LD t1, 0(sp)
     ADDI sp, sp, 8
@@ -387,20 +363,16 @@ TEMP_LABEL9_START:
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## a
-    LD t1, 40(sp)
 # begin array address
-    ADDI sp, sp, -8
-    SD t1, 0(sp)
 ########## i
-    LD t0, 24(sp)
+    LD t0, 16(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LD t1, 40(sp)
     ADD t0, t1, t0
     ADDI sp, sp, -8
     SD t0, 0(sp)

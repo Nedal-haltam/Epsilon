@@ -16,7 +16,7 @@ namespace Epsilon
         public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
         public List<string> STD_FUNCTIONS = ["exit", "strlen", "itoa", "printf"];
 
-        public string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
+        public static string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
         {
             if (op == NodeBinExpr.NodeBinExprType.Add)
                 return (Convert.ToInt32(imm1) + Convert.ToInt32(imm2)).ToString();

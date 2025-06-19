@@ -190,7 +190,7 @@ namespace Epsilon
             public List<Token> tokens;
             public string src;
         }
-        private Dictionary<string, Macro> macro = [];
+        private readonly Dictionary<string, Macro> macro = [];
         public List<Token> Tokenize()
         {
             m_tokens = [];

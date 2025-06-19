@@ -234,7 +234,7 @@ namespace Epsilon
                         {
                             Type = TokenType.IntLit,
                             Value = num,
-                            Line = -1,
+                            Line = line,
                         }
                     }
                 }

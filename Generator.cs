@@ -172,10 +172,10 @@ namespace Epsilon
             NodeExpr rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
             return NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Add, lhs, rhs);
         }
-        void GenArrayAddrFrom_m_vars(List<NodeExpr> indexes, Var var, string BaseReg = "sp")
+        void GenArrayAddrFrom_m_vars(List<NodeExpr> indexes, Var var, int? relative_location_of_base_reg = null)
         {
             m_outputcode.AppendLine($"# begin array address");
-            string reg = BaseReg == m_FirstTempReg ? m_SecondTempReg : m_FirstTempReg;
+            string reg = m_FirstTempReg;
             if (!var.IsArray)
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{var.Value}` is not declared as an array\n");
@@ -185,8 +185,6 @@ namespace Epsilon
             Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
 
             NodeExpr IndexExpr = GenIndexExpr(ref indexes, ref dims, 0);
-            if (BaseReg != "sp")
-                GenPush(BaseReg, 8);
 
             GenExpr(
                 NodeExpr.BinExpr(
@@ -196,8 +194,12 @@ namespace Epsilon
                 reg, 8
             );
 
-            if (BaseReg != "sp")
-                GenPop(BaseReg, 8);
+            string BaseReg = "sp";
+            if (relative_location_of_base_reg.HasValue)
+            {
+                BaseReg = m_SecondTempReg;
+                m_outputcode.AppendLine($"    LD {BaseReg}, {relative_location_of_base_reg}(sp)");
+            }
             m_outputcode.AppendLine($"    ADD {reg}, {BaseReg}, {reg}");
             if (BaseReg == "sp")
             {
@@ -292,9 +294,8 @@ namespace Epsilon
                         Var var = m_vars[index];
                         if (var.IsParameter)
                         {
-                            int relative_location = m_StackSize - VariableLocation(ident.ident.Value) - 8;
-                            m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
-                            GenArrayAddrFrom_m_vars(ident.indexes, var, reg);
+                            int relative_location_of_base_reg = m_StackSize - VariableLocation(ident.ident.Value) - 8;
+                            GenArrayAddrFrom_m_vars(ident.indexes, var, relative_location_of_base_reg);
                         }
                         else
                         {
@@ -512,9 +513,8 @@ namespace Epsilon
                     Var var = m_vars[index];
                     if (var.IsParameter)
                     {
-                        int relative_location = m_StackSize - VariableLocation(ident.Value) - 8;
-                        m_outputcode.AppendLine($"    LD {reg_addr}, {relative_location}(sp)");
-                        GenArrayAddrFrom_m_vars(assign.array.indexes, var, reg_addr);
+                        int relative_location_of_base_reg = m_StackSize - VariableLocation(ident.Value) - 8;
+                        GenArrayAddrFrom_m_vars(assign.array.indexes, var, relative_location_of_base_reg);
                     }
                     else
                     {
@@ -947,7 +947,7 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n");
                 Environment.Exit(1);
             }
-            // TODO: should resolve and generate global and keep them without resetting
+            // TODO: should resolve and generate global and keep them saved without resetting
             GenFunctionDefinition(m_UserDefinedFunctions["main"].FunctionName.Value);
             for (int i = 0; i < m_CalledFunctions.Count; i++)
             {

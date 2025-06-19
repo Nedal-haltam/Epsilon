@@ -256,23 +256,19 @@ LABEL9_START:
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## arr
-    LD t0, 16(sp)
 # begin array address
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
 ########## i
-    LD t0, 16(sp)
+    LD t0, 8(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t1, 8
-    LD t0, 0(sp)
+    LI t0, 8
+    LD t1, 0(sp)
     ADDI sp, sp, 8
-    MUL t1, t1, t0
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    ADD t1, t0, t1
+    MUL t0, t0, t1
+    LD t1, 16(sp)
+    ADD t0, t1, t0
     ADDI sp, sp, -8
-    SD t1, 0(sp)
+    SD t0, 0(sp)
 # end array address
     LD t1, 0(sp)
     ADDI sp, sp, 8
@@ -284,21 +280,17 @@ LABEL9_START:
     BEQZ t0, LABEL11_elifs
 # begin scope
 ########## arr
-    LD s0, 8(sp)
 # begin array address
-    ADDI sp, sp, -8
-    SD s0, 0(sp)
 ########## i
-    LD t0, 8(sp)
+    LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
-    LD s0, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, s0, t0
+    LD t1, 8(sp)
+    ADD t0, t1, t0
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end array address
