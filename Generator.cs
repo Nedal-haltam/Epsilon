@@ -829,7 +829,8 @@ namespace Epsilon
             {
                 GenStmt(stmt);
             }
-            if (Function.FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
+
+            if (Function.FunctionBody.stmts.Count == 0 || Function.FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
             {
                 m_outputcode.AppendLine($"    mv s0, zero");
                 GenReturnFromFunction();
