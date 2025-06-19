@@ -44,8 +44,7 @@ namespace Epsilon
                 return (Convert.ToInt32(imm1) / Convert.ToInt32(imm2)).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.Rem)
                 return (Convert.ToInt32(imm1) % Convert.ToInt32(imm2)).ToString();
-            Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid operation `{op}`\n");
-            Environment.Exit(1);
+            Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid operation `{op}`\n", 1);
             return "";
         }
         Token? Peek(int offset = 0) => 0 <= m_curr_index + offset && m_curr_index + offset < m_tokens.Count ? m_tokens[m_curr_index + offset] : null;
@@ -66,8 +65,7 @@ namespace Epsilon
             {
                 Token? peeked = Peek(-1);
                 string line = peeked.HasValue ? $" on line: {peeked.Value.Line}" : "";
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error expected `{type}`{line}\n");
-                Environment.Exit(1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error expected `{type}`{line}\n", 1);
             }
             return Consume();
         }
@@ -96,8 +94,7 @@ namespace Epsilon
         {
             if (!expr.HasValue)
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: expected expression\n");
-                Environment.Exit(1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: expected expression\n", 1);
                 return new();
             }
             return expr.Value;
@@ -242,8 +239,7 @@ namespace Epsilon
                 return NodeBinExpr.NodeBinExprType.Or;
             if (op == TokenType.Xor)
                 return NodeBinExpr.NodeBinExprType.Xor;
-            Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: inavalid operation `{op}`\n");
-            Environment.Exit(1);
+            Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: inavalid operation `{op}`\n", 1);
             return 0;
         }
         static bool IsExprIntLit(NodeExpr expr) => expr.type == NodeExpr.NodeExprType.Term && expr.term.type == NodeTerm.NodeTermType.IntLit;
@@ -362,8 +358,7 @@ namespace Epsilon
         {
             if (!Peek(TokenType.OpenParen).HasValue)
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: expected `(` after `if`\n");
-                Environment.Exit(1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: expected `(` after `if`\n", 1);
             }
             Consume();
             NodeIfPredicate pred = new();
@@ -382,8 +377,7 @@ namespace Epsilon
                 List<NodeStmt> stmt = ParseDeclare();
                 if (stmt.Count > 1)
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"cannot declare more than one variable in `for-loops`\n");
-                    Environment.Exit(1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"cannot declare more than one variable in `for-loops`\n", 1);
                 }
                 if (stmt[0].type != NodeStmt.NodeStmtType.Declare)
                     Shartilities.UNREACHABLE("");
@@ -464,8 +458,7 @@ namespace Epsilon
             Token size_token = Consume();
             if (!uint.TryParse(size_token.Value, out uint _))
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error Expected a constant size for the array on line: {size_token.Line}\n");
-                Environment.Exit(1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: Error Expected a constant size for the array on line: {size_token.Line}\n", 1);
             }
             TryConsumeError(TokenType.CloseSquare);
             return size_token;
@@ -487,8 +480,7 @@ namespace Epsilon
                     DataType = NodeStmtDataType.Char;
                 else
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Error data type `{vartype.Value}` is not supported\n");
-                    Environment.Exit(1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Error data type `{vartype.Value}` is not supported\n", 1);
                 }
                 Token Ident = Consume();
                 NodeStmtIdentifierType IdentifierType = NodeStmtIdentifierType.SingleVar;
@@ -503,8 +495,7 @@ namespace Epsilon
                     };
                     if (DimensionsOfArrays.ContainsKey(Ident.Value))
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: array `{Ident.Value}` is alread delcared\n");
-                        Environment.Exit(1);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: array `{Ident.Value}` is alread delcared\n", 1);
                     }
                     else
                     {
@@ -677,8 +668,7 @@ namespace Epsilon
                 Token FunctionName = Consume();
                 if (STD_FUNCTIONS.Contains(FunctionName.Value) || UserDefinedFunctions.ContainsKey(FunctionName.Value))
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"function with the name `{FunctionName.Value}` is already defined\n");
-                    Environment.Exit(1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"function with the name `{FunctionName.Value}` is already defined\n", 1);
                 }
                 List<Var> parameters = [];
                 TryConsumeError(TokenType.OpenParen);
@@ -688,8 +678,7 @@ namespace Epsilon
                     {
                         if (!IsStmtDeclare())
                         {
-                            Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: error in definition of function `{FunctionName.Value}`\n");
-                            Environment.Exit(1);
+                            Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: error in definition of function `{FunctionName.Value}`\n", 1);
                         }
                         Token vartype = Consume();
                         Token ident = Consume();
@@ -700,8 +689,7 @@ namespace Epsilon
                         {
                             if (DimensionsOfArrays.ContainsKey(ident.Value))
                             {
-                                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: array `{ident.Value}` is alread delcared\n");
-                                Environment.Exit(1);
+                                Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: array `{ident.Value}` is alread delcared\n", 1);
                             }
                             else
                             {
@@ -731,8 +719,7 @@ namespace Epsilon
                 TryConsumeError(TokenType.CloseParen);
                 if (!Peek(TokenType.OpenCurly).HasValue)
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: expected a scope for function `{FunctionName.Value}`\n");
-                    Environment.Exit(1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: expected a scope for function `{FunctionName.Value}`\n", 1);
                 }
 
                 NodeStmtScope FunctionBody = ParseScope();
@@ -786,8 +773,7 @@ namespace Epsilon
                         NodeExpr StrlenParameter = ExpectedExpression(ParseExpr());
                         if (!(StrlenParameter.type == NodeExpr.NodeExprType.Term && StrlenParameter.term.type == NodeTerm.NodeTermType.StringLit))
                         {
-                            Shartilities.Log(Shartilities.LogType.ERROR, $"invalid paramter to function `{CalledFunctionName.Value}` on line: {CalledFunctionName.Line}\n");
-                            Environment.Exit(1);
+                            Shartilities.Log(Shartilities.LogType.ERROR, $"invalid paramter to function `{CalledFunctionName.Value}` on line: {CalledFunctionName.Line}\n", 1);
                         }
 
                         TryConsumeError(TokenType.CloseParen);
@@ -808,8 +794,7 @@ namespace Epsilon
                     }
                     else
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"undefined std function `{CalledFunctionName.Value}`\n");
-                        Environment.Exit(1);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"undefined std function `{CalledFunctionName.Value}`\n", 1);
                         return [];
                     }
                 }
@@ -838,8 +823,7 @@ namespace Epsilon
                     };
                     if (CalledFunctionName.Value == "main")
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: cannot call function `main`\n");
-                        Environment.Exit(1);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: cannot call function `main`\n", 1);
                     }
                     return [stmt];
                 }
@@ -884,13 +868,12 @@ namespace Epsilon
                 Token? peeked = Peek();
                 if (peeked.HasValue)
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: invalid statement `{peeked.Value.Value}`\n");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: invalid statement `{peeked.Value.Value}`\n", 1);
                 }
                 else
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: there is no statement to parse\n");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: there is no statement to parse\n", 1);
                 }
-                Environment.Exit(1);
                 return [];
             }
         }

@@ -53,14 +53,13 @@ namespace Epsilon
                 {
                     if (!Shartilities.ShiftArgs(ref args, out string OutputFilePathuser))
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"Expected output file path\n");
-                        Environment.Exit(1);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Expected output file path\n", 1);
                     }
                     OutputFilePath = OutputFilePathuser;
                 }
                 else
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Invalid argument `{arg}` was provided\n");
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Invalid flag `{arg}` was provided\n");
                     Usage();
                     Environment.Exit(1);
                 }

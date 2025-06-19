@@ -301,13 +301,11 @@ namespace Epsilon
                     buffer.Append(ConsumeUntil('\''));
                     if (buffer.Length == 0)
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"empty character is assigned on line {line}\n");
-                        Environment.Exit(1);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"empty character is assigned on line {line}\n", 1);
                     }
                     if (buffer.Length != 1)
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"Error expected a single character between single quotes but got `{buffer}` on line {line}\n");
-                        Environment.Exit(1);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Error expected a single character between single quotes but got `{buffer}` on line {line}\n", 1);
                     }
                     Consume();
                     m_tokens.Add(new() { Value = Convert.ToUInt32(buffer.ToString()[0]).ToString(), Type = TokenType.IntLit, Line = line });
@@ -413,8 +411,7 @@ namespace Epsilon
                 }
                 else
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Invalid token: {curr_token}\n");
-                    Environment.Exit(1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Invalid token: {curr_token}\n", 1);
                 }
                 buffer.Clear();
             }

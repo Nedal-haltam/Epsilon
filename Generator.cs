@@ -178,8 +178,7 @@ namespace Epsilon
             string reg = m_FirstTempReg;
             if (!var.IsArray)
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{var.Value}` is not declared as an array\n");
-                Environment.Exit(1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{var.Value}` is not declared as an array\n", 1);
             }
             List<NodeTermIntLit> dims = m_DimensionsOfArrays[var.Value];
             Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
@@ -280,8 +279,7 @@ namespace Epsilon
                     }
                     else
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.ident.Value}` is undeclared\n");
-                        Environment.Exit(1);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.ident.Value}` is undeclared\n", 1);
                     }
                 }
                 else
@@ -317,8 +315,7 @@ namespace Epsilon
                     }
                     else
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.ident.Value}` is not declared\n");
-                        Environment.Exit(1);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.ident.Value}` is not declared\n", 1);
                     }
                 }
             }
@@ -333,8 +330,7 @@ namespace Epsilon
             }
             else
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid term `{term.type}`\n");
-                Environment.Exit(1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid term `{term.type}`\n", 1);
             }
         }
         void GenBinExpr(NodeBinExpr binExpr, string? DestReg, int size)
@@ -389,8 +385,7 @@ namespace Epsilon
                     m_outputcode.AppendLine($"    div {reg}, {reg}, {reg2}");
                     break;
                 default:
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid binary operator `{binExpr.type}`\n");
-                    Environment.Exit(1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid binary operator `{binExpr.type}`\n", 1);
                     return;
             }
             if (DestReg == null)
@@ -421,8 +416,7 @@ namespace Epsilon
                 Token ident = declare.singlevar.ident;
                 if (m_vars.Any(x => x.Value == ident.Value))
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{ident.Value}` is alread declared\n");
-                    Environment.Exit(1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{ident.Value}` is alread declared\n", 1);
                 }
                 else
                 {
@@ -445,8 +439,7 @@ namespace Epsilon
                 Token ident = declare.array.ident;
                 if (m_vars.Any(x => x.Value == ident.Value))
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{ident.Value}` is alread declared\n");
-                    Environment.Exit(1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{ident.Value}` is alread declared\n", 1);
                 }
                 else
                 {
@@ -498,8 +491,7 @@ namespace Epsilon
                 }
                 else
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.Value}` is not declared\n");
-                    Environment.Exit(1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.Value}` is not declared\n", 1);
                 }
             }
             else if (assign.type == NodeStmtIdentifierType.Array)
@@ -533,8 +525,7 @@ namespace Epsilon
                 }
                 else
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.Value}` is not declared\n");
-                    Environment.Exit(1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"variable `{ident.Value}` is not declared\n", 1);
                 }
             }
             else
@@ -703,8 +694,7 @@ namespace Epsilon
         {
             if (m_scopeend.Count == 0)
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no enclosing loop out of which to break from on line {breakk.breakk.Line}\n");
-                Environment.Exit(1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no enclosing loop out of which to break from on line {breakk.breakk.Line}\n", 1);
             }
             m_outputcode.AppendLine($"    J {m_scopeend.Peek()}");
         }
@@ -712,8 +702,7 @@ namespace Epsilon
         {
             if (m_scopestart.Count == 0)
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no enclosing loop out of which to continue on line {continuee.continuee.Line}\n");
-                Environment.Exit(1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no enclosing loop out of which to continue on line {continuee.continuee.Line}\n", 1);
             }
             m_outputcode.AppendLine($"    J {m_scopestart.Peek()}");
         }
@@ -723,14 +712,12 @@ namespace Epsilon
             {
                 if (CalledFunction.parameters.Count != Function.parameters.Count)
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: Function call to `{CalledFunction.FunctionName.Value}` is not valid, check function arity\n");
-                    Environment.Exit(1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: Function call to `{CalledFunction.FunctionName.Value}` is not valid, check function arity\n", 1);
                 }
             }
             else if (!STD_FUNCTIONS.Contains(Function.FunctionName.Value))
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: Function `{Function.FunctionName.Value}` is not defined\n");
-                Environment.Exit(1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: Function `{Function.FunctionName.Value}` is not defined\n", 1);
             }
 
             if (!m_CalledFunctions.Contains(Function.FunctionName.Value))
@@ -891,8 +878,7 @@ namespace Epsilon
             }
             else
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid statement `{stmt.type}`\n");
-                Environment.Exit(1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid statement `{stmt.type}`\n", 1);
             }
         }
         void GenStdFunctions()
@@ -944,8 +930,7 @@ namespace Epsilon
 
             if (!m_UserDefinedFunctions.ContainsKey("main"))
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n");
-                Environment.Exit(1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n", 1);
             }
             // TODO: should resolve and generate global and keep them saved without resetting
             GenFunctionDefinition(m_UserDefinedFunctions["main"].FunctionName.Value);
