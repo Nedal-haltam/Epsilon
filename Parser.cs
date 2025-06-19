@@ -752,37 +752,7 @@ namespace Epsilon
             else if (Peek(TokenType.Ident).HasValue && Peek(TokenType.OpenParen, 1).HasValue)
             {
                 Token? PotentialFunctionName = Peek();
-                if (PotentialFunctionName.HasValue && UserDefinedFunctions.ContainsKey(PotentialFunctionName.Value.Value))
-                {
-                    Token CalledFunctionName = Consume();
-                    TryConsumeError(TokenType.OpenParen);
-                    List<NodeExpr> parameters = [];
-                    if (!Peek(TokenType.CloseParen).HasValue)
-                        do
-                        {
-                            NodeExpr expr = ExpectedExpression(ParseExpr());
-                            parameters.Add(expr);
-                        } while (PeekAndConsume(TokenType.Comma).HasValue);
-                    TryConsumeError(TokenType.CloseParen);
-                    TryConsumeError(TokenType.SemiColon);
-                    NodeStmtFunctionCall CalledFunction = new()
-                    {
-                        FunctionName = CalledFunctionName,
-                        parameters = parameters
-                    };
-                    NodeStmt stmt = new()
-                    {
-                        type = NodeStmt.NodeStmtType.Function,
-                        CalledFunction = CalledFunction
-                    };
-                    if (CalledFunctionName.Value == "main")
-                    {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: cannot call function `main`\n");
-                        Environment.Exit(1);
-                    }
-                    return [stmt];
-                }
-                else if (PotentialFunctionName.HasValue && STD_FUNCTIONS.Contains(PotentialFunctionName.Value.Value))
+                if (PotentialFunctionName.HasValue && STD_FUNCTIONS.Contains(PotentialFunctionName.Value.Value))
                 {
                     Token CalledFunctionName = Consume();
                     NodeStmtFunctionCall CalledFunction = new()
@@ -843,15 +813,38 @@ namespace Epsilon
                         return [];
                     }
                 }
-                else
+                else if (PotentialFunctionName.HasValue)
                 {
-                    if (PotentialFunctionName.HasValue)
+                    Token CalledFunctionName = Consume();
+                    TryConsumeError(TokenType.OpenParen);
+                    List<NodeExpr> parameters = [];
+                    if (!Peek(TokenType.CloseParen).HasValue)
+                        do
+                        {
+                            NodeExpr expr = ExpectedExpression(ParseExpr());
+                            parameters.Add(expr);
+                        } while (PeekAndConsume(TokenType.Comma).HasValue);
+                    TryConsumeError(TokenType.CloseParen);
+                    TryConsumeError(TokenType.SemiColon);
+                    NodeStmtFunctionCall CalledFunction = new()
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"function `{PotentialFunctionName.Value.Value}` is undefined\n");
+                        FunctionName = CalledFunctionName,
+                        parameters = parameters
+                    };
+                    NodeStmt stmt = new()
+                    {
+                        type = NodeStmt.NodeStmtType.Function,
+                        CalledFunction = CalledFunction
+                    };
+                    if (CalledFunctionName.Value == "main")
+                    {
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Parser: cannot call function `main`\n");
                         Environment.Exit(1);
                     }
-                    return [];
+                    return [stmt];
                 }
+                Shartilities.UNREACHABLE("parsing function call");
+                return [];
             }
 
             else if (Peek(TokenType.Return).HasValue)
