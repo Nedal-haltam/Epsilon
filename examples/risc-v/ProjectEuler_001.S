@@ -93,7 +93,7 @@ TEMP_LABEL1_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-    la a0, StringLits0
+    LA a0, StringLits0
 ########## ans
     LD a1, 0(sp)
     call printf

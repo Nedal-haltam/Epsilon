@@ -1,7 +1,7 @@
 .section .text
 .globl main
 main:
-    la a0, StringLits0
+    LA a0, StringLits0
     ADDI sp, sp, -16
     SD a0, 0(sp)
     SD a1, 8(sp)
@@ -11,7 +11,7 @@ main:
     LD a1, 8(sp)
     LD a0, 0(sp)
     ADDI sp, sp, 16
-    mv a1, s0
+    MV a1, s0
     call printf
     call Print10sMultipleAndLengths
     mv s0, zero
@@ -85,11 +85,11 @@ TEMP_LABEL0_START:
     call itoa
     LD a0, 0(sp)
     ADDI sp, sp, 8
-    mv a0, s0
+    MV a0, s0
     call strlen
     LD a0, 0(sp)
     ADDI sp, sp, 8
-    mv t0, s0
+    MV t0, s0
     ADDI sp, sp, -8
     SD t0, 0(sp)
 LABEL3_START:
@@ -105,11 +105,11 @@ LABEL3_START:
     SNEZ t0, t0
     BEQZ t0, LABEL5_elifs
 # begin scope
-    la a0, StringLits1
+    LA a0, StringLits1
 ########## x
     LD a1, 32(sp)
     call printf
-    la a0, StringLits2
+    LA a0, StringLits2
 ########## len
     LD a1, 0(sp)
     call printf

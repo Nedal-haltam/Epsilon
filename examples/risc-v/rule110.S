@@ -191,13 +191,13 @@ LABEL7_START:
     LD t0, 0(t1)
     BEQZ t0, LABEL9_elifs
 # begin scope
-    la a0, StringLits0
+    LA a0, StringLits0
     call printf
 # end scope
     J LABEL8_END
 LABEL9_elifs:
 # begin scope
-    la a0, StringLits1
+    LA a0, StringLits1
     call printf
 # end scope
 LABEL8_END:
@@ -215,7 +215,7 @@ LABEL8_END:
 TEMP_LABEL6_END:
 # end scope
 # end whileloop
-    la a0, StringLits2
+    LA a0, StringLits2
     call printf
     mv s0, zero
     ADDI sp, sp, 24

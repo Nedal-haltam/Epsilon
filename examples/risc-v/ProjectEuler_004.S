@@ -82,7 +82,7 @@ LABEL6_START:
     call IsPalindrome
     LD a0, 0(sp)
     ADDI sp, sp, 8
-    mv t0, s0
+    MV t0, s0
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
@@ -131,7 +131,7 @@ TEMP_LABEL1_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-    la a0, StringLits0
+    LA a0, StringLits0
 ########## MaxPalindrome
     LD a1, 0(sp)
     call printf

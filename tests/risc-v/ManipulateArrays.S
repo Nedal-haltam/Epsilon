@@ -16,7 +16,7 @@ main:
 ########## n
     LD a1, 160(sp)
     call PrintArray
-    la a0, StringLits0
+    LA a0, StringLits0
     call printf
 ########## xs
     ADDI a0, sp, 80
@@ -29,7 +29,7 @@ main:
 ########## n
     LD a1, 160(sp)
     call PrintArray
-    la a0, StringLits0
+    LA a0, StringLits0
     call printf
 ########## ys
     ADDI a0, sp, 0
@@ -48,7 +48,7 @@ main:
 ########## n
     LD a1, 160(sp)
     call PrintArray
-    la a0, StringLits0
+    LA a0, StringLits0
     call printf
     LI s0, 0
     ADDI sp, sp, 168
@@ -158,7 +158,7 @@ TEMP_LABEL3_START:
     BEQZ t0, TEMP_LABEL4_END
 # end condition
 # begin scope
-    la a0, StringLits1
+    LA a0, StringLits1
 ########## i
     LD a1, 0(sp)
 ########## xs

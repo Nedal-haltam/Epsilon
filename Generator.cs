@@ -176,15 +176,14 @@ namespace Epsilon
         {
             m_outputcode.AppendLine($"# begin array address");
             string reg = m_FirstTempReg;
+
             if (!var.IsArray)
-            {
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{var.Value}` is not declared as an array\n", 1);
-            }
+
             List<NodeTermIntLit> dims = m_DimensionsOfArrays[var.Value];
             Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
 
             NodeExpr IndexExpr = GenIndexExpr(ref indexes, ref dims, 0);
-
             GenExpr(
                 NodeExpr.BinExpr(
                     NodeBinExpr.NodeBinExprType.Mul,
@@ -200,6 +199,7 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    LD {BaseReg}, {relative_location_of_base_reg}(sp)");
             }
             m_outputcode.AppendLine($"    ADD {reg}, {BaseReg}, {reg}");
+
             if (BaseReg == "sp")
             {
                 int relative_location = m_StackSize - VariableLocation(var.Value) - var.Size;
@@ -228,7 +228,7 @@ namespace Epsilon
                     m_StringLits.Add(term.stringlit.stringlit.Value);
                     index = m_StringLits.Count - 1;
                 }
-                m_outputcode.AppendLine($"    la {reg}, StringLits{index}");
+                m_outputcode.AppendLine($"    LA {reg}, StringLits{index}");
                 if (DestReg == null)
                     GenPush(reg, size);
             }
@@ -236,7 +236,7 @@ namespace Epsilon
             {
                 string reg = DestReg ?? m_FirstTempReg;
                 GenStmtFunctionCall(new() { FunctionName = term.functioncall.FunctionName, parameters = term.functioncall.parameters }, true);
-                m_outputcode.AppendLine($"    mv {reg}, s0");
+                m_outputcode.AppendLine($"    MV {reg}, s0");
                 if (DestReg == null)
                     GenPush(reg, size);
             }

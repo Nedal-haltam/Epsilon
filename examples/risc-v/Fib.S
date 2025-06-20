@@ -117,11 +117,11 @@ TEMP_LABEL3_START:
     LD a1, 8(sp)
     LD a0, 0(sp)
     ADDI sp, sp, 16
-    mv t1, s0
+    MV t1, s0
     LD t0, 0(sp)
     ADDI sp, sp, 8
     SD t1, 0(t0)
-    la a0, StringLits0
+    LA a0, StringLits0
 ########## arr
 # begin array address
 ########## i
@@ -159,7 +159,7 @@ TEMP_LABEL4_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-    la a0, StringLits1
+    LA a0, StringLits1
     call printf
     mv s0, zero
     ADDI sp, sp, 240
@@ -199,7 +199,7 @@ TEMP_LABEL6_START:
     BEQZ t0, TEMP_LABEL7_END
 # end condition
 # begin scope
-    la a0, StringLits0
+    LA a0, StringLits0
 ########## a
     LD a1, 24(sp)
     call printf
@@ -237,7 +237,7 @@ TEMP_LABEL7_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-    la a0, StringLits1
+    LA a0, StringLits1
     call printf
     mv s0, zero
     ADDI sp, sp, 32
@@ -356,7 +356,7 @@ LABEL13_END:
     LD a1, 8(sp)
     LD a0, 0(sp)
     ADDI sp, sp, 16
-    mv t0, s0
+    MV t0, s0
     ADDI sp, sp, -8
     SD t0, 0(sp)
     ADDI sp, sp, -16
@@ -376,7 +376,7 @@ LABEL13_END:
     LD a1, 8(sp)
     LD a0, 0(sp)
     ADDI sp, sp, 16
-    mv s0, s0
+    MV s0, s0
     LD t0, 0(sp)
     ADDI sp, sp, 8
     ADD s0, s0, t0

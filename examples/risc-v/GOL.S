@@ -456,13 +456,13 @@ LABEL21_START:
     LD t0, 0(t1)
     BEQZ t0, LABEL23_elifs
 # begin scope
-    la a0, StringLits0
+    LA a0, StringLits0
     call printf
 # end scope
     J LABEL22_END
 LABEL23_elifs:
 # begin scope
-    la a0, StringLits1
+    LA a0, StringLits1
     call printf
 # end scope
 LABEL22_END:
@@ -484,7 +484,7 @@ TEMP_LABEL19_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-    la a0, StringLits2
+    LA a0, StringLits2
     call printf
 # end scope
 # begin update

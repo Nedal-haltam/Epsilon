@@ -90,7 +90,7 @@ LABEL6_END:
 TEMP_LABEL1_END:
 # end scope
 # end whileloop
-    la a0, StringLits0
+    LA a0, StringLits0
 ########## sum
     LD a1, 24(sp)
     call printf

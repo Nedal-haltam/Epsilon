@@ -1,14 +1,14 @@
 .section .text
 .globl main
 main:
-    la a0, StringLits0
+    LA a0, StringLits0
     call printf
-    la a0, StringLits1
+    LA a0, StringLits1
     call printf
     call CharArrayTest
-    la a0, StringLits0
+    LA a0, StringLits0
     call printf
-    la a0, StringLits2
+    LA a0, StringLits2
     call printf
     call PointerTest
     LI s0, 0
@@ -41,7 +41,7 @@ TEMP_LABEL0_START:
     BEQZ t0, TEMP_LABEL1_END
 # end condition
 # begin scope
-    la a0, StringLits3
+    LA a0, StringLits3
 ########## arr
 # begin array address
 ########## i
@@ -79,9 +79,9 @@ TEMP_LABEL1_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-    la a0, StringLits4
+    LA a0, StringLits4
     call printf
-    la a0, StringLits5
+    LA a0, StringLits5
 ########## arr
     ADDI a1, sp, 0
     call printf
@@ -93,17 +93,17 @@ TEMP_LABEL1_END:
 PointerTest:
     ADDI sp, sp, -8
     SD ra, 0(sp)
-    la t0, StringLits6
+    LA t0, StringLits6
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    la a0, StringLits7
+    LA a0, StringLits7
 ########## x
     LD a1, 0(sp)
     call printf
 ########## x
     LD a0, 0(sp)
     call printf
-    la a0, StringLits4
+    LA a0, StringLits4
     call printf
     mv s0, zero
     ADDI sp, sp, 8
@@ -215,7 +215,7 @@ TEMP_LABEL6_START:
     BEQZ t0, TEMP_LABEL7_END
 # end condition
 # begin scope
-    la a0, StringLits3
+    LA a0, StringLits3
 ########## chars
 # begin array address
 ########## i
@@ -253,9 +253,9 @@ TEMP_LABEL7_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-    la a0, StringLits4
+    LA a0, StringLits4
     call printf
-    la a0, StringLits8
+    LA a0, StringLits8
 ########## chars
     LD a1, 0(sp)
     call printf

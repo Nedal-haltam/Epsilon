@@ -1,7 +1,7 @@
 .section .text
 .globl main
 main:
-    la a0, StringLits0
+    LA a0, StringLits0
     call printf
     LI s0, 0
     mv a0, s0
