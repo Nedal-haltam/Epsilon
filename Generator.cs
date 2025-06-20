@@ -736,7 +736,7 @@ namespace Epsilon
             {
                 for (int i = 0; i < Function.parameters.Count; i++)
                 {
-                    GenExpr(Function.parameters[i], $"a{i}", func.parameters[i].Size);
+                    GenExpr(Function.parameters[i], $"a{i}", func.parameters[i].TypeSize);
                 }
             }
             else
