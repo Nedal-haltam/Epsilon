@@ -104,14 +104,10 @@ func PrintCharTwoD(char cs[charsize][charsize])
 func TwoD(auto ns[numbersize][numbersize], char cs[charsize][charsize])
 {
     printf("autos are here: \n");
-    PrintAutoTwoD(ns);
-    printf("------------------------------------------------\n");
     FillAutoTwoD(ns, 10);
     PrintAutoTwoD(ns);
     printf("------------------------------------------------\n");
     printf("characters are here: \n");
-    PrintCharTwoD(cs);
-    printf("------------------------------------------------\n");
     FillCharTwoD(cs, 0);
     PrintCharTwoD(cs);
     printf("------------------------------------------------\n");
