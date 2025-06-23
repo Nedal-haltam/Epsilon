@@ -1,33 +1,39 @@
 
 
-EXAMPLES_SRC_PATH=./examples/src
-EXAMPLES_RISCV_ASSEMBLY=./examples/risc-v
-EXAMPLES_RISCV_BIN=./examples/risc-v/bin
+EXAMPLES_SRC_PATH := ./examples/src
+EXAMPLES_RISCV_ASSEMBLY := ./examples/risc-v
+EXAMPLES_RISCV_BIN := ./examples/risc-v/bin
 
-TESTS_SRC_PATH=./tests/src
-TESTS_RISCV_ASSEMBLY=./tests/risc-v
-TESTS_RISCV_BIN=./tests/risc-v/bin
+TESTS_SRC_PATH := ./tests/src
+TESTS_RISCV_ASSEMBLY := ./tests/risc-v
+TESTS_RISCV_BIN := ./tests/risc-v/bin
+
+SAVED_OUTPUT_PATH := ./SavedOutput.txt
 
 .PHONY:	all build-main run-main main \
 		examples build-examples run-examples \
 		tests build-tests run-tests \
-		clean clean-examples clean-tests
+		reset clean clean-examples clean-tests
 
-all: tests examples
+all: reset tests examples
 	@echo "✅ Built successfully."
 
 
 build-main:
 	dotnet ./bin/Debug/net8.0/Epsilon.dll ./main.e -o ./main.S
 
-run-main:
+run-main: reset
 	riscv64-linux-gnu-gcc -o ./main ./main.S -static
-	qemu-riscv64 ./main
+	@if [ "$(LOG_TO_FILE)" = "1" ]; then \
+		script -q -a -c "qemu-riscv64 ./main" $(SAVED_OUTPUT_PATH);  \
+	else \
+		qemu-riscv64 ./main; \
+	fi;
 
 main: build-main run-main
 	@echo "✅ Built main successfully."
 
-EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 ProjectEuler_004 # ProjectEuler_005
+EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 ProjectEuler_004 ProjectEuler_005
 
 build-examples: clean-examples
 	@for ex in $(EXAMPLES); do \
@@ -40,7 +46,11 @@ run-examples:
 		echo "-------------------------------------------------------------------"; \
 		echo "Building and running $$ex..."; \
 		riscv64-linux-gnu-gcc -o $(EXAMPLES_RISCV_BIN)/$$ex $(EXAMPLES_RISCV_ASSEMBLY)/$$ex.S -static || exit 1; \
-		qemu-riscv64 $(EXAMPLES_RISCV_BIN)/$$ex || exit 1; \
+		if [ "$(LOG_TO_FILE)" = "1" ]; then \
+			script -q -a -c "qemu-riscv64 $(EXAMPLES_RISCV_BIN)/$$ex" $(SAVED_OUTPUT_PATH) || exit 1; \
+		else \
+			qemu-riscv64 $(EXAMPLES_RISCV_BIN)/$$ex || exit 1; \
+		fi; \
 	done
 
 examples: build-examples run-examples
@@ -59,7 +69,11 @@ run-tests:
 		echo "-------------------------------------------------------------------"; \
 		echo "Building and running $$ex..."; \
 		riscv64-linux-gnu-gcc -o $(TESTS_RISCV_BIN)/$$ex $(TESTS_RISCV_ASSEMBLY)/$$ex.S -static || exit 1; \
-		qemu-riscv64 $(TESTS_RISCV_BIN)/$$ex || exit 1; \
+		if [ "$(LOG_TO_FILE)" = "1" ]; then \
+			script -q -a -c "qemu-riscv64 $(TESTS_RISCV_BIN)/$$ex" $(SAVED_OUTPUT_PATH) || exit 1; \
+		else \
+			qemu-riscv64 $(TESTS_RISCV_BIN)/$$ex || exit 1; \
+		fi; \
 	done
 
 tests: build-tests run-tests
@@ -78,3 +92,7 @@ clean-tests:
 
 clean: clean-examples clean-tests
 	@echo "🧹 Cleaning up all"
+
+reset:
+	rm -rf $(SAVED_OUTPUT_PATH)
+	touch $(SAVED_OUTPUT_PATH)
