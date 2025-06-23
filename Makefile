@@ -27,7 +27,7 @@ run-main:
 main: build-main run-main
 	@echo "✅ Built main successfully."
 
-EXAMPLES := HelloWorld GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 ProjectEuler_004
+EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 ProjectEuler_004 # ProjectEuler_005
 
 build-examples: clean-examples
 	@for ex in $(EXAMPLES); do \
@@ -46,7 +46,7 @@ run-examples:
 examples: build-examples run-examples
 
 
-TESTS := Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc
+TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc
 
 build-tests: clean-tests
 	@for ex in $(TESTS); do \
