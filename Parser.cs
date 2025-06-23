@@ -117,7 +117,19 @@ namespace Epsilon
                 term.Negative = true;
                 Consume();
             }
-            if (Peek(TokenType.IntLit).HasValue)
+            if (Peek(TokenType.ExclamationMark).HasValue)
+            {
+                Consume();
+                NodeExpr expr = ExpectedExpression(ParseExpr());
+                term.type = NodeTerm.NodeTermType.unary;
+                term.unary = new()
+                {
+                    type = NodeTermUnaryExpr.NodeTermUnaryExprType.not,
+                    expr = expr,
+                };
+                return term;
+            }
+            else if (Peek(TokenType.IntLit).HasValue)
             {
                 term.type = NodeTerm.NodeTermType.IntLit;
                 term.intlit = new()

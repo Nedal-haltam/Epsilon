@@ -24,6 +24,8 @@ namespace Epsilon
         Equal,
         SemiColon,
 
+        ExclamationMark,
+
         Plus,
         Minus,
         Mul,
@@ -345,60 +347,65 @@ namespace Epsilon
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Comma, Line = line});
                 }
+                else if (Peek('!').HasValue)
+                {
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.ExclamationMark, Line = line});
+                }
                 else if (Peek('+').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Plus, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Plus, Line = line });
                 }
                 else if (Peek('*').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Mul, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Mul, Line = line });
                 }
                 else if (Peek('%').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Rem, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Rem, Line = line });
                 }
                 else if (Peek('/').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Div, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Div, Line = line });
                 }
                 else if (Peek('-').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Minus, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Minus, Line = line });
                 }
                 else if (Peek('&').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.And, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.And, Line = line });
                 }
                 else if (Peek('|').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Or, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Or, Line = line });
                 }
                 else if (Peek('^').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Xor, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Xor, Line = line });
                 }
                 else if (Peek('<').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.LessThan, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.LessThan, Line = line });
                 }
                 else if (Peek('=').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Equal , Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Equal, Line = line });
                 }
                 else if (Peek(';').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.SemiColon, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.SemiColon, Line = line });
                 }
                 else if (curr_token == '\n')
                 {

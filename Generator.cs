@@ -211,7 +211,17 @@ namespace Epsilon
         }
         void GenTerm(NodeTerm term, string? DestReg, int size)
         {
-            if (term.type == NodeTerm.NodeTermType.IntLit)
+            if (term.type == NodeTerm.NodeTermType.unary)
+            {
+                string reg = DestReg ?? m_FirstTempReg;
+                GenExpr(term.unary.expr, reg, size);
+                m_outputcode.AppendLine($"    NOT {reg}, {reg}");
+                if (term.Negative)
+                    m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
+                if (DestReg == null)
+                    GenPush(reg, size);
+            }
+            else if (term.type == NodeTerm.NodeTermType.IntLit)
             {
                 string reg = DestReg ?? m_FirstTempReg;
                 string sign = (term.Negative) ? "-" : "";

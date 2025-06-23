@@ -245,7 +245,7 @@ namespace Epsilon
     {
         public enum NodeTermType
         {
-            IntLit, StringLit, FunctionCall, Ident, Paren
+            IntLit, StringLit, FunctionCall, Ident, Paren, unary
         }
         public NodeTermType type;
         public bool Negative;
@@ -254,6 +254,16 @@ namespace Epsilon
         public NodeTermFunctionCall functioncall;
         public NodeTermIdent ident;
         public NodeTermParen paren;
+        public NodeTermUnaryExpr unary;
+    }
+    public class NodeTermUnaryExpr
+    {
+        public enum NodeTermUnaryExprType
+        {
+            not,
+        }
+        public NodeTermUnaryExprType type;
+        public NodeExpr expr;
     }
     public struct NodeTermIntLit
     {
