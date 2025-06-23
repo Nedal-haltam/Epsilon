@@ -16,34 +16,39 @@ namespace Epsilon
         public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
         public List<string> STD_FUNCTIONS = ["exit", "strlen", "itoa", "printf"];
 
-        public static string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
+        public static string GetImmedOperation(string imm1, bool isneg1, string imm2, bool isneg2, NodeBinExpr.NodeBinExprType op)
         {
+            Int64 a = Convert.ToInt64(imm1);
+            if (isneg1) a = -a;
+            Int64 b = Convert.ToInt32(imm2);
+            if (isneg2) b = -b;
+
             if (op == NodeBinExpr.NodeBinExprType.Add)
-                return (Convert.ToInt32(imm1) + Convert.ToInt32(imm2)).ToString();
+                return (a + b).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.Sub)
-                return (Convert.ToInt32(imm1) - Convert.ToInt32(imm2)).ToString();
+                return (a - b).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.Sll)
-                return (Convert.ToInt32(imm1) << Convert.ToInt32(imm2)).ToString();
+                return (a << (Int32)b).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.Srl)
-                return (Convert.ToInt32(imm1) >> Convert.ToInt32(imm2)).ToString();
+                return (a >> (Int32)b).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.EqualEqual)
-                return (Convert.ToInt32(imm1) == Convert.ToInt32(imm2) ? 1 : 0).ToString();
+                return (a == b ? 1 : 0).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.NotEqual)
-                return (Convert.ToInt32(imm1) != Convert.ToInt32(imm2) ? 1 : 0).ToString();
+                return (a != b ? 1 : 0).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.LessThan)
-                return (Convert.ToInt32(imm1) < Convert.ToInt32(imm2) ? 1 : 0).ToString();
+                return (a < b ? 1 : 0).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.And)
-                return (Convert.ToInt32(imm1) & Convert.ToInt32(imm2)).ToString();
+                return (a & b).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.Or)
-                return (Convert.ToInt32(imm1) | Convert.ToInt32(imm2)).ToString();
+                return (a | b).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.Xor)
-                return (Convert.ToInt32(imm1) ^ Convert.ToInt32(imm2)).ToString();
+                return (a ^ b).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.Mul)
-                return (Convert.ToInt32(imm1) * Convert.ToInt32(imm2)).ToString();
+                return (a * b).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.Div)
-                return (Convert.ToInt32(imm1) / Convert.ToInt32(imm2)).ToString();
+                return (a / b).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.Rem)
-                return (Convert.ToInt32(imm1) % Convert.ToInt32(imm2)).ToString();
+                return (a % b).ToString();
             Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid operation `{op}`\n", 1);
             return "";
         }
@@ -293,7 +298,7 @@ namespace Epsilon
                     {
                         string constant1 = expr.lhs.term.intlit.intlit.Value;
                         string constant2 = expr.rhs.term.intlit.intlit.Value;
-                        string value = GetImmedOperation(constant1, constant2, expr.type);
+                        string value = GetImmedOperation(constant1, expr.lhs.term.Negative, constant2, expr.rhs.term.Negative, expr.type);
                         exprlhs = NodeExpr.Number(value, expr.lhs.term.intlit.intlit.Line);
                     }
                     else
