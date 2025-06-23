@@ -96,3 +96,13 @@ clean: clean-examples clean-tests
 reset:
 	rm -rf $(SAVED_OUTPUT_PATH)
 	touch $(SAVED_OUTPUT_PATH)
+
+diff-diff:
+	rm -rf logs
+	mkdir logs
+	rm -rf ./SavedOutput2.txt
+	touch ./SavedOutput2.txt
+	make LOG_TO_FILE=1 SAVED_OUTPUT_PATH=./SavedOutput2.txt
+	col -b < SavedOutput.txt > logs/SavedOutput.txt
+	col -b < SavedOutput2.txt > logs/SavedOutput2.txt
+	diff -a --suppress-common-lines --color=always logs/SavedOutput.txt logs/SavedOutput2.txt
