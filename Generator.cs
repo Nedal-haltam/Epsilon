@@ -213,13 +213,20 @@ namespace Epsilon
         {
             if (term.type == NodeTerm.NodeTermType.unary)
             {
-                string reg = DestReg ?? m_FirstTempReg;
-                GenExpr(term.unary.expr, reg, size);
-                m_outputcode.AppendLine($"    NOT {reg}, {reg}");
-                if (term.Negative)
-                    m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
-                if (DestReg == null)
-                    GenPush(reg, size);
+                if (term.unary.type == NodeTermUnaryExpr.NodeTermUnaryExprType.not)
+                {
+                    string reg = DestReg ?? m_FirstTempReg;
+                    GenExpr(term.unary.expr, reg, size);
+                    m_outputcode.AppendLine($"    SEQZ {reg}, {reg}");
+                    if (term.Negative)
+                        m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
+                    if (DestReg == null)
+                        GenPush(reg, size);
+                }
+                else
+                {
+                    Shartilities.UNREACHABLE("invalid unary oprator");
+                }
             }
             else if (term.type == NodeTerm.NodeTermType.IntLit)
             {

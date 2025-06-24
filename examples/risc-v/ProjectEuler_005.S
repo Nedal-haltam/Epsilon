@@ -13,7 +13,7 @@ main:
 TEMP_LABEL0_START:
 ########## found
     LD t0, 8(sp)
-    NOT t0, t0
+    SEQZ t0, t0
     BEQZ t0, TEMP_LABEL1_END
 # end condition
 # begin scope
@@ -26,7 +26,7 @@ TEMP_LABEL0_START:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 0(sp)
-    LI t0, -1
+    LI t0, 1
     SD t0, 8(sp)
 # begin forloop
 # begin scope

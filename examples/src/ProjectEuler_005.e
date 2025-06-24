@@ -5,7 +5,7 @@ func main()
     while(!found)
     {
         i = i + 1;
-        found = -1;
+        found = 1;
         for (auto j = 1; j < 21; j = j + 1)
         {
             if (i % j != 0)
