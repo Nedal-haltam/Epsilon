@@ -216,7 +216,7 @@ namespace Epsilon
                 if (term.unary.type == NodeTermUnaryExpr.NodeTermUnaryExprType.not)
                 {
                     string reg = DestReg ?? m_FirstTempReg;
-                    GenExpr(term.unary.expr, reg, size);
+                    GenTerm(term.unary.term, reg, size);
                     m_outputcode.AppendLine($"    SEQZ {reg}, {reg}");
                     if (term.Negative)
                         m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");

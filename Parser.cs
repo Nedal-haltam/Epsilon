@@ -125,12 +125,14 @@ namespace Epsilon
             if (Peek(TokenType.ExclamationMark).HasValue)
             {
                 Consume();
-                NodeExpr expr = ExpectedExpression(ParseExpr());
+                NodeTerm? termunary = ParseTerm();
+                if (!termunary.HasValue)
+                    return null;
                 term.type = NodeTerm.NodeTermType.unary;
                 term.unary = new()
                 {
                     type = NodeTermUnaryExpr.NodeTermUnaryExprType.not,
-                    expr = expr,
+                    term = termunary.Value,
                 };
                 return term;
             }

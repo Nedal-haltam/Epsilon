@@ -263,7 +263,7 @@ namespace Epsilon
             not,
         }
         public NodeTermUnaryExprType type;
-        public NodeExpr expr;
+        public NodeTerm term;
     }
     public struct NodeTermIntLit
     {
