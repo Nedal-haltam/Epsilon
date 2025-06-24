@@ -25,6 +25,7 @@ namespace Epsilon
         SemiColon,
 
         ExclamationMark,
+        tilde,
 
         Plus,
         Minus,
@@ -351,6 +352,11 @@ namespace Epsilon
                 {
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.ExclamationMark, Line = line});
+                }
+                else if (Peek('~').HasValue)
+                {
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.tilde, Line = line});
                 }
                 else if (Peek('+').HasValue)
                 {

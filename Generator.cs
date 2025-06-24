@@ -223,6 +223,16 @@ namespace Epsilon
                     if (DestReg == null)
                         GenPush(reg, size);
                 }
+                else if (term.unary.type == NodeTermUnaryExpr.NodeTermUnaryExprType.not)
+                {
+                    string reg = DestReg ?? m_FirstTempReg;
+                    GenTerm(term.unary.term, reg, size);
+                    m_outputcode.AppendLine($"    NOT {reg}, {reg}");
+                    if (term.Negative)
+                        m_outputcode.AppendLine($"    SUB {reg}, zero, {reg}");
+                    if (DestReg == null)
+                        GenPush(reg, size);
+                }
                 else
                 {
                     Shartilities.UNREACHABLE("invalid unary oprator");
