@@ -213,7 +213,7 @@ namespace Epsilon
         {
             if (term.type == NodeTerm.NodeTermType.unary)
             {
-                if (term.unary.type == NodeTermUnaryExpr.NodeTermUnaryExprType.not)
+                if (term.unary.type == NodeTermUnaryExpr.NodeTermUnaryExprType.negate)
                 {
                     string reg = DestReg ?? m_FirstTempReg;
                     GenTerm(term.unary.term, reg, size);

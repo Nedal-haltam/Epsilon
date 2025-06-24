@@ -131,7 +131,7 @@ namespace Epsilon
                 term.type = NodeTerm.NodeTermType.unary;
                 term.unary = new()
                 {
-                    type = NodeTermUnaryExpr.NodeTermUnaryExprType.not,
+                    type = NodeTermUnaryExpr.NodeTermUnaryExprType.negate,
                     term = termunary.Value,
                 };
                 return term;
