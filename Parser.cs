@@ -15,7 +15,7 @@ namespace Epsilon
         private int m_curr_index = 0;
         public Dictionary<string, List<uint>> DimensionsOfArrays = [];
         public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
-        public List<string> STD_FUNCTIONS = ["exit", "strlen", "itoa", "printf"];
+        public List<string> STD_FUNCTIONS = ["strlen", "itoa", "write"];
 
         public string GetImmedOperation(string imm1, bool isneg1, string imm2, bool isneg2, NodeBinExpr.NodeBinExprType op)
         {
@@ -816,27 +816,7 @@ namespace Epsilon
                         FunctionName = CalledFunctionName,
                         parameters = []
                     };
-                    if (CalledFunctionName.Value == "printf")
-                    {
-                        TryConsumeError(TokenType.OpenParen);
-                        List<NodeExpr> parameters = [];
-                        if (!Peek(TokenType.CloseParen).HasValue)
-                            do
-                            {
-                                NodeExpr expr = ExpectedExpression(ParseExpr());
-                                parameters.Add(expr);
-                            } while (PeekAndConsume(TokenType.Comma).HasValue);
-                        TryConsumeError(TokenType.CloseParen);
-                        TryConsumeError(TokenType.SemiColon);
-                        CalledFunction.parameters = parameters;
-                        NodeStmt stmt = new()
-                        {
-                            type = NodeStmt.NodeStmtType.Function,
-                            CalledFunction = CalledFunction
-                        };
-                        return [stmt];
-                    }
-                    else if (CalledFunctionName.Value == "strlen")
+                    if (CalledFunctionName.Value == "strlen")
                     {
                         TryConsumeError(TokenType.OpenParen);
                         NodeExpr StrlenParameter = ExpectedExpression(ParseExpr());
@@ -862,6 +842,26 @@ namespace Epsilon
                         // TODO: change the implementation of `itoa` to operate on the desired buffer no the default one (i.e. `itoaTempBuffer`)
                         Shartilities.TODO("calling itoa");
                         return [];
+                    }
+                    else if (CalledFunctionName.Value == "write")
+                    {
+                        TryConsumeError(TokenType.OpenParen);
+                        List<NodeExpr> parameters = [];
+                        if (!Peek(TokenType.CloseParen).HasValue)
+                            do
+                            {
+                                NodeExpr expr = ExpectedExpression(ParseExpr());
+                                parameters.Add(expr);
+                            } while (PeekAndConsume(TokenType.Comma).HasValue);
+                        TryConsumeError(TokenType.CloseParen);
+                        TryConsumeError(TokenType.SemiColon);
+                        CalledFunction.parameters = parameters;
+                        NodeStmt stmt = new()
+                        {
+                            type = NodeStmt.NodeStmtType.Function,
+                            CalledFunction = CalledFunction
+                        };
+                        return [stmt];
                     }
                     else
                     {

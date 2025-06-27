@@ -22,7 +22,7 @@ namespace Epsilon
             List<Token> TokenizedProgram = Tokenizer.Tokenize();
             Parser Parser = new(TokenizedProgram, InputFilePath);
             NodeProg ParsedProgram = Parser.ParseProg();
-            RISCVGenerator Generator = new(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath);
+            RISCVGenerator Generator = new(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
             StringBuilder GeneratedProgram = Generator.GenProg();
             if (OutputFilePath == null)
             {

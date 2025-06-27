@@ -16,7 +16,7 @@ namespace Epsilon
         public bool IsParameter = IsParameter;
         public bool IsArray = IsArray;
     }
-    class RISCVGenerator(NodeProg prog, Dictionary<string, NodeStmtFunction> UserDefinedFunctions, string InputFilePath)
+    class RISCVGenerator(NodeProg prog, Dictionary<string, NodeStmtFunction> UserDefinedFunctions, string InputFilePath, List<string> std_functions)
     {
         public readonly string m_FirstTempReg = "t0";
         public readonly string m_SecondTempReg = "t1";
@@ -37,7 +37,7 @@ namespace Epsilon
         public Stack<string?> m_scopeend = new();
         public List<Var> m_parameters = [];
         public string m_CurrentFunction = "NO_FUNCTION_NAME";
-        readonly List<string> STD_FUNCTIONS = ["exit", "strlen", "itoa", "printf"];
+        readonly List<string> STD_FUNCTIONS = std_functions;
 
 
         void GenPush(string reg, uint size)
@@ -809,7 +809,8 @@ namespace Epsilon
             m_DimensionsOfArrays = [];
             m_parameters = [];
 
-            m_outputcode.AppendLine($"{FunctionName}:");
+            if (FunctionName != "main")
+                m_outputcode.AppendLine($"{FunctionName}:");
             m_CurrentFunction = FunctionName;
             m_DimensionsOfArrays = m_UserDefinedFunctions[FunctionName].DimensionsOfArrays;
             m_parameters = m_UserDefinedFunctions[FunctionName].parameters;
@@ -943,18 +944,27 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    mv s0, t2");
                 m_outputcode.AppendLine($"    ret");
             }
+            if (m_CalledFunctions.Contains("write"))
+            {
+                m_outputcode.AppendLine($"write:");
+                m_outputcode.AppendLine($"    li a7, 64");
+                m_outputcode.AppendLine($"    ecall");
+                m_outputcode.AppendLine($"    ret");
+            }
         }
         public StringBuilder GenProg()
         {
+            string MainFunctionName = "main";
             m_outputcode.AppendLine($".section .text");
-            m_outputcode.AppendLine($".globl main");
+            m_outputcode.AppendLine($".globl {MainFunctionName}");
 
             if (!m_UserDefinedFunctions.ContainsKey("main"))
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n", 1);
             }
             // TODO: should resolve and generate global and keep them saved without resetting
-            GenFunctionDefinition(m_UserDefinedFunctions["main"].FunctionName.Value);
+            m_outputcode.AppendLine($"{MainFunctionName}:");
+            GenFunctionDefinition("main");
             for (int i = 0; i < m_CalledFunctions.Count; i++)
             {
                 if (m_UserDefinedFunctions.ContainsKey(m_CalledFunctions[i]))
@@ -977,7 +987,6 @@ namespace Epsilon
                 m_outputcode.AppendLine($"itoaTempBuffer:     ");
                 m_outputcode.AppendLine($"    .space 32");
             }
-            //m_outputcode.AppendLine($".extern printf");
             return m_outputcode;
         }
     }
