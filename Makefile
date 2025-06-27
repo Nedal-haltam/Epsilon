@@ -18,6 +18,8 @@ SAVED_OUTPUT_PATH := ./SavedOutput.txt
 all: reset tests examples
 	@echo "✅ Built successfully."
 
+build: build-examples build-tests
+
 build-main:
 	dotnet ./bin/Debug/net8.0/Epsilon.dll ./main.e -o ./main.S
 
@@ -49,7 +51,6 @@ run-examples:
 	done
 
 examples: build-examples run-examples
-
 
 TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc
 
