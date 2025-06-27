@@ -43,7 +43,7 @@ run-examples:
 		echo "-------------------------------------------------------------------"; \
 		echo "Building and running $$ex..."; \
 		riscv64-linux-gnu-gcc -o $(EXAMPLES_RISCV_BIN)/$$ex $(EXAMPLES_RISCV_ASSEMBLY)/$$ex.S -static || exit 1; \
-		if [ "$(LOG_TO_FILE)" = "1" ]; then \
+		if [ "$(LOG)" = "1" ]; then \
 			script -q -a -c "qemu-riscv64 $(EXAMPLES_RISCV_BIN)/$$ex" /dev/null | col -b >> $(SAVED_OUTPUT_PATH) 2>&1 || exit 1; \
 		else \
 			qemu-riscv64 $(EXAMPLES_RISCV_BIN)/$$ex || exit 1; \
@@ -65,7 +65,7 @@ run-tests:
 		echo "-------------------------------------------------------------------"; \
 		echo "Building and running $$ex..."; \
 		riscv64-linux-gnu-gcc -o $(TESTS_RISCV_BIN)/$$ex $(TESTS_RISCV_ASSEMBLY)/$$ex.S -static || exit 1; \
-		if [ "$(LOG_TO_FILE)" = "1" ]; then \
+		if [ "$(LOG)" = "1" ]; then \
 			script -q -a -c "qemu-riscv64 $(TESTS_RISCV_BIN)/$$ex" /dev/null | col -b >> $(SAVED_OUTPUT_PATH) 2>&1 || exit 1; \
 		else \
 			qemu-riscv64 $(TESTS_RISCV_BIN)/$$ex || exit 1; \
@@ -90,7 +90,7 @@ clean: clean-examples clean-tests
 	@echo "🧹 Cleaning up all"
 
 reset:
-	@if [ "$(LOG_TO_FILE)" = "1" ]; then \
+	@if [ "$(LOG)" = "1" ]; then \
 		rm -rf $(SAVED_OUTPUT_PATH); \
 		touch $(SAVED_OUTPUT_PATH); \
 	fi;
@@ -100,7 +100,7 @@ diff-diff:
 	mkdir logs
 	rm -rf ./SavedOutput2.txt
 	touch ./SavedOutput2.txt
-	make LOG_TO_FILE=1 SAVED_OUTPUT_PATH=./SavedOutput2.txt
+	make LOG=1 SAVED_OUTPUT_PATH=./SavedOutput2.txt
 	col -b < $(SAVED_OUTPUT_PATH) > logs/SavedOutput.txt
 	col -b < SavedOutput2.txt > logs/SavedOutput2.txt
 	diff -as --suppress-common-lines --color=always logs/SavedOutput.txt logs/SavedOutput2.txt
