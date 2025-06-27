@@ -17,6 +17,8 @@ namespace Epsilon
     {
         static void Compile(string InputFilePath, string? OutputFilePath = null)
         {
+            if (!File.Exists(InputFilePath))
+                Shartilities.Log(Shartilities.LogType.ERROR, $"file `{InputFilePath}` doesn't exists\n", 1);
             string InputCode = File.ReadAllText(InputFilePath);
             Tokenizer Tokenizer = new(InputCode, InputFilePath);
             List<Token> TokenizedProgram = Tokenizer.Tokenize();

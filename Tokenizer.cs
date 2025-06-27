@@ -114,7 +114,11 @@ namespace Epsilon
         }
         char Consume()
         {
-            return m_thecode.ElementAt(m_curr_index++);
+            if (Peek().HasValue)
+                return m_thecode.ElementAt(m_curr_index++);
+            else
+                Shartilities.Log(Shartilities.LogType.ERROR, $"reached the end of the file\n", 1);
+            return ' ';
         }
         string ConsumeMany(int ConsumeLength)
         {
@@ -244,6 +248,24 @@ namespace Epsilon
                     }
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.IntLit, Line = line });
                     buffer.Clear();
+                }
+                else if (Peek("#include "))
+                {
+                    ConsumeMany(8);
+                    SkipUntilNot(' ');
+                    if (!Peek('\"').HasValue) 
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: expected `\"`\n", 1);
+                    Consume();
+                    buffer.Append(ConsumeUntil('\"'));
+                    Consume();
+                    string IncludeFilePath = buffer.ToString();
+                    if (!File.Exists(IncludeFilePath)) 
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: file `{IncludeFilePath}` doesn't exists\n", 1);
+                    string FileContent = File.ReadAllText(IncludeFilePath);
+                    Tokenizer temp = new(FileContent, IncludeFilePath);
+
+                    List<Token> FileContentTokenized = temp.Tokenize();
+                    m_tokens.AddRange(FileContentTokenized);
                 }
                 else if (Peek("#define "))
                 {
