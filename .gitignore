@@ -8,5 +8,5 @@ main.e
 /examples/risc-v/bin
 /tests/risc-v/bin
 /logs
-SavedOutput.txt
+!SavedOutput.txt
 SavedOutput2.txt
