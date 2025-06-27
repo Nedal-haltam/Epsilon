@@ -13,11 +13,10 @@ SAVED_OUTPUT_PATH := ./SavedOutput.txt
 .PHONY:	all build-main run-main main \
 		examples build-examples run-examples \
 		tests build-tests run-tests \
-		reset clean clean-examples clean-tests
+		reset clean clean-examples clean-tests diff-diff update
 
 all: reset tests examples
 	@echo "✅ Built successfully."
-
 
 build-main:
 	dotnet ./bin/Debug/net8.0/Epsilon.dll ./main.e -o ./main.S

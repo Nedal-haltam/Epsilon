@@ -556,27 +556,13 @@ TEMP_LABEL27_START:
 # begin forloop
 # begin scope
 # begin init
-    LI t0, 1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## i
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SUB t0, t0, t1
+    LI t0, -1
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end init
 # begin condition
 TEMP_LABEL30_START:
     LI t0, 2
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## i
-    LD t0, 32(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## dx
@@ -590,27 +576,13 @@ TEMP_LABEL30_START:
 # begin forloop
 # begin scope
 # begin init
-    LI t0, 1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## j
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SUB t0, t0, t1
+    LI t0, -1
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # end init
 # begin condition
 TEMP_LABEL33_START:
     LI t0, 2
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## j
-    LD t0, 32(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## dy
@@ -622,116 +594,76 @@ TEMP_LABEL33_START:
 # end condition
 # begin scope
 LABEL36_START:
-########## j
-    LD t0, 24(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
 ########## dy
-    LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SNEZ t0, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## i
-    LD t0, 40(sp)
+    LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## dx
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SNEZ t0, t0
+    LD t0, 16(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
     OR t0, t0, t1
     BEQZ t0, LABEL38_elifs
 # begin scope
+    LI t0, 5
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 5
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 5
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## i
+    LD t0, 56(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
 ########## dx
-    LD t0, 8(sp)
+    LD t0, 40(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    rem t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    rem t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 5
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 5
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 5
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## j
+    LD t0, 56(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## dy
-    LD t0, 8(sp)
+    LD t0, 40(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    rem t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    rem t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
 LABEL39_START:
-    LI t0, -1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## dx
-    LD t0, 32(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    BEQZ t0, LABEL41_elifs
-# begin scope
-    LI t0, 4
-    SD t0, 8(sp)
-# end scope
-    J LABEL40_END
-LABEL41_elifs:
-# begin scope
-LABEL42_START:
-    LI t0, 5
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## dx
-    LD t0, 32(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    BEQZ t0, LABEL44_elifs
-# begin scope
-    LI t0, 0
-    SD t0, 8(sp)
-# end scope
-LABEL44_elifs:
-LABEL43_END:
-# end scope
-LABEL40_END:
-LABEL45_START:
-    LI t0, -1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## dy
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    BEQZ t0, LABEL47_elifs
-# begin scope
-    LI t0, 4
-    SD t0, 0(sp)
-# end scope
-    J LABEL46_END
-LABEL47_elifs:
-# begin scope
-LABEL48_START:
-    LI t0, 5
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## dy
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    BEQZ t0, LABEL50_elifs
-# begin scope
-    LI t0, 0
-    SD t0, 0(sp)
-# end scope
-LABEL50_elifs:
-LABEL49_END:
-# end scope
-LABEL46_END:
-LABEL51_START:
 ########## grid
 # begin array address
 ########## indexy
@@ -763,7 +695,7 @@ LABEL51_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     LD t0, 0(t1)
-    BEQZ t0, LABEL53_elifs
+    BEQZ t0, LABEL41_elifs
 # begin scope
     LI t0, 1
     ADDI sp, sp, -8
@@ -775,8 +707,8 @@ LABEL51_START:
     ADD t0, t0, t1
     SD t0, 32(sp)
 # end scope
-LABEL53_elifs:
-LABEL52_END:
+LABEL41_elifs:
+LABEL40_END:
 # end scope
     ADDI sp, sp, 16
 LABEL38_elifs:
@@ -817,7 +749,7 @@ TEMP_LABEL31_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
-LABEL54_START:
+LABEL42_START:
 ########## grid
 # begin array address
 ########## j
@@ -849,9 +781,9 @@ LABEL54_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     LD t0, 0(t1)
-    BEQZ t0, LABEL56_elifs
+    BEQZ t0, LABEL44_elifs
 # begin scope
-LABEL57_START:
+LABEL45_START:
     LI t0, 3
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -875,7 +807,7 @@ LABEL57_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
-    BEQZ t0, LABEL59_elifs
+    BEQZ t0, LABEL47_elifs
 # begin scope
 # begin array address
 ########## j
@@ -909,13 +841,13 @@ LABEL57_START:
     ADDI sp, sp, 8
     SD t1, 0(t0)
 # end scope
-LABEL59_elifs:
-LABEL58_END:
+LABEL47_elifs:
+LABEL46_END:
 # end scope
-    J LABEL55_END
-LABEL56_elifs:
+    J LABEL43_END
+LABEL44_elifs:
 # begin scope
-LABEL60_START:
+LABEL48_START:
     LI t0, 3
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -925,7 +857,7 @@ LABEL60_START:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SEQZ t0, t0
-    BEQZ t0, LABEL62_elifs
+    BEQZ t0, LABEL50_elifs
 # begin scope
 # begin array address
 ########## j
@@ -959,10 +891,10 @@ LABEL60_START:
     ADDI sp, sp, 8
     SD t1, 0(t0)
 # end scope
-LABEL62_elifs:
-LABEL61_END:
+LABEL50_elifs:
+LABEL49_END:
 # end scope
-LABEL55_END:
+LABEL43_END:
 # end scope
     ADDI sp, sp, 8
 # begin update
@@ -1038,7 +970,7 @@ SlowDown:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL63_START:
+TEMP_LABEL51_START:
     LI t0, 1000
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1047,7 +979,7 @@ TEMP_LABEL63_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL64_END
+    BEQZ t0, TEMP_LABEL52_END
 # end condition
 # begin scope
 # begin forloop
@@ -1058,7 +990,7 @@ TEMP_LABEL63_START:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL66_START:
+TEMP_LABEL54_START:
     LI t0, 1000
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1067,7 +999,7 @@ TEMP_LABEL66_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL67_END
+    BEQZ t0, TEMP_LABEL55_END
 # end condition
 # begin scope
 # begin forloop
@@ -1078,7 +1010,7 @@ TEMP_LABEL66_START:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL69_START:
+TEMP_LABEL57_START:
     LI t0, 25
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1087,12 +1019,12 @@ TEMP_LABEL69_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL70_END
+    BEQZ t0, TEMP_LABEL58_END
 # end condition
 # begin scope
 # end scope
 # begin update
-TEMP_LABEL71_START:
+TEMP_LABEL59_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1103,14 +1035,14 @@ TEMP_LABEL71_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL69_START
-TEMP_LABEL70_END:
+    J TEMP_LABEL57_START
+TEMP_LABEL58_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
 # end scope
 # begin update
-TEMP_LABEL68_START:
+TEMP_LABEL56_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1121,14 +1053,14 @@ TEMP_LABEL68_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL66_START
-TEMP_LABEL67_END:
+    J TEMP_LABEL54_START
+TEMP_LABEL55_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
 # end scope
 # begin update
-TEMP_LABEL65_START:
+TEMP_LABEL53_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1139,8 +1071,8 @@ TEMP_LABEL65_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL63_START
-TEMP_LABEL64_END:
+    J TEMP_LABEL51_START
+TEMP_LABEL52_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
@@ -1163,7 +1095,7 @@ Copy:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL72_START:
+TEMP_LABEL60_START:
     LI t0, 5
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1172,7 +1104,7 @@ TEMP_LABEL72_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL73_END
+    BEQZ t0, TEMP_LABEL61_END
 # end condition
 # begin scope
 # begin forloop
@@ -1183,7 +1115,7 @@ TEMP_LABEL72_START:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL75_START:
+TEMP_LABEL63_START:
     LI t0, 5
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1192,7 +1124,7 @@ TEMP_LABEL75_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL76_END
+    BEQZ t0, TEMP_LABEL64_END
 # end condition
 # begin scope
 # begin array address
@@ -1258,7 +1190,7 @@ TEMP_LABEL75_START:
     SD t1, 0(t0)
 # end scope
 # begin update
-TEMP_LABEL77_START:
+TEMP_LABEL65_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1269,14 +1201,14 @@ TEMP_LABEL77_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL75_START
-TEMP_LABEL76_END:
+    J TEMP_LABEL63_START
+TEMP_LABEL64_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
 # end scope
 # begin update
-TEMP_LABEL74_START:
+TEMP_LABEL62_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1287,8 +1219,8 @@ TEMP_LABEL74_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL72_START
-TEMP_LABEL73_END:
+    J TEMP_LABEL60_START
+TEMP_LABEL61_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop

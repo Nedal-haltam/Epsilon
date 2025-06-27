@@ -78,23 +78,14 @@ func main()
             for (auto j = 0; j < SIZE; j = j + 1)
             {
                 auto live = 0;
-                for (auto dx = i - 1; dx < i + 2; dx = dx + 1)
+                for (auto dx = -1; dx < 2; dx = dx + 1)
                 {
-                    for (auto dy = j - 1; dy < j + 2; dy = dy + 1)
+                    for (auto dy = -1; dy < 2; dy = dy + 1)
                     {
-                        if ((dx != i) | (dy != j))
+                        if (dx | dy)
                         {
-                            auto indexx = dx;
-                            auto indexy = dy;
-                            if (dx == -1)
-                                indexx = SIZE - 1;
-                            else if (dx == SIZE)
-                                indexx = 0;
-                            if (dy == -1)
-                                indexy = SIZE - 1;
-                            else if (dy == SIZE)
-                                indexy = 0;
-                            
+                            auto indexx = (((dx + i) % SIZE) + SIZE) % SIZE;
+                            auto indexy = (((dy + j) % SIZE) + SIZE) % SIZE;
                             if (grid[indexx][indexy])
                                 live = live + 1;
                         }
