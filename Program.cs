@@ -18,11 +18,11 @@ namespace Epsilon
         static void Compile(string InputFilePath, string? OutputFilePath = null)
         {
             string InputCode = File.ReadAllText(InputFilePath);
-            Tokenizer Tokenizer = new(InputCode);
+            Tokenizer Tokenizer = new(InputCode, InputFilePath);
             List<Token> TokenizedProgram = Tokenizer.Tokenize();
-            Parser Parser = new(TokenizedProgram);
+            Parser Parser = new(TokenizedProgram, InputFilePath);
             NodeProg ParsedProgram = Parser.ParseProg();
-            RISCVGenerator Generator = new(ParsedProgram, Parser.DimensionsOfArrays, Parser.UserDefinedFunctions);
+            RISCVGenerator Generator = new(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath);
             StringBuilder GeneratedProgram = Generator.GenProg();
             if (OutputFilePath == null)
             {

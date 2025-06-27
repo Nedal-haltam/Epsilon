@@ -8,15 +8,15 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Epsilon
 {
-    public struct Var(string value, int size, int TypeSize, bool IsArray, bool IsParameter)
+    public struct Var(string value, uint size, uint TypeSize, bool IsArray, bool IsParameter)
     {                                                     
-        public int TypeSize { get; set; } = TypeSize;
+        public uint TypeSize { get; set; } = TypeSize;
         public string Value { get; set; } = value;
-        public int Size { get; set; } = size;
+        public uint Size { get; set; } = size;
         public bool IsParameter = IsParameter;
         public bool IsArray = IsArray;
     }
-    class RISCVGenerator(NodeProg prog, Dictionary<string, List<NodeTermIntLit>> Arraydims, Dictionary<string, NodeStmtFunction> UserDefinedFunctions)
+    class RISCVGenerator(NodeProg prog, Dictionary<string, NodeStmtFunction> UserDefinedFunctions, string InputFilePath)
     {
         public readonly string m_FirstTempReg = "t0";
         public readonly string m_SecondTempReg = "t1";
@@ -25,13 +25,14 @@ namespace Epsilon
         public readonly List<string> m_CalledFunctions = [];
         public List<string> m_StringLits = [];
 
+        private readonly string m_inputFilePath = InputFilePath;
         public NodeProg m_prog = prog;
         public Dictionary<string, NodeStmtFunction> m_UserDefinedFunctions = UserDefinedFunctions;
 
-        public Dictionary<string, List<NodeTermIntLit>> m_DimensionsOfArrays = Arraydims;
+        public Dictionary<string, List<uint>> m_DimensionsOfArrays = [];
         public List<Var> m_vars = [];
         public Stack<int> m_scopes = [];
-        public int m_StackSize;
+        public uint m_StackSize;
         public Stack<string?> m_scopestart = new();
         public Stack<string?> m_scopeend = new();
         public List<Var> m_parameters = [];
@@ -39,7 +40,7 @@ namespace Epsilon
         readonly List<string> STD_FUNCTIONS = ["exit", "strlen", "itoa", "printf"];
 
 
-        void GenPush(string reg, int size)
+        void GenPush(string reg, uint size)
         {
             m_outputcode.AppendLine($"    ADDI sp, sp, -{size}");
             if (size == 1)
@@ -57,10 +58,10 @@ namespace Epsilon
             {
                 m_outputcode.AppendLine($"    SD {regs[i]}, {8 * i}(sp)");
             }
-            m_StackSize += 8 * regs.Count;
+            m_StackSize += (uint)(8 * regs.Count);
         }
 
-        void GenPop(string reg, int size)
+        void GenPop(string reg, uint size)
         {
             if (size == 1)
                 m_outputcode.AppendLine($"    LB {reg}, 0(sp)");
@@ -78,9 +79,9 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    LD {regs[regs.Count - i - 1]}, {8 * (regs.Count - i - 1)}(sp)");
             }
             m_outputcode.AppendLine($"    ADDI sp, sp, {regs.Count * 8}");
-            m_StackSize -= 8 * regs.Count;
+            m_StackSize -= (uint)(8 * regs.Count);
         }
-        void StackPopEndScope(int popcount)
+        void StackPopEndScope(uint popcount)
         {
             if (popcount != 0)
             {
@@ -106,7 +107,7 @@ namespace Epsilon
             int Vars_topop = m_vars.Count - m_scopes.Pop();
             int i = m_vars.Count - 1;
             int iterations = Vars_topop;
-            int popcount = 0;
+            uint popcount = 0;
             while (iterations-- > 0)
             {
                 popcount += m_vars[i--].Size;
@@ -124,9 +125,9 @@ namespace Epsilon
             }
             EndScope();
         }
-        int VariableLocation(string name)
+        uint VariableLocation(string name)
         {
-            int size = 0;
+            uint size = 0;
             int index = m_vars.FindIndex(x => x.Value == name);
             for (int i = 0; i < index; i++)
             {
@@ -137,11 +138,11 @@ namespace Epsilon
             }
             return size;
         }
-        static NodeExpr GenIndexExprMult(ref List<NodeExpr> indexes, ref List<NodeTermIntLit> dims, int i)
+        static NodeExpr GenIndexExprMult(ref List<NodeExpr> indexes, ref List<uint> dims, int i)
         {
             if (i == dims.Count - 1)
             {
-                return NodeExpr.Number(dims[^1].intlit.Value, -1);
+                return NodeExpr.Number(dims[^1].ToString(), -1);
             }
             return new()
             {
@@ -149,12 +150,12 @@ namespace Epsilon
                 binexpr = new()
                 {
                     type = NodeBinExpr.NodeBinExprType.Mul,
-                    lhs = NodeExpr.Number(dims[i].intlit.Value, -1),
+                    lhs = NodeExpr.Number(dims[i].ToString(), -1),
                     rhs = GenIndexExprMult(ref indexes, ref dims, i + 1),
                 },
             };
         }
-        static NodeExpr GenIndexExpr(ref List<NodeExpr> indexes, ref List<NodeTermIntLit> dims, int i)
+        static NodeExpr GenIndexExpr(ref List<NodeExpr> indexes, ref List<uint> dims, int i)
         {
             if (i == dims.Count - 1)
             {
@@ -172,7 +173,7 @@ namespace Epsilon
             NodeExpr rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
             return NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Add, lhs, rhs);
         }
-        void GenArrayAddrFrom_m_vars(List<NodeExpr> indexes, Var var, int? relative_location_of_base_reg = null)
+        void GenArrayAddrFrom_m_vars(List<NodeExpr> indexes, Var var, uint? relative_location_of_base_reg = null)
         {
             m_outputcode.AppendLine($"# begin array address");
             string reg = m_FirstTempReg;
@@ -180,7 +181,7 @@ namespace Epsilon
             if (!var.IsArray)
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{var.Value}` is not declared as an array\n", 1);
 
-            List<NodeTermIntLit> dims = m_DimensionsOfArrays[var.Value];
+            List<uint> dims = m_DimensionsOfArrays[var.Value];
             Shartilities.Assert(indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
 
             NodeExpr IndexExpr = GenIndexExpr(ref indexes, ref dims, 0);
@@ -202,14 +203,14 @@ namespace Epsilon
 
             if (BaseReg == "sp")
             {
-                int relative_location = m_StackSize - VariableLocation(var.Value) - var.Size;
+                uint relative_location = m_StackSize - VariableLocation(var.Value) - var.Size;
                 m_outputcode.AppendLine($"    ADDI {reg}, {reg}, {relative_location}");
             }
 
             GenPush(reg, 8);
             m_outputcode.AppendLine($"# end array address");
         }
-        void GenTerm(NodeTerm term, string? DestReg, int size)
+        void GenTerm(NodeTerm term, string? DestReg, uint size)
         {
             if (term.type == NodeTerm.NodeTermType.unary)
             {
@@ -278,9 +279,9 @@ namespace Epsilon
                     {
                         Var var = m_vars[index];
                         string reg = DestReg ?? m_FirstTempReg;
-                        int TypeSize = var.IsArray && var.IsParameter ? 8 : var.TypeSize;
-                        int Count = var.Size / var.TypeSize;
-                        int relative_location = m_StackSize - VariableLocation(var.Value) - TypeSize;
+                        uint TypeSize = var.IsArray && var.IsParameter ? 8 : var.TypeSize;
+                        uint Count = var.Size / var.TypeSize;
+                        uint relative_location = m_StackSize - VariableLocation(var.Value) - TypeSize;
 
                         if (ident.ByRef)
                         {
@@ -319,7 +320,7 @@ namespace Epsilon
                         Var var = m_vars[index];
                         if (var.IsParameter)
                         {
-                            int relative_location_of_base_reg = m_StackSize - VariableLocation(ident.ident.Value) - 8;
+                            uint relative_location_of_base_reg = m_StackSize - VariableLocation(ident.ident.Value) - 8;
                             GenArrayAddrFrom_m_vars(ident.indexes, var, relative_location_of_base_reg);
                         }
                         else
@@ -360,7 +361,7 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid term `{term.type}`\n", 1);
             }
         }
-        void GenBinExpr(NodeBinExpr binExpr, string? DestReg, int size)
+        void GenBinExpr(NodeBinExpr binExpr, string? DestReg, uint size)
         {
             string reg = DestReg ?? m_FirstTempReg;
             string reg2 = reg == m_FirstTempReg ? m_SecondTempReg : m_FirstTempReg;
@@ -418,7 +419,7 @@ namespace Epsilon
             if (DestReg == null)
                 GenPush(reg, size);
         }
-        void GenExpr(NodeExpr expr, string? DestReg, int size)
+        void GenExpr(NodeExpr expr, string? DestReg, uint size)
         {
             if (expr.type == NodeExpr.NodeExprType.Term)
             {
@@ -470,20 +471,13 @@ namespace Epsilon
                 }
                 else
                 {
-                    List<NodeTermIntLit> dims = m_DimensionsOfArrays[ident.Value];
-                    int count = 1;
-                    foreach (NodeTermIntLit l in dims)
+                    List<uint> dims = m_DimensionsOfArrays[ident.Value];
+                    uint count = 1;
+                    foreach (uint d in dims)
                     {
-                        if (int.TryParse(l.intlit.Value, out int dim))
-                        {
-                            count *= dim;
-                        }
-                        else
-                        {
-                            Shartilities.UNREACHABLE("GenStmtDeclare_arrays");
-                        }
+                        count *= d;
                     }
-                    int SizePerVar = 0;
+                    uint SizePerVar = 0;
                     if (declare.datatype == NodeStmtDataType.Auto)
                         SizePerVar = 8;
                     else if (declare.datatype == NodeStmtDataType.Char)
@@ -510,7 +504,7 @@ namespace Epsilon
                 {
                     Var var = m_vars[index];
                     GenExpr(assign.singlevar.expr, reg, var.TypeSize);
-                    int relative_location = m_StackSize - VariableLocation(ident.Value);
+                    uint relative_location = m_StackSize - VariableLocation(ident.Value);
                     if (var.TypeSize == 1)
                         m_outputcode.AppendLine($"    SB {reg}, {relative_location - var.TypeSize}(sp)");
                     if (var.TypeSize == 8)
@@ -532,7 +526,7 @@ namespace Epsilon
                     Var var = m_vars[index];
                     if (var.IsParameter)
                     {
-                        int relative_location_of_base_reg = m_StackSize - VariableLocation(ident.Value) - 8;
+                        uint relative_location_of_base_reg = m_StackSize - VariableLocation(ident.Value) - 8;
                         GenArrayAddrFrom_m_vars(assign.array.indexes, var, relative_location_of_base_reg);
                     }
                     else
@@ -781,7 +775,7 @@ namespace Epsilon
         }
         void GenReturnFromFunction()
         {
-            int stacksize = 0;
+            uint stacksize = 0;
             foreach (Var v in m_vars)
             {
                 if (v.IsParameter && v.IsArray)
@@ -830,8 +824,8 @@ namespace Epsilon
             }
             for (int i = 0; i < Function.parameters.Count; i++)
             {
-                int TypeSize = Function.parameters[i].TypeSize;
-                int Size = Function.parameters[i].Size;
+                uint TypeSize = Function.parameters[i].TypeSize;
+                uint Size = Function.parameters[i].Size;
                 bool IsArray = Function.DimensionsOfArrays.ContainsKey(Function.parameters[i].Value);
                 if (IsArray)
                     GenPush($"a{i}", 8);

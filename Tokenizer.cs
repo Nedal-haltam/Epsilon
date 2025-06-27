@@ -65,7 +65,7 @@ namespace Epsilon
         Exit,
         Return,
     }
-    class Tokenizer(string thecode)
+    class Tokenizer(string thecode, string InputFilePath)
     {
         readonly Dictionary<string, TokenType> KeyWords = new()
         {
@@ -83,6 +83,7 @@ namespace Epsilon
             { "exit", TokenType.Exit},
         };
         private readonly string m_thecode = thecode;
+        private readonly string m_inputFilePath = InputFilePath;
         private int m_curr_index = 0;
         private List<Token> m_tokens = [];
         char? Peek(int offset = 0)
@@ -259,7 +260,7 @@ namespace Epsilon
                     buffer.Append(ConsumeUntil('\n'));
                     Consume();
                     string MacroSrc = buffer.ToString();
-                    Tokenizer temp = new(MacroSrc);
+                    Tokenizer temp = new(MacroSrc, m_inputFilePath);
                     List<Token> macrovalue = temp.Tokenize();
                     macro.Add(macroname, new() { src = MacroSrc, tokens = macrovalue });
                 }
@@ -304,11 +305,11 @@ namespace Epsilon
                     buffer.Append(ConsumeUntil('\''));
                     if (buffer.Length == 0)
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"empty character is assigned on line {line}\n", 1);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: empty character is assigned on line {line}\n", 1);
                     }
                     if (buffer.Length != 1)
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"Error expected a single character between single quotes but got `{buffer}` on line {line}\n", 1);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Error expected a single character between single quotes but got `{buffer}` on line {line}\n", 1);
                     }
                     Consume();
                     m_tokens.Add(new() { Value = Convert.ToUInt32(buffer.ToString()[0]).ToString(), Type = TokenType.IntLit, Line = line });
@@ -424,7 +425,7 @@ namespace Epsilon
                 }
                 else
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Invalid token: {curr_token}\n", 1);
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Invalid token: {curr_token}\n", 1);
                 }
                 buffer.Clear();
             }

@@ -178,7 +178,7 @@ namespace Epsilon
         public Token FunctionName;
         public List<Var> parameters;
         public NodeStmtScope FunctionBody;
-        public Dictionary<string, List<NodeTermIntLit>> DimensionsOfArrays;
+        public Dictionary<string, List<uint>> DimensionsOfArrays;
     }
     public struct NodeStmtReturn
     {
