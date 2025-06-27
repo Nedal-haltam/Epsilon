@@ -17,12 +17,10 @@ namespace Epsilon
         public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
         public List<string> STD_FUNCTIONS = ["strlen", "itoa", "write"];
 
-        public string GetImmedOperation(string imm1, bool isneg1, string imm2, bool isneg2, NodeBinExpr.NodeBinExprType op)
+        public string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
         {
             Int64 a = Convert.ToInt64(imm1);
-            if (isneg1) a = -a;
             Int64 b = Convert.ToInt32(imm2);
-            if (isneg2) b = -b;
 
             if (op == NodeBinExpr.NodeBinExprType.Add)
                 return (a + b).ToString();
@@ -118,14 +116,20 @@ namespace Epsilon
         }
         NodeTerm? ParseTerm()
         {
-            NodeTerm term = new()
-            {
-                Negative = false
-            };
+            NodeTerm term = new();
             if (Peek(TokenType.Minus).HasValue)
             {
-                term.Negative = true;
                 Consume();
+                NodeTerm? termunary = ParseTerm();
+                if (!termunary.HasValue)
+                    return null;
+                term.type = NodeTerm.NodeTermType.Unary;
+                term.unary = new()
+                {
+                    type = NodeTermUnaryExpr.NodeTermUnaryExprType.negative,
+                    term = termunary.Value,
+                };
+                return term;
             }
             if (Peek(TokenType.ExclamationMark).HasValue)
             {
@@ -133,10 +137,10 @@ namespace Epsilon
                 NodeTerm? termunary = ParseTerm();
                 if (!termunary.HasValue)
                     return null;
-                term.type = NodeTerm.NodeTermType.unary;
+                term.type = NodeTerm.NodeTermType.Unary;
                 term.unary = new()
                 {
-                    type = NodeTermUnaryExpr.NodeTermUnaryExprType.negate,
+                    type = NodeTermUnaryExpr.NodeTermUnaryExprType.complement,
                     term = termunary.Value,
                 };
                 return term;
@@ -147,7 +151,7 @@ namespace Epsilon
                 NodeTerm? termunary = ParseTerm();
                 if (!termunary.HasValue)
                     return null;
-                term.type = NodeTerm.NodeTermType.unary;
+                term.type = NodeTerm.NodeTermType.Unary;
                 term.unary = new()
                 {
                     type = NodeTermUnaryExpr.NodeTermUnaryExprType.not,
@@ -207,6 +211,16 @@ namespace Epsilon
                     term.ident.indexes.Add(Parseindex());
                 }
                 term.ident.ByRef = DimensionsOfArrays.ContainsKey(term.ident.ident.Value) && term.ident.indexes.Count == 0;
+                return term;
+            }
+            else if (Peek(TokenType.Variadic).HasValue)
+            {
+                Consume();
+                TryConsumeError(TokenType.OpenParen);
+                NodeExpr VariadicIndex = ExpectedExpression(ParseExpr());
+                TryConsumeError(TokenType.CloseParen);
+                term.type = NodeTerm.NodeTermType.Variadic;
+                term.variadic = new() { VariadicIndex =  VariadicIndex };
                 return term;
             }
             else if (Peek(TokenType.OpenParen).HasValue)
@@ -321,7 +335,7 @@ namespace Epsilon
                     {
                         string constant1 = expr.lhs.term.intlit.intlit.Value;
                         string constant2 = expr.rhs.term.intlit.intlit.Value;
-                        string value = GetImmedOperation(constant1, expr.lhs.term.Negative, constant2, expr.rhs.term.Negative, expr.type);
+                        string value = GetImmedOperation(constant1, constant2, expr.type);
                         exprlhs = NodeExpr.Number(value, expr.lhs.term.intlit.intlit.Line);
                     }
                     else
@@ -728,59 +742,76 @@ namespace Epsilon
                 {
                     do
                     {
-                        if (!IsStmtDeclare())
+                        if (Peek(TokenType.Variadic).HasValue)
+                        {
+                            Consume();
+                            int NumberofVariadics = 8 - parameters.Count;
+                            while (NumberofVariadics-- > 0)
+                                DimensionsOfArrays.Add($"variadic({NumberofVariadics})", [0]);
+                            parameters.Add(new("", 0, 0, false, true, true));
+                            if (Peek(TokenType.Comma).HasValue)
+                            {
+                                Token? peeked = Peek(-1);
+                                int line = peeked.HasValue ? peeked.Value.Line : 1;
+                                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: cannod declare afer variadic argument\n", 1);
+                            }
+                        }
+                        else if (IsStmtDeclare())
+                        {
+                            Token vartype = Consume();
+                            Token ident = Consume();
+                            Var parameter = new();
+
+                            parameter.Size = 1;
+                            if (Peek(TokenType.OpenSquare).HasValue)
+                            {
+                                if (DimensionsOfArrays.ContainsKey(ident.Value))
+                                {
+                                    Token? peeked = Peek(-1);
+                                    int line = peeked.HasValue ? peeked.Value.Line : 1;
+                                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: array `{ident.Value}` is alread delcared\n", 1);
+                                }
+                                else
+                                {
+                                    DimensionsOfArrays.Add(ident.Value, []);
+                                }
+                                while (Peek(TokenType.OpenSquare).HasValue)
+                                {
+                                    uint DimValue;
+                                    if (Peek(TokenType.CloseSquare, 1).HasValue)
+                                    {
+                                        Consume();
+                                        Consume();
+                                        DimValue = 0;
+                                    }
+                                    else
+                                    {
+                                        Token dim = Parsedimension();
+                                        DimValue = uint.Parse(dim.Value);
+                                    }
+                                    DimensionsOfArrays[ident.Value].Add(DimValue);
+                                    parameter.Size *= DimValue;
+                                }
+                            }
+                            uint TypeSize = 0;
+                            if (vartype.Type == TokenType.Auto)
+                                TypeSize = 8;
+                            else if (vartype.Type == TokenType.Char)
+                                TypeSize = 1;
+                            else
+                                Shartilities.UNREACHABLE("");
+
+                            parameter.Value = ident.Value;
+                            parameter.TypeSize = TypeSize;
+                            parameter.Size *= TypeSize;
+                            parameters.Add(parameter);
+                        }
+                        else
                         {
                             Token? peeked = Peek(-1);
                             int line = peeked.HasValue ? peeked.Value.Line : 1;
                             Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: error in definition of function `{FunctionName.Value}`\n", 1);
                         }
-                        Token vartype = Consume();
-                        Token ident = Consume();
-                        Var parameter = new();
-
-                        parameter.Size = 1;
-                        if (Peek(TokenType.OpenSquare).HasValue)
-                        {
-                            if (DimensionsOfArrays.ContainsKey(ident.Value))
-                            {
-                                Token? peeked = Peek(-1);
-                                int line = peeked.HasValue ? peeked.Value.Line : 1;
-                                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: array `{ident.Value}` is alread delcared\n", 1);
-                            }
-                            else
-                            {
-                                DimensionsOfArrays.Add(ident.Value, []);
-                            }
-                            while (Peek(TokenType.OpenSquare).HasValue)
-                            {
-                                uint DimValue;
-                                if (Peek(TokenType.CloseSquare, 1).HasValue)
-                                {
-                                    Consume();
-                                    Consume();
-                                    DimValue = 0;
-                                }
-                                else
-                                {
-                                    Token dim = Parsedimension();
-                                    DimValue = uint.Parse(dim.Value);
-                                }
-                                DimensionsOfArrays[ident.Value].Add(DimValue);
-                                parameter.Size *= DimValue;
-                            }
-                        }
-                        uint TypeSize = 0;
-                        if (vartype.Type == TokenType.Auto)
-                            TypeSize = 8;
-                        else if (vartype.Type == TokenType.Char)
-                            TypeSize = 1;
-                        else
-                            Shartilities.UNREACHABLE("");
-
-                        parameter.Value = ident.Value;
-                        parameter.TypeSize = TypeSize;
-                        parameter.Size *= TypeSize;
-                        parameters.Add(parameter);
                     } while (PeekAndConsume(TokenType.Comma).HasValue);
                 }
                 TryConsumeError(TokenType.CloseParen);

@@ -245,22 +245,26 @@ namespace Epsilon
     {
         public enum NodeTermType
         {
-            IntLit, StringLit, FunctionCall, Ident, Paren, unary
+            IntLit, StringLit, FunctionCall, Ident, Paren, Unary, Variadic
         }
         public NodeTermType type;
-        public bool Negative;
         public NodeTermIntLit intlit;
         public NodeTermStringLit stringlit;
         public NodeTermFunctionCall functioncall;
         public NodeTermIdent ident;
         public NodeTermParen paren;
         public NodeTermUnaryExpr unary;
+        public NodeTermVariadic variadic;
+    }
+    public class NodeTermVariadic
+    {
+        public NodeExpr VariadicIndex;
     }
     public class NodeTermUnaryExpr
     {
         public enum NodeTermUnaryExprType
         {
-            negate, not,
+            negative, complement, not,
         }
         public NodeTermUnaryExprType type;
         public NodeTerm term;

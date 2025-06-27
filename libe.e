@@ -14,7 +14,7 @@ func printnumber(auto Number)
     }
 }
 
-func print(char msg[], auto msg_len, auto i, auto Number, auto IfPrintNumber)
+func printhelper(char msg[], auto msg_len, auto i, auto Number, auto IfPrintNumber)
 {
     if (IfPrintNumber & msg[i] == '%' & i + 1 < msg_len & msg[i + 1] == 'd')
     {
@@ -43,64 +43,23 @@ func print(char msg[], auto msg_len, auto i, auto Number, auto IfPrintNumber)
     return 1;
 }
 
-func print1(char msg[])
-{
-    auto msg_len = strlen(msg);
-    auto i = 0;
-    while (i < msg_len)
-    {
-        write(1, msg + i, 1);
-        i = i + 1;
-    }
-}
-
-func print2(char msg[], auto a)
+func print(char msg[], variadic)
 {
     auto msg_len = strlen(msg);
     auto i = 0;
     auto n = 0;
     while (i < msg_len)
     {
-        if (n == 0)
+        if (n < 7)
         {
-            
-            auto skip = print(msg, msg_len, i, a, 1);
+            auto skip = printhelper(msg, msg_len, i, variadic(n), 1);
             i = i + skip;
             if (skip != 1)
                 n = n + 1;
         }
         else
         {
-            auto skip = print(msg, msg_len, i, 0, 0);
-            i = i + skip;
-        }
-    }
-}
-
-func print3(char msg[], auto a, auto b)
-{
-    auto msg_len = strlen(msg);
-    auto i = 0;
-    auto n = 0;
-    while (i < msg_len)
-    {
-        if (n == 0)
-        {
-            auto skip = print(msg, msg_len, i, a, 1);
-            i = i + skip;
-            if (skip != 1)
-                n = n + 1;
-        }
-        else if (n == 1)
-        {
-            auto skip = print(msg, msg_len, i, b, 1);
-            i = i + skip;
-            if (skip != 1)
-                n = n + 1;
-        }
-        else
-        {
-            auto skip = print(msg, msg_len, i, 0, 0);
+            auto skip = printhelper(msg, msg_len, i, 0, 0);
             i = i + skip;
         }
     }

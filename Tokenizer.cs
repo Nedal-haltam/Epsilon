@@ -43,10 +43,13 @@ namespace Epsilon
         NotEqual,
         LessThan,
 
+        Ident,
+
+        IntLit,
+        StringLit,
+
         Auto,
         Char,
-
-        Ident,
 
         If,
         Elif,
@@ -54,10 +57,8 @@ namespace Epsilon
         For,
         While,
 
-        IntLit,
-        StringLit,
-
         Func,
+        Variadic,
 
         Continue,
         Break,
@@ -76,9 +77,10 @@ namespace Epsilon
             { "else", TokenType.Else},
             { "for", TokenType.For},
             { "while", TokenType.While},
-            { "break", TokenType.Break},
-            { "continue", TokenType.Continue},
             { "func", TokenType.Func},
+            { "variadic", TokenType.Variadic},
+            { "continue", TokenType.Continue},
+            { "break", TokenType.Break},
             { "return", TokenType.Return},
             { "exit", TokenType.Exit},
         };
