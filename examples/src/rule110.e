@@ -1,14 +1,15 @@
+#include "libe.e"
 
 #define SIZE 100
 
 func display(auto base[], auto n) {
     auto i  = 0;
     while (i < n) {
-        if (base[i]) printf("#"); 
-        else printf(".");
+        if (base[i]) print1("#"); 
+        else print1(".");
         i = i + 1;
     }
-    printf("\n");
+    print1("\n");
 }
 
 func next(auto base[], auto n) {

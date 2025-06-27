@@ -1,3 +1,5 @@
+#include "libe.e"
+
 func main()
 {
     auto found = 0;
@@ -15,6 +17,6 @@ func main()
             }
         }
     }
-    printf("the smallest positive number that is evenly divisible by all of the numbers from 1 to 20 is : %d\n", i);
+    print2("the smallest positive number that is evenly divisible by all of the numbers from 1 to 20 is : %d\n", i);
     return 0;
 }

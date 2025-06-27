@@ -1,3 +1,6 @@
+
+#include "libe.e"
+
 func Print10sMultipleAndLengths()
 {
     auto x = 1;
@@ -8,8 +11,8 @@ func Print10sMultipleAndLengths()
         auto len = strlen(itoa(x));
         if (count != len)
         {
-            printf("number = %d\n", x);
-            printf("new len = %d\n", len);
+            print2("number = %d\n", x);
+            print2("new len = %d\n", len);
             count = len;
         }
         x = x + 1;
@@ -23,6 +26,6 @@ func foo(auto a, auto b)
 
 func main()
 {
-    printf("return of foo is : %d\n", foo(123, 456));
+    print2("return of foo is : %d\n", foo(123, 456));
     Print10sMultipleAndLengths();
 }

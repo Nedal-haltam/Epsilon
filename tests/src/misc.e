@@ -1,51 +1,53 @@
 
+#include "libe.e"
+
 #define numbersize 10
 #define charsize 15
 
 func bar(auto number, char character, auto numbers[], char chars[], auto WillCall)
 {
-    printf("Entering function `bar`\n");
-    printf("number = %d\n", number);
-    printf("character = %d\n", character);
-    printf("character = %c\n", character);
-    printf("numbers: \n");
+    print1("Entering function `bar`\n");
+    print2("number = %d\n", number);
+    print2("character = %d\n", character);
+    print2("character = %c\n", character);
+    print1("numbers: \n");
     for (auto i = 0; i < numbersize; i = i + 1)
     {
-        printf("%d ", numbers[i]);
+        print2("%d ", numbers[i]);
     }
-    printf("\n");
-    printf("characters: \n");
+    print1("\n");
+    print1("characters: \n");
     for (auto i = 0; i < charsize; i = i + 1)
     {
-        printf("%c ", chars[i]);
+        print2("%c ", chars[i]);
     }
-    printf("\n");
-    printf("characters as a string: `%s`\n", chars);
-    printf("WillCall = %d\n", WillCall);
-    printf("------------------------------------------------\n");
+    print1("\n");
+    print2("characters as a string: `%s`\n", chars);
+    print2("WillCall = %d\n", WillCall);
+    print1("------------------------------------------------\n");
 }
 
 func foo(auto number, char character, auto numbers[], char chars[], auto WillCall)
 {
-    printf("Entering function `foo`\n");
-    printf("number = %d\n", number);
-    printf("character = %d\n", character);
-    printf("character = %c\n", character);
-    printf("numbers: \n");
+    print1("Entering function `foo`\n");
+    print2("number = %d\n", number);
+    print2("character = %d\n", character);
+    print2("character = %c\n", character);
+    print1("numbers: \n");
     for (auto i = 0; i < numbersize; i = i + 1)
     {
-        printf("%d ", numbers[i]);
+        print2("%d ", numbers[i]);
     }
-    printf("\n");
-    printf("characters: \n");
+    print1("\n");
+    print1("characters: \n");
     for (auto i = 0; i < charsize; i = i + 1)
     {
-        printf("%c ", chars[i]);
+        print2("%c ", chars[i]);
     }
-    printf("\n");
-    printf("characters as a string: `%s`\n", chars);
-    printf("WillCall = %d\n", WillCall);
-    printf("------------------------------------------------\n");
+    print1("\n");
+    print2("characters as a string: `%s`\n", chars);
+    print2("WillCall = %d\n", WillCall);
+    print1("------------------------------------------------\n");
     if (WillCall)
     {
         foo(number, character, numbers, chars, 0);
@@ -73,9 +75,9 @@ func PrintAutoTwoD(auto ns[][numbersize])
     {
         for (auto j = 0; j < numbersize; j = j + 1)
         {
-            printf("%-3d", ns[i][j]);
+            print2("%d", ns[i][j]);
         }
-        printf("\n");
+        print1("\n");
     }
 }
 func FillCharTwoD(char cs[][charsize], char n)
@@ -95,36 +97,22 @@ func PrintCharTwoD(char cs[][charsize])
     {
         for (auto j = 0; j < charsize; j = j + 1)
         {
-            printf("%-3d", cs[i][j]);
+            print2("%d", cs[i][j]);
         }
-        printf("\n");
+        print1("\n");
     }
 }
 
 func TwoD(auto ns[][numbersize], char cs[][charsize])
 {
-    printf("autos are here: \n");
+    print1("autos are here: \n");
     FillAutoTwoD(ns, 10);
     PrintAutoTwoD(ns);
-    printf("------------------------------------------------\n");
-    printf("characters are here: \n");
+    print1("------------------------------------------------\n");
+    print1("characters are here: \n");
     FillCharTwoD(cs, 0);
     PrintCharTwoD(cs);
-    printf("------------------------------------------------\n");
-}
-
-#define size 10
-func test()
-{
-    auto a[size];
-    auto b[size];
-    conv(a, b);
-
-    // assembly:
-    // la t0, a
-    // la t1, b
-    // li t2, size
-    // conv t0, t1, t2
+    print1("------------------------------------------------\n");
 }
 
 func pass_array_with_offset(auto arr[4])
@@ -143,9 +131,9 @@ func PassArrayWithOffset()
     pass_array_with_offset(ns + 8); // the offset should account for the `byte` addressable memory
     for (auto i = 0; i < 4; i = i + 1)
     {
-        printf("%d ", ns[i]);
+        print2("%d ", ns[i]);
     }
-    printf("\n");
+    print1("\n");
     return 0;
 }
 
@@ -162,15 +150,15 @@ func StringLitManipulate(char string[], auto n)
     {
         string[i] = 'a' + i - 6;
     }
-    printf("printing character by character: ");
-    printf("`");
+    print1("printing character by character: ");
+    print1("`");
     for (auto i = 0; i < n; i = i + 1)
     {
-        printf("%c", string[i]);
+        print2("%c", string[i]);
     }
-    printf("`");
-    printf("\n");
-    printf("the nth index character: `%c` // ... so it is null terminated by default\n", string[n]);
+    print1("`");
+    print1("\n");
+    print2("the nth index character: `%c` // ... so it is null terminated by default\n", string[n]);
 }
 
 func main()
@@ -190,15 +178,15 @@ func main()
     }
     foo(n, c, ns1D, cs1D, 1);
     bar(n, c, ns1D, cs1D, 0);
-    printf("--------------------------------------------------------------\n");
+    print1("--------------------------------------------------------------\n");
 
     auto ns2D[numbersize][numbersize];
     char cs2D[charsize][charsize];
     TwoD(ns2D, cs2D);
-    printf("--------------------------------------------------------------\n");
+    print1("--------------------------------------------------------------\n");
 
     PassArrayWithOffset();
-    printf("--------------------------------------------------------------\n");
+    print1("--------------------------------------------------------------\n");
 
     // we get from a string literal (i.e. "a string literal") a pointer (address) of that string
     // so we can do the following
@@ -206,22 +194,22 @@ func main()
     auto StrinLitLength = strlen(AddressOfStringLit);
 
     // we can print it directly
-    printf("length of stringlit : `%d`\n", StrinLitLength);
-    printf("print it directly : ");
-    printf("`");
-    printf(AddressOfStringLit);
-    printf("`");
-    printf("\n");
-    printf("or print it using format specifier : `%s`\n", AddressOfStringLit);
+    print2("length of stringlit : `%d`\n", StrinLitLength);
+    print1("print it directly : ");
+    print1("`");
+    print1(AddressOfStringLit);
+    print1("`");
+    print1("\n");
+    print2("or print it using format specifier : `%s`\n", AddressOfStringLit);
     StringLitManipulate(AddressOfStringLit, StrinLitLength);
-    printf("after manipulation:\n");
-    printf("print it directly : ");
-    printf("`");
-    printf(AddressOfStringLit);
-    printf("`");
-    printf("\n");
-    printf("or print it using format specifier : `%s`\n", AddressOfStringLit);
-    printf("--------------------------------------------------------------\n");
+    print1("after manipulation:\n");
+    print1("print it directly : ");
+    print1("`");
+    print1(AddressOfStringLit);
+    print1("`");
+    print1("\n");
+    print2("or print it using format specifier : `%s`\n", AddressOfStringLit);
+    print1("--------------------------------------------------------------\n");
 
     return 0;
 }

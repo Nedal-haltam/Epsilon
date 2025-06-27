@@ -1,4 +1,5 @@
 
+#include "libe.e"
 
 #define SIZE 30
 func _FibRecursive(auto arr[], auto i)
@@ -19,9 +20,9 @@ func FibRecursive()
     for (auto i = 0; i < SIZE; i = i + 1)
     {
         arr[i] = _FibRecursive(arr, i);
-        printf("%ld ", arr[i]);
+        print2("%ld ", arr[i]);
     }
-    printf("\n");
+    print1("\n");
 }
 
 func FibIterative(auto n)
@@ -30,12 +31,12 @@ func FibIterative(auto n)
     auto c;
     for (auto i = 0; i < n; i = i + 1)
     {
-        printf("%ld ", a);
+        print2("%ld ", a);
         c = a + b;
         a = b;
         b = c;
     }
-    printf("\n");
+    print1("\n");
 }
 
 func main()

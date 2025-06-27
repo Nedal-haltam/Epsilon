@@ -1,5 +1,8 @@
+
+#include "libe.e"
+
 func main()
 {
-    printf("Hello, World!\n");
+    print1("Hello, World!\n");
     return 0;
 }

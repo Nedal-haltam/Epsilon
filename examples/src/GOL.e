@@ -1,5 +1,5 @@
 
-
+#include "libe.e"
 
 #define SIZE 5
 #define glider_size 5
@@ -62,14 +62,14 @@ func main()
             {
                 if (grid[i][j])
                 {
-                    printf("#");
+                    print1("#");
                 }
                 else
                 {
-                    printf(".");
+                    print1(".");
                 }
             }
-            printf("\n");
+            print1("\n");
         }
         SlowDown();
         Copy(grid, grid2);

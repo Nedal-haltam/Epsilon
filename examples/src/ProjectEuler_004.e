@@ -1,3 +1,5 @@
+#include "libe.e"
+
 func IsPalindrome(auto number)
 {
     auto temp = number;
@@ -25,6 +27,6 @@ func main()
             }
         }
     }
-    printf("the largest palindrome made from the product of two 3-digit numbers is : %d\n", MaxPalindrome);
+    print2("the largest palindrome made from the product of two 3-digit numbers is : %d\n", MaxPalindrome);
     return 0;
 }

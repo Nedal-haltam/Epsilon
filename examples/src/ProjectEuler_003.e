@@ -1,3 +1,6 @@
+
+#include "libe.e"
+
 func main()
 {
     auto n = 600851475143;
@@ -14,6 +17,6 @@ func main()
             n = n / i;
     }
 
-    printf("the largest prime factor of the number %ld is %ld\n", number, ans);
+    print3("the largest prime factor of the number %ld is %ld\n", number, ans);
     return 0;
 }

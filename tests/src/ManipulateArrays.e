@@ -1,12 +1,13 @@
 
+
+#include "libe.e"
+
 #define SIZE 10
-
-
 func PrintArray(auto xs[], auto n)
 {
     for (auto i = 0; i < n; i = i + 1)
     {
-        printf("xs[%d] = %d\n", i, xs[i]);
+        print3("xs[%d] = %d\n", i, xs[i]);
     }
 }
 
@@ -40,13 +41,13 @@ func main()
     auto xs[SIZE], ys[SIZE];
     InitArray(xs, n);
     PrintArray(xs, n);
-    printf("-------------------------------------\n");
+    print1("-------------------------------------\n");
     MultiplyArray(xs, n, 7);
     PrintArray(xs, n);
-    printf("-------------------------------------\n");
+    print1("-------------------------------------\n");
     InitArray(ys, n);
     Dot(xs, ys, n);
     PrintArray(xs, n);
-    printf("-------------------------------------\n");
+    print1("-------------------------------------\n");
     return 0;
 }

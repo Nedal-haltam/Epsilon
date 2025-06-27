@@ -1,3 +1,6 @@
+
+#include "libe.e"
+
 #define SIZE 27
 func foo(char chars[])
 {
@@ -8,10 +11,10 @@ func foo(char chars[])
     chars[SIZE - 1] = 0;
     for (auto i = 0; i < SIZE; i = i + 1)
     {
-        printf("%c ", chars[i]);
+        print2("%c ", chars[i]);
     }
-    printf("\n");
-    printf("chars: `%s`\n", chars);
+    print1("\n");
+    print2("chars: `%s`\n", chars);
 }
 
 func CharArrayTest()
@@ -20,29 +23,29 @@ func CharArrayTest()
     foo(arr);
     for (auto i = 0; i < SIZE; i = i + 1)
     {
-        printf("%c ", arr[i]);
+        print2("%c ", arr[i]);
     }
-    printf("\n");
-    printf("arr: `%s`\n", arr);
+    print1("\n");
+    print2("arr: `%s`\n", arr);
 }
 
 // interesting
 func PointerTest()
 {
     auto x = "`hello world`";
-    printf("%s\n", x);
-    printf(x);
-    printf("\n");
+    print2("%s\n", x);
+    print1(x);
+    print1("\n");
 }
 
 func main()
 {
-    printf("-----------------------------\n");
-    printf("CharArrayTest:\n");
+    print1("-----------------------------\n");
+    print1("CharArrayTest:\n");
     CharArrayTest();
 
-    printf("-----------------------------\n");
-    printf("PointerTest:\n");
+    print1("-----------------------------\n");
+    print1("PointerTest:\n");
     PointerTest();
 
     return 0;

@@ -1,3 +1,6 @@
+
+#include "libe.e"
+
 #define limit 1000
 func main()
 {
@@ -9,6 +12,6 @@ func main()
             ans = ans + i;
         }
     }
-    printf("sum of all the multiples of 3 or 5 below 1000 is: %d\n", ans);
+    print2("sum of all the multiples of 3 or 5 below 1000 is: %d\n", ans);
     return 0;
 }

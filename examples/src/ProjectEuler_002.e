@@ -1,3 +1,6 @@
+
+#include "libe.e"
+
 func main()
 {
     auto bound = 4000000;
@@ -15,6 +18,6 @@ func main()
         a = b;
         b = c;
     }
-    printf("the sum of the even-valued terms is: %d\n", sum);
+    print2("the sum of the even-valued terms is: %d\n", sum);
     return 0;
 }
