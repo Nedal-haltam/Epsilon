@@ -259,12 +259,16 @@ namespace Epsilon
                     buffer.Append(ConsumeUntil('\"'));
                     Consume();
                     string IncludeFilePath = buffer.ToString();
-                    if (!File.Exists(IncludeFilePath)) 
+                    if (!File.Exists(IncludeFilePath))
                         Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: file `{IncludeFilePath}` doesn't exists\n", 1);
                     string FileContent = File.ReadAllText(IncludeFilePath);
                     Tokenizer temp = new(FileContent, IncludeFilePath);
 
                     List<Token> FileContentTokenized = temp.Tokenize();
+                    {
+                        Parser parser = new(FileContentTokenized, IncludeFilePath);
+                        parser.ParseProg();
+                    }
                     m_tokens.AddRange(FileContentTokenized);
                 }
                 else if (Peek("#define "))
