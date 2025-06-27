@@ -7,7 +7,7 @@ func PrintArray(auto xs[], auto n)
 {
     for (auto i = 0; i < n; i = i + 1)
     {
-        print3("xs[%d] = %d\n", i, xs[i]);
+        print("xs[%d] = %d\n", i, xs[i]);
     }
 }
 
@@ -41,13 +41,13 @@ func main()
     auto xs[SIZE], ys[SIZE];
     InitArray(xs, n);
     PrintArray(xs, n);
-    print1("-------------------------------------\n");
+    print("-------------------------------------\n");
     MultiplyArray(xs, n, 7);
     PrintArray(xs, n);
-    print1("-------------------------------------\n");
+    print("-------------------------------------\n");
     InitArray(ys, n);
     Dot(xs, ys, n);
     PrintArray(xs, n);
-    print1("-------------------------------------\n");
+    print("-------------------------------------\n");
     return 0;
 }

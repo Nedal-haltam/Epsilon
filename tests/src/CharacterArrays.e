@@ -11,10 +11,10 @@ func foo(char chars[])
     chars[SIZE - 1] = 0;
     for (auto i = 0; i < SIZE; i = i + 1)
     {
-        print2("%c ", chars[i]);
+        print("%c ", chars[i]);
     }
-    print1("\n");
-    print2("chars: `%s`\n", chars);
+    print("\n");
+    print("chars: `%s`\n", chars);
 }
 
 func CharArrayTest()
@@ -23,29 +23,29 @@ func CharArrayTest()
     foo(arr);
     for (auto i = 0; i < SIZE; i = i + 1)
     {
-        print2("%c ", arr[i]);
+        print("%c ", arr[i]);
     }
-    print1("\n");
-    print2("arr: `%s`\n", arr);
+    print("\n");
+    print("arr: `%s`\n", arr);
 }
 
 // interesting
 func PointerTest()
 {
     auto x = "`hello world`";
-    print2("%s\n", x);
-    print1(x);
-    print1("\n");
+    print("%s\n", x);
+    print(x);
+    print("\n");
 }
 
 func main()
 {
-    print1("-----------------------------\n");
-    print1("CharArrayTest:\n");
+    print("-----------------------------\n");
+    print("CharArrayTest:\n");
     CharArrayTest();
 
-    print1("-----------------------------\n");
-    print1("PointerTest:\n");
+    print("-----------------------------\n");
+    print("PointerTest:\n");
     PointerTest();
 
     return 0;

@@ -3,6 +3,6 @@
 
 func main()
 {
-    print1("Hello, World!\n");
+    print("Hello, World!\n");
     return 0;
 }

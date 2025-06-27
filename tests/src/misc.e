@@ -6,48 +6,48 @@
 
 func bar(auto number, char character, auto numbers[], char chars[], auto WillCall)
 {
-    print1("Entering function `bar`\n");
-    print2("number = %d\n", number);
-    print2("character = %d\n", character);
-    print2("character = %c\n", character);
-    print1("numbers: \n");
+    print("Entering function `bar`\n");
+    print("number = %d\n", number);
+    print("character = %d\n", character);
+    print("character = %c\n", character);
+    print("numbers: \n");
     for (auto i = 0; i < numbersize; i = i + 1)
     {
-        print2("%d ", numbers[i]);
+        print("%d ", numbers[i]);
     }
-    print1("\n");
-    print1("characters: \n");
+    print("\n");
+    print("characters: \n");
     for (auto i = 0; i < charsize; i = i + 1)
     {
-        print2("%c ", chars[i]);
+        print("%c ", chars[i]);
     }
-    print1("\n");
-    print2("characters as a string: `%s`\n", chars);
-    print2("WillCall = %d\n", WillCall);
-    print1("------------------------------------------------\n");
+    print("\n");
+    print("characters as a string: `%s`\n", chars);
+    print("WillCall = %d\n", WillCall);
+    print("------------------------------------------------\n");
 }
 
 func foo(auto number, char character, auto numbers[], char chars[], auto WillCall)
 {
-    print1("Entering function `foo`\n");
-    print2("number = %d\n", number);
-    print2("character = %d\n", character);
-    print2("character = %c\n", character);
-    print1("numbers: \n");
+    print("Entering function `foo`\n");
+    print("number = %d\n", number);
+    print("character = %d\n", character);
+    print("character = %c\n", character);
+    print("numbers: \n");
     for (auto i = 0; i < numbersize; i = i + 1)
     {
-        print2("%d ", numbers[i]);
+        print("%d ", numbers[i]);
     }
-    print1("\n");
-    print1("characters: \n");
+    print("\n");
+    print("characters: \n");
     for (auto i = 0; i < charsize; i = i + 1)
     {
-        print2("%c ", chars[i]);
+        print("%c ", chars[i]);
     }
-    print1("\n");
-    print2("characters as a string: `%s`\n", chars);
-    print2("WillCall = %d\n", WillCall);
-    print1("------------------------------------------------\n");
+    print("\n");
+    print("characters as a string: `%s`\n", chars);
+    print("WillCall = %d\n", WillCall);
+    print("------------------------------------------------\n");
     if (WillCall)
     {
         foo(number, character, numbers, chars, 0);
@@ -75,9 +75,9 @@ func PrintAutoTwoD(auto ns[][numbersize])
     {
         for (auto j = 0; j < numbersize; j = j + 1)
         {
-            print2("%d", ns[i][j]);
+            print("%d", ns[i][j]);
         }
-        print1("\n");
+        print("\n");
     }
 }
 func FillCharTwoD(char cs[][charsize], char n)
@@ -97,22 +97,22 @@ func PrintCharTwoD(char cs[][charsize])
     {
         for (auto j = 0; j < charsize; j = j + 1)
         {
-            print2("%d", cs[i][j]);
+            print("%d", cs[i][j]);
         }
-        print1("\n");
+        print("\n");
     }
 }
 
 func TwoD(auto ns[][numbersize], char cs[][charsize])
 {
-    print1("autos are here: \n");
+    print("autos are here: \n");
     FillAutoTwoD(ns, 10);
     PrintAutoTwoD(ns);
-    print1("------------------------------------------------\n");
-    print1("characters are here: \n");
+    print("------------------------------------------------\n");
+    print("characters are here: \n");
     FillCharTwoD(cs, 0);
     PrintCharTwoD(cs);
-    print1("------------------------------------------------\n");
+    print("------------------------------------------------\n");
 }
 
 func pass_array_with_offset(auto arr[4])
@@ -131,9 +131,9 @@ func PassArrayWithOffset()
     pass_array_with_offset(ns + 8); // the offset should account for the `byte` addressable memory
     for (auto i = 0; i < 4; i = i + 1)
     {
-        print2("%d ", ns[i]);
+        print("%d ", ns[i]);
     }
-    print1("\n");
+    print("\n");
     return 0;
 }
 
@@ -150,15 +150,15 @@ func StringLitManipulate(char string[], auto n)
     {
         string[i] = 'a' + i - 6;
     }
-    print1("printing character by character: ");
-    print1("`");
+    print("printing character by character: ");
+    print("`");
     for (auto i = 0; i < n; i = i + 1)
     {
-        print2("%c", string[i]);
+        print("%c", string[i]);
     }
-    print1("`");
-    print1("\n");
-    print2("the nth index character: `%c` // ... so it is null terminated by default\n", string[n]);
+    print("`");
+    print("\n");
+    print("the nth index character: `%c` // ... so it is null terminated by default\n", string[n]);
 }
 
 func main()
@@ -178,15 +178,15 @@ func main()
     }
     foo(n, c, ns1D, cs1D, 1);
     bar(n, c, ns1D, cs1D, 0);
-    print1("--------------------------------------------------------------\n");
+    print("--------------------------------------------------------------\n");
 
     auto ns2D[numbersize][numbersize];
     char cs2D[charsize][charsize];
     TwoD(ns2D, cs2D);
-    print1("--------------------------------------------------------------\n");
+    print("--------------------------------------------------------------\n");
 
     PassArrayWithOffset();
-    print1("--------------------------------------------------------------\n");
+    print("--------------------------------------------------------------\n");
 
     // we get from a string literal (i.e. "a string literal") a pointer (address) of that string
     // so we can do the following
@@ -194,22 +194,22 @@ func main()
     auto StrinLitLength = strlen(AddressOfStringLit);
 
     // we can print it directly
-    print2("length of stringlit : `%d`\n", StrinLitLength);
-    print1("print it directly : ");
-    print1("`");
-    print1(AddressOfStringLit);
-    print1("`");
-    print1("\n");
-    print2("or print it using format specifier : `%s`\n", AddressOfStringLit);
+    print("length of stringlit : `%d`\n", StrinLitLength);
+    print("print it directly : ");
+    print("`");
+    print(AddressOfStringLit);
+    print("`");
+    print("\n");
+    print("or print it using format specifier : `%s`\n", AddressOfStringLit);
     StringLitManipulate(AddressOfStringLit, StrinLitLength);
-    print1("after manipulation:\n");
-    print1("print it directly : ");
-    print1("`");
-    print1(AddressOfStringLit);
-    print1("`");
-    print1("\n");
-    print2("or print it using format specifier : `%s`\n", AddressOfStringLit);
-    print1("--------------------------------------------------------------\n");
+    print("after manipulation:\n");
+    print("print it directly : ");
+    print("`");
+    print(AddressOfStringLit);
+    print("`");
+    print("\n");
+    print("or print it using format specifier : `%s`\n", AddressOfStringLit);
+    print("--------------------------------------------------------------\n");
 
     return 0;
 }

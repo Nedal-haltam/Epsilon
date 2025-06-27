@@ -17,6 +17,6 @@ func main()
             }
         }
     }
-    print2("the smallest positive number that is evenly divisible by all of the numbers from 1 to 20 is : %d\n", i);
+    print("the smallest positive number that is evenly divisible by all of the numbers from 1 to 20 is : %d\n", i);
     return 0;
 }

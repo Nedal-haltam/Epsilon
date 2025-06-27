@@ -62,14 +62,14 @@ func main()
             {
                 if (grid[i][j])
                 {
-                    print1("#");
+                    print("#");
                 }
                 else
                 {
-                    print1(".");
+                    print(".");
                 }
             }
-            print1("\n");
+            print("\n");
         }
         SlowDown();
         Copy(grid, grid2);

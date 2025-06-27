@@ -12,12 +12,12 @@ main:
     LD a0, 0(sp)
     ADDI sp, sp, 16
     MV a1, s0
-    call print2
+    call print
     call Print10sMultipleAndLengths
     mv s0, zero
     mv a0, s0
     call exit
-print2:
+print:
     ADDI sp, sp, -8
     SD ra, 0(sp)
     ADDI sp, sp, -8
@@ -25,9 +25,21 @@ print2:
     ADDI sp, sp, -8
     SD a1, 0(sp)
     ADDI sp, sp, -8
+    SD a2, 0(sp)
+    ADDI sp, sp, -8
+    SD a3, 0(sp)
+    ADDI sp, sp, -8
+    SD a4, 0(sp)
+    ADDI sp, sp, -8
+    SD a5, 0(sp)
+    ADDI sp, sp, -8
+    SD a6, 0(sp)
+    ADDI sp, sp, -8
+    SD a7, 0(sp)
+    ADDI sp, sp, -8
     SD a0, 0(sp)
 ########## msg
-    LD a0, 16(sp)
+    LD a0, 64(sp)
     call strlen
     LD a0, 0(sp)
     ADDI sp, sp, 8
@@ -57,15 +69,14 @@ TEMP_LABEL0_START:
 # end condition
 # begin scope
 LABEL2_START:
-    LI t0, 0
+    LI t0, 7
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## n
     LD t0, 8(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
+    SLT t0, t0, t1
     BEQZ t0, LABEL4_elifs
 # begin scope
     ADDI sp, sp, -40
@@ -75,15 +86,23 @@ LABEL2_START:
     SD a3, 24(sp)
     SD a4, 32(sp)
 ########## msg
-    LD a0, 72(sp)
+    LD a0, 120(sp)
 ########## msg_len
     LD a1, 56(sp)
 ########## i
     LD a2, 48(sp)
-########## a
-    LD a3, 64(sp)
+########## n
+    LD t0, 40(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 8
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    MUL t0, t0, t1
+    SUB t0, sp, t0
+    LD a3, 112(t0)
     LI a4, 1
-    call print
+    call printhelper
     LD a4, 32(sp)
     LD a3, 24(sp)
     LD a2, 16(sp)
@@ -139,14 +158,14 @@ LABEL4_elifs:
     SD a3, 24(sp)
     SD a4, 32(sp)
 ########## msg
-    LD a0, 72(sp)
+    LD a0, 120(sp)
 ########## msg_len
     LD a1, 56(sp)
 ########## i
     LD a2, 48(sp)
     LI a3, 0
     LI a4, 0
-    call print
+    call printhelper
     LD a4, 32(sp)
     LD a3, 24(sp)
     LD a2, 16(sp)
@@ -175,7 +194,7 @@ TEMP_LABEL1_END:
 # end scope
 # end whileloop
     mv s0, zero
-    ADDI sp, sp, 40
+    ADDI sp, sp, 88
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
@@ -270,11 +289,11 @@ LABEL11_START:
     LA a0, StringLits1
 ########## x
     LD a1, 32(sp)
-    call print2
+    call print
     LA a0, StringLits2
 ########## len
     LD a1, 0(sp)
-    call print2
+    call print
 ########## len
     LD t0, 0(sp)
     SD t0, 24(sp)
@@ -314,7 +333,7 @@ TEMP_LABEL9_END:
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
-print:
+printhelper:
     ADDI sp, sp, -8
     SD ra, 0(sp)
     ADDI sp, sp, -8

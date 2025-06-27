@@ -11,8 +11,8 @@ func Print10sMultipleAndLengths()
         auto len = strlen(itoa(x));
         if (count != len)
         {
-            print2("number = %d\n", x);
-            print2("new len = %d\n", len);
+            print("number = %d\n", x);
+            print("new len = %d\n", len);
             count = len;
         }
         x = x + 1;
@@ -26,6 +26,6 @@ func foo(auto a, auto b)
 
 func main()
 {
-    print2("return of foo is : %d\n", foo(123, 456));
+    print("return of foo is : %d\n", foo(123, 456));
     Print10sMultipleAndLengths();
 }

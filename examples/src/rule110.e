@@ -5,11 +5,11 @@
 func display(auto base[], auto n) {
     auto i  = 0;
     while (i < n) {
-        if (base[i]) print1("#"); 
-        else print1(".");
+        if (base[i]) print("#"); 
+        else print(".");
         i = i + 1;
     }
-    print1("\n");
+    print("\n");
 }
 
 func next(auto base[], auto n) {

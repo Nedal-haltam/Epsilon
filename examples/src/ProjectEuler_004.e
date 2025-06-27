@@ -27,6 +27,6 @@ func main()
             }
         }
     }
-    print2("the largest palindrome made from the product of two 3-digit numbers is : %d\n", MaxPalindrome);
+    print("the largest palindrome made from the product of two 3-digit numbers is : %d\n", MaxPalindrome);
     return 0;
 }

@@ -18,6 +18,6 @@ func main()
         a = b;
         b = c;
     }
-    print2("the sum of the even-valued terms is: %d\n", sum);
+    print("the sum of the even-valued terms is: %d\n", sum);
     return 0;
 }
