@@ -1,7 +1,7 @@
 
 #define SIZE 100
 
-func display(auto base[SIZE], auto n) {
+func display(auto base[], auto n) {
     auto i  = 0;
     while (i < n) {
         if (base[i]) printf("#"); 
@@ -11,7 +11,7 @@ func display(auto base[SIZE], auto n) {
     printf("\n");
 }
 
-func next(auto base[SIZE], auto n) {
+func next(auto base[], auto n) {
     auto state = base[0] | base[1] << 1;
     auto i  = 2;
     while (i < n) {

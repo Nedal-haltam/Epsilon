@@ -2,7 +2,7 @@
 #define SIZE 10
 
 
-func PrintArray(auto xs[SIZE], auto n)
+func PrintArray(auto xs[], auto n)
 {
     for (auto i = 0; i < n; i = i + 1)
     {
@@ -10,7 +10,7 @@ func PrintArray(auto xs[SIZE], auto n)
     }
 }
 
-func InitArray(auto xs[SIZE], auto n)
+func InitArray(auto xs[], auto n)
 {
     for (auto i = 0; i < n; i = i + 1)
     {
@@ -18,7 +18,7 @@ func InitArray(auto xs[SIZE], auto n)
     }
 }
 
-func MultiplyArray(auto xs[SIZE], auto n, auto value)
+func MultiplyArray(auto xs[], auto n, auto value)
 {
     for (auto i = 0; i < n; i = i + 1)
     {
@@ -26,7 +26,7 @@ func MultiplyArray(auto xs[SIZE], auto n, auto value)
     }
 }
 
-func Dot(auto a[SIZE], auto b[SIZE], auto n)
+func Dot(auto a[], auto b[], auto n)
 {
     for (auto i = 0; i < n; i = i + 1)
     {

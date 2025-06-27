@@ -2,7 +2,7 @@
 #define numbersize 10
 #define charsize 15
 
-func bar(auto number, char character, auto numbers[numbersize], char chars[charsize], auto WillCall)
+func bar(auto number, char character, auto numbers[], char chars[], auto WillCall)
 {
     printf("Entering function `bar`\n");
     printf("number = %d\n", number);
@@ -25,7 +25,7 @@ func bar(auto number, char character, auto numbers[numbersize], char chars[chars
     printf("------------------------------------------------\n");
 }
 
-func foo(auto number, char character, auto numbers[numbersize], char chars[charsize], auto WillCall)
+func foo(auto number, char character, auto numbers[], char chars[], auto WillCall)
 {
     printf("Entering function `foo`\n");
     printf("number = %d\n", number);
@@ -56,7 +56,7 @@ func foo(auto number, char character, auto numbers[numbersize], char chars[chars
     }
 }
 
-func FillAutoTwoD(auto ns[numbersize][numbersize], auto n)
+func FillAutoTwoD(auto ns[][numbersize], auto n)
 {
     for (auto i = 0; i < numbersize; i = i + 1)
     {
@@ -67,7 +67,7 @@ func FillAutoTwoD(auto ns[numbersize][numbersize], auto n)
     }
 }
 
-func PrintAutoTwoD(auto ns[numbersize][numbersize])
+func PrintAutoTwoD(auto ns[][numbersize])
 {
     for (auto i = 0; i < numbersize; i = i + 1)
     {
@@ -78,7 +78,7 @@ func PrintAutoTwoD(auto ns[numbersize][numbersize])
         printf("\n");
     }
 }
-func FillCharTwoD(char cs[charsize][charsize], char n)
+func FillCharTwoD(char cs[][charsize], char n)
 {
     for (auto i = 0; i < charsize; i = i + 1)
     {
@@ -89,7 +89,7 @@ func FillCharTwoD(char cs[charsize][charsize], char n)
     }
 }
 
-func PrintCharTwoD(char cs[charsize][charsize])
+func PrintCharTwoD(char cs[][charsize])
 {
     for (auto i = 0; i < charsize; i = i + 1)
     {
@@ -101,7 +101,7 @@ func PrintCharTwoD(char cs[charsize][charsize])
     }
 }
 
-func TwoD(auto ns[numbersize][numbersize], char cs[charsize][charsize])
+func TwoD(auto ns[][numbersize], char cs[][charsize])
 {
     printf("autos are here: \n");
     FillAutoTwoD(ns, 10);
@@ -149,8 +149,8 @@ func PassArrayWithOffset()
     return 0;
 }
 
-// the zero in the size of the `string` character array variable is just a dummy value
-func StringLitManipulate(char string[0], auto n)
+
+func StringLitManipulate(char string[], auto n)
 {
     string[0] = 'H';
     string[1] = 'e';

@@ -1,7 +1,7 @@
 
 
 #define SIZE 30
-func _FibRecursive(auto arr[SIZE], auto i)
+func _FibRecursive(auto arr[], auto i)
 {
     if (arr[i] != -1)
         return arr[i];

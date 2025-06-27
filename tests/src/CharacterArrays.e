@@ -1,5 +1,5 @@
 #define SIZE 27
-func foo(char chars[SIZE])
+func foo(char chars[])
 {
     for (char i = 'a'; i < 'z' + 1; i = i + 1)
     {

@@ -753,8 +753,18 @@ namespace Epsilon
                             }
                             while (Peek(TokenType.OpenSquare).HasValue)
                             {
-                                Token dim = Parsedimension();
-                                uint DimValue = uint.Parse(dim.Value);
+                                uint DimValue;
+                                if (Peek(TokenType.CloseSquare, 1).HasValue)
+                                {
+                                    Consume();
+                                    Consume();
+                                    DimValue = 0;
+                                }
+                                else
+                                {
+                                    Token dim = Parsedimension();
+                                    DimValue = uint.Parse(dim.Value);
+                                }
                                 DimensionsOfArrays[ident.Value].Add(DimValue);
                                 parameter.Size *= DimValue;
                             }

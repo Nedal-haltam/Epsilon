@@ -19,7 +19,7 @@ func SlowDown()
     }
 }
 
-func Copy(auto src[SIZE][SIZE], auto dst[SIZE][SIZE])
+func Copy(auto src[][SIZE], auto dst[][SIZE])
 {
     for (auto i = 0; i < SIZE; i = i + 1)
     {
