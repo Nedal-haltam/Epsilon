@@ -10,39 +10,37 @@ TESTS_RISCV_BIN := ./tests/risc-v/bin
 
 SAVED_OUTPUT_PATH := ./SavedOutput.txt
 
-.PHONY:	all build-main run-main main \
-		examples build-examples run-examples \
-		tests build-tests run-tests \
-		reset clean clean-examples clean-tests diff-diff update
+EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 ProjectEuler_004 ProjectEuler_005
+TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc
 
-all: reset tests examples
+.PHONY:	all main compile-examples assemble-examples run-examples examples \
+		compile-tests assemble-tests run-tests tests clean-examples clean-tests clean reset-log diff-diff
+
+all: reset-log tests examples
 	@echo "✅ Built successfully."
 
-build: build-examples build-tests
-
-build-main:
+main:
 	dotnet ./bin/Debug/net8.0/Epsilon.dll ./main.e -o ./main.S
-
-run-main:
 	riscv64-linux-gnu-gcc -o ./main ./main.S -static
 	qemu-riscv64 ./main
-
-main: build-main run-main
 	@echo "✅ Built main successfully."
 
-EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 ProjectEuler_004 ProjectEuler_005
-
-build-examples: clean-examples
+compile-examples: clean-examples
 	@for ex in $(EXAMPLES); do \
 		echo "Compiling $$ex.e..."; \
 		dotnet ./bin/Debug/net8.0/Epsilon.dll $(EXAMPLES_SRC_PATH)/$$ex.e -o $(EXAMPLES_RISCV_ASSEMBLY)/$$ex.S || exit 1; \
 	done
 
+assemble-examples:
+	@for ex in $(EXAMPLES); do \
+		echo "Assembling $$ex..."; \
+		riscv64-linux-gnu-gcc -o $(EXAMPLES_RISCV_BIN)/$$ex $(EXAMPLES_RISCV_ASSEMBLY)/$$ex.S -static || exit 1; \
+	done
+
 run-examples:
 	@for ex in $(EXAMPLES); do \
 		echo "-------------------------------------------------------------------"; \
-		echo "Building and running $$ex..."; \
-		riscv64-linux-gnu-gcc -o $(EXAMPLES_RISCV_BIN)/$$ex $(EXAMPLES_RISCV_ASSEMBLY)/$$ex.S -static || exit 1; \
+		echo "Running $$ex..."; \
 		if [ "$(LOG)" = "1" ]; then \
 			script -q -a -c "qemu-riscv64 $(EXAMPLES_RISCV_BIN)/$$ex" /dev/null | col -b >> $(SAVED_OUTPUT_PATH) 2>&1 || exit 1; \
 		else \
@@ -50,21 +48,25 @@ run-examples:
 		fi; \
 	done
 
-examples: build-examples run-examples
+examples: compile-examples assemble-examples run-examples
 
-TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc
 
-build-tests: clean-tests
+compile-tests: clean-tests
 	@for ex in $(TESTS); do \
 		echo "Compiling $$ex.e..."; \
 		dotnet ./bin/Debug/net8.0/Epsilon.dll $(TESTS_SRC_PATH)/$$ex.e -o $(TESTS_RISCV_ASSEMBLY)/$$ex.S || exit 1; \
 	done
 
+assemble-tests:
+	@for ex in $(TESTS); do \
+		echo "Assembling $$ex..."; \
+		riscv64-linux-gnu-gcc -o $(TESTS_RISCV_BIN)/$$ex $(TESTS_RISCV_ASSEMBLY)/$$ex.S -static || exit 1; \
+	done
+
 run-tests:
 	@for ex in $(TESTS); do \
 		echo "-------------------------------------------------------------------"; \
-		echo "Building and running $$ex..."; \
-		riscv64-linux-gnu-gcc -o $(TESTS_RISCV_BIN)/$$ex $(TESTS_RISCV_ASSEMBLY)/$$ex.S -static || exit 1; \
+		echo "Running $$ex..."; \
 		if [ "$(LOG)" = "1" ]; then \
 			script -q -a -c "qemu-riscv64 $(TESTS_RISCV_BIN)/$$ex" /dev/null | col -b >> $(SAVED_OUTPUT_PATH) 2>&1 || exit 1; \
 		else \
@@ -72,7 +74,7 @@ run-tests:
 		fi; \
 	done
 
-tests: build-tests run-tests
+tests: compile-tests assemble-tests run-tests
 
 clean-examples:
 	@echo "🧹 Cleaning up examples"
@@ -89,7 +91,7 @@ clean-tests:
 clean: clean-examples clean-tests
 	@echo "🧹 Cleaning up all"
 
-reset:
+reset-log:
 	@if [ "$(LOG)" = "1" ]; then \
 		rm -rf $(SAVED_OUTPUT_PATH); \
 		touch $(SAVED_OUTPUT_PATH); \
