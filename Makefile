@@ -14,7 +14,7 @@ EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 P
 TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc
 
 .PHONY:	all main compile-examples assemble-examples run-examples examples \
-		compile-tests assemble-tests run-tests tests clean-examples clean-tests clean reset-log diff-diff
+		compile-tests assemble-tests run-tests tests clean-examples clean-tests clean record-log diff-diff
 
 all: reset-log tests examples
 	@echo "✅ Built successfully."
@@ -91,11 +91,10 @@ clean-tests:
 clean: clean-examples clean-tests
 	@echo "🧹 Cleaning up all"
 
-reset-log:
-	@if [ "$(LOG)" = "1" ]; then \
-		rm -rf $(SAVED_OUTPUT_PATH); \
-		touch $(SAVED_OUTPUT_PATH); \
-	fi;
+record-log:
+	@rm -rf $(SAVED_OUTPUT_PATH)
+	@touch $(SAVED_OUTPUT_PATH)
+	$(MAKE) LOG=1 SAVED_OUTPUT_PATH=$(SAVED_OUTPUT_PATH)
 
 diff-diff:
 	rm -rf logs
