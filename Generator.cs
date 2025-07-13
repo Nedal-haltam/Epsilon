@@ -234,6 +234,34 @@ namespace Epsilon
                     if (DestReg == null)
                         GenPush(reg, size);
                 }
+                else if (term.unary.type == NodeTermUnaryExpr.NodeTermUnaryExprType.addressof)
+                {
+                    string reg = DestReg ?? m_FirstTempReg;
+                    NodeTermIdent ident = term.unary.term.ident;
+                    if (ident.indexes.Count == 0)
+                    {
+                        int index = m_vars.FindIndex(x => x.Value == ident.ident.Value);
+                        if (index != -1)
+                        {
+                            Var var = m_vars[index];
+                            uint TypeSize = var.IsArray && var.IsParameter ? 8 : var.TypeSize;
+                            uint Count = var.Size / var.TypeSize;
+                            uint relative_location = m_StackSize - VariableLocation(var.Value) - TypeSize;
+                            //if (!var.IsParameter)
+                                m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location - (TypeSize * (Count - 1))}");
+                            //else
+                            //    m_outputcode.AppendLine($"    ADD {reg}, sp, {relative_location}");
+                            if (DestReg == null)
+                                GenPush(reg, size);
+                        }
+                        else
+                        {
+                            Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.ident.Line}:1:  variable `{ident.ident.Value}` is undeclared\n", 1);
+                        }
+                    }
+                    if (DestReg == null)
+                        GenPush(reg, size);
+                }
                 else
                 {
                     Shartilities.UNREACHABLE("invalid unary oprator");

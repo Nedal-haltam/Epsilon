@@ -33,9 +33,7 @@ func printhelper(char msg[], auto msg_len, auto i, auto Number, auto IfPrintNumb
     }
     if (IfPrintNumber & msg[i] == '%' & i + 1 < msg_len & msg[i + 1] == 'c')
     {
-        char c[1];
-        c[0] = Number;
-        write(1, c, 1);
+        write(1, &Number, 1);
         return 2;
     }
     if (IfPrintNumber & msg[i] == '%' & i + 1 < msg_len & msg[i + 1] == 's')

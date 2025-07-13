@@ -264,7 +264,7 @@ namespace Epsilon
     {
         public enum NodeTermUnaryExprType
         {
-            negative, complement, not,
+            negative, complement, not, addressof
         }
         public NodeTermUnaryExprType type;
         public NodeTerm term;

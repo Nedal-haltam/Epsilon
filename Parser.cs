@@ -20,7 +20,7 @@ namespace Epsilon
         public string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
         {
             Int64 a = Convert.ToInt64(imm1);
-            Int64 b = Convert.ToInt32(imm2);
+            Int64 b = Convert.ToInt64(imm2);
 
             if (op == NodeBinExpr.NodeBinExprType.Add)
                 return (a + b).ToString();
@@ -29,7 +29,7 @@ namespace Epsilon
             else if (op == NodeBinExpr.NodeBinExprType.Sll)
                 return (a << (Int32)b).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.Srl)
-                return (a >> (Int32)b).ToString();
+                return (a >>> (Int32)b).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.EqualEqual)
                 return (a == b ? 1 : 0).ToString();
             else if (op == NodeBinExpr.NodeBinExprType.NotEqual)
@@ -159,6 +159,22 @@ namespace Epsilon
                 };
                 return term;
             }
+            else if (Peek(TokenType.And).HasValue)
+            {
+                Consume();
+                NodeTerm? termunary = ParseTerm();
+                if (!termunary.HasValue)
+                    return null;
+                if (termunary.Value.type != NodeTerm.NodeTermType.Ident)
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"address of operator is only on identifiers with no offsets\n", 1);
+                term.type = NodeTerm.NodeTermType.Unary;
+                term.unary = new()
+                {
+                    type = NodeTermUnaryExpr.NodeTermUnaryExprType.addressof,
+                    term = termunary.Value,
+                };
+                return term;
+            }
             else if (Peek(TokenType.IntLit).HasValue)
             {
                 term.type = NodeTerm.NodeTermType.IntLit;
@@ -220,7 +236,7 @@ namespace Epsilon
                 NodeExpr VariadicIndex = ExpectedExpression(ParseExpr());
                 TryConsumeError(TokenType.CloseParen);
                 term.type = NodeTerm.NodeTermType.Variadic;
-                term.variadic = new() { VariadicIndex =  VariadicIndex };
+                term.variadic = new() { VariadicIndex = VariadicIndex };
                 return term;
             }
             else if (Peek(TokenType.OpenParen).HasValue)
@@ -250,18 +266,20 @@ namespace Epsilon
 
         static int? GetPrec(TokenType type)
         {
-            return type switch
+            int? prec = type switch
             {
-                TokenType.Mul or TokenType.Rem or TokenType.Div => 7,
-                TokenType.Plus or TokenType.Minus => 6,
+                TokenType.Mul or TokenType.Rem or TokenType.Div => 3,
+                TokenType.Plus or TokenType.Minus => 4,
                 TokenType.Sll or TokenType.Srl => 5,
-                TokenType.LessThan => 4,
-                TokenType.EqualEqual or TokenType.NotEqual => 3,
-                TokenType.And => 2,
-                TokenType.Xor => 1,
-                TokenType.Or => 0,
+                TokenType.LessThan => 6,
+                TokenType.EqualEqual or TokenType.NotEqual => 7,
+                TokenType.And => 8,
+                TokenType.Xor => 9,
+                TokenType.Or => 10,
                _ => null,
             };
+            if (!prec.HasValue) return null;
+            return 10 - prec.Value;
         }
         NodeBinExpr.NodeBinExprType GetOpType(TokenType op)
         {
