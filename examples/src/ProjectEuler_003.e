@@ -17,6 +17,6 @@ func main()
             n = n / i;
     }
 
-    print("the largest prime factor of the number %ld is %ld\n", number, ans);
+    print("the largest prime factor of the number %d is %d\n", number, ans);
     return 0;
 }

@@ -1405,37 +1405,16 @@ LABEL41_START:
     AND t0, t0, t1
     BEQZ t0, LABEL43_elifs
 # begin scope
-    ADDI sp, sp, -1
-# begin array address
-    LI t0, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    MUL t0, t0, t1
-    ADD t0, sp, t0
-    ADDI t0, t0, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-# end array address
-########## Number
-    LD t1, 17(sp)
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    SB t1, 0(t0)
     LI a0, 1
-########## c
-    ADDI a1, sp, 0
+    ADDI a1, sp, 8
     LI a2, 1
     call write
     LI s0, 2
-    ADDI sp, sp, 41
+    ADDI sp, sp, 40
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
 # end scope
-    ADDI sp, sp, 1
 LABEL43_elifs:
 LABEL42_END:
 LABEL44_START:
@@ -1554,164 +1533,6 @@ LABEL44_START:
     ADDI sp, sp, 8
 LABEL46_elifs:
 LABEL45_END:
-LABEL47_START:
-    LI t0, 100
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## msg
-# begin array address
-    LI t0, 2
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## i
-    LD t0, 32(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    MUL t0, t0, t1
-    LD t1, 40(sp)
-    ADD t0, t1, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-# end array address
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    LB t0, 0(t1)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## msg_len
-    LD t0, 32(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 2
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## i
-    LD t0, 40(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SLT t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 108
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## msg
-# begin array address
-    LI t0, 1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## i
-    LD t0, 48(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    MUL t0, t0, t1
-    LD t1, 56(sp)
-    ADD t0, t1, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-# end array address
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    LB t0, 0(t1)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## msg_len
-    LD t0, 48(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## i
-    LD t0, 56(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SLT t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 37
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## msg
-# begin array address
-########## i
-    LD t0, 56(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    MUL t0, t0, t1
-    LD t1, 72(sp)
-    ADD t0, t1, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-# end array address
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    LB t0, 0(t1)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## IfPrintNumber
-    LD t0, 40(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    AND t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    AND t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    AND t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    AND t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    AND t0, t0, t1
-    BEQZ t0, LABEL49_elifs
-# begin scope
-########## Number
-    LD a0, 8(sp)
-    call printnumber
-    LI s0, 3
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
-    ret
-# end scope
-LABEL49_elifs:
-LABEL48_END:
     LI a0, 1
 ########## i
     LD t0, 16(sp)
@@ -1744,7 +1565,7 @@ FillAutoTwoD:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL50_START:
+TEMP_LABEL47_START:
     LI t0, 10
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1753,7 +1574,7 @@ TEMP_LABEL50_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL51_END
+    BEQZ t0, TEMP_LABEL48_END
 # end condition
 # begin scope
 # begin forloop
@@ -1764,7 +1585,7 @@ TEMP_LABEL50_START:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL53_START:
+TEMP_LABEL50_START:
     LI t0, 10
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1773,7 +1594,7 @@ TEMP_LABEL53_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL54_END
+    BEQZ t0, TEMP_LABEL51_END
 # end condition
 # begin scope
 # begin array address
@@ -1823,7 +1644,7 @@ TEMP_LABEL53_START:
     SD t1, 0(t0)
 # end scope
 # begin update
-TEMP_LABEL55_START:
+TEMP_LABEL52_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1834,14 +1655,14 @@ TEMP_LABEL55_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL53_START
-TEMP_LABEL54_END:
+    J TEMP_LABEL50_START
+TEMP_LABEL51_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
 # end scope
 # begin update
-TEMP_LABEL52_START:
+TEMP_LABEL49_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1852,8 +1673,8 @@ TEMP_LABEL52_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL50_START
-TEMP_LABEL51_END:
+    J TEMP_LABEL47_START
+TEMP_LABEL48_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
@@ -1875,7 +1696,7 @@ PrintAutoTwoD:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL56_START:
+TEMP_LABEL53_START:
     LI t0, 10
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1884,7 +1705,7 @@ TEMP_LABEL56_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL57_END
+    BEQZ t0, TEMP_LABEL54_END
 # end condition
 # begin scope
 # begin forloop
@@ -1895,7 +1716,7 @@ TEMP_LABEL56_START:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL59_START:
+TEMP_LABEL56_START:
     LI t0, 10
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1904,7 +1725,7 @@ TEMP_LABEL59_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL60_END
+    BEQZ t0, TEMP_LABEL57_END
 # end condition
 # begin scope
     LA a0, StringLits25
@@ -1942,7 +1763,7 @@ TEMP_LABEL59_START:
     call print
 # end scope
 # begin update
-TEMP_LABEL61_START:
+TEMP_LABEL58_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1953,8 +1774,8 @@ TEMP_LABEL61_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL59_START
-TEMP_LABEL60_END:
+    J TEMP_LABEL56_START
+TEMP_LABEL57_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
@@ -1962,7 +1783,7 @@ TEMP_LABEL60_END:
     call print
 # end scope
 # begin update
-TEMP_LABEL58_START:
+TEMP_LABEL55_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1973,8 +1794,8 @@ TEMP_LABEL58_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL56_START
-TEMP_LABEL57_END:
+    J TEMP_LABEL53_START
+TEMP_LABEL54_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
@@ -1998,7 +1819,7 @@ FillCharTwoD:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL62_START:
+TEMP_LABEL59_START:
     LI t0, 15
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -2007,7 +1828,7 @@ TEMP_LABEL62_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL63_END
+    BEQZ t0, TEMP_LABEL60_END
 # end condition
 # begin scope
 # begin forloop
@@ -2018,7 +1839,7 @@ TEMP_LABEL62_START:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL65_START:
+TEMP_LABEL62_START:
     LI t0, 15
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -2027,7 +1848,7 @@ TEMP_LABEL65_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL66_END
+    BEQZ t0, TEMP_LABEL63_END
 # end condition
 # begin scope
 # begin array address
@@ -2078,7 +1899,7 @@ TEMP_LABEL65_START:
     SB t1, 0(t0)
 # end scope
 # begin update
-TEMP_LABEL67_START:
+TEMP_LABEL64_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -2089,14 +1910,14 @@ TEMP_LABEL67_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL65_START
-TEMP_LABEL66_END:
+    J TEMP_LABEL62_START
+TEMP_LABEL63_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
 # end scope
 # begin update
-TEMP_LABEL64_START:
+TEMP_LABEL61_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -2107,8 +1928,8 @@ TEMP_LABEL64_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL62_START
-TEMP_LABEL63_END:
+    J TEMP_LABEL59_START
+TEMP_LABEL60_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
@@ -2130,7 +1951,7 @@ PrintCharTwoD:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL68_START:
+TEMP_LABEL65_START:
     LI t0, 15
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -2139,7 +1960,7 @@ TEMP_LABEL68_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL69_END
+    BEQZ t0, TEMP_LABEL66_END
 # end condition
 # begin scope
 # begin forloop
@@ -2150,7 +1971,7 @@ TEMP_LABEL68_START:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL71_START:
+TEMP_LABEL68_START:
     LI t0, 15
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -2159,7 +1980,7 @@ TEMP_LABEL71_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL72_END
+    BEQZ t0, TEMP_LABEL69_END
 # end condition
 # begin scope
     LA a0, StringLits25
@@ -2197,7 +2018,7 @@ TEMP_LABEL71_START:
     call print
 # end scope
 # begin update
-TEMP_LABEL73_START:
+TEMP_LABEL70_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -2208,8 +2029,8 @@ TEMP_LABEL73_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL71_START
-TEMP_LABEL72_END:
+    J TEMP_LABEL68_START
+TEMP_LABEL69_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
@@ -2217,7 +2038,7 @@ TEMP_LABEL72_END:
     call print
 # end scope
 # begin update
-TEMP_LABEL70_START:
+TEMP_LABEL67_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -2228,8 +2049,8 @@ TEMP_LABEL70_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL68_START
-TEMP_LABEL69_END:
+    J TEMP_LABEL65_START
+TEMP_LABEL66_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
@@ -2255,7 +2076,7 @@ pass_array_with_offset:
     SD t0, 0(sp)
 # end init
 # begin condition
-TEMP_LABEL74_START:
+TEMP_LABEL71_START:
     LI t0, 3
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -2264,7 +2085,7 @@ TEMP_LABEL74_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL75_END
+    BEQZ t0, TEMP_LABEL72_END
 # end condition
 # begin scope
 # begin array address
@@ -2297,7 +2118,7 @@ TEMP_LABEL74_START:
     SD t0, 8(sp)
 # end scope
 # begin update
-TEMP_LABEL76_START:
+TEMP_LABEL73_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -2308,8 +2129,8 @@ TEMP_LABEL76_START:
     ADD t0, t0, t1
     SD t0, 0(sp)
 # end update
-    J TEMP_LABEL74_START
-TEMP_LABEL75_END:
+    J TEMP_LABEL71_START
+TEMP_LABEL72_END:
 # end scope
     ADDI sp, sp, 8
 # end forloop
@@ -2323,20 +2144,66 @@ printnumber:
     SD ra, 0(sp)
     ADDI sp, sp, -8
     SD a0, 0(sp)
-LABEL77_START:
+LABEL74_START:
 ########## Number
     LD t0, 0(sp)
     SEQZ t0, t0
-    BEQZ t0, LABEL79_elifs
+    BEQZ t0, LABEL76_elifs
 # begin scope
     LI a0, 1
     LA a1, StringLits26
     LI a2, 1
     call write
 # end scope
-    J LABEL78_END
-LABEL79_elifs:
+    J LABEL75_END
+LABEL76_elifs:
 # begin scope
+LABEL77_START:
+    LI t0, -9223372036854775808
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## Number
+    LD t0, 8(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    XOR t0, t0, t1
+    SEQZ t0, t0
+    BEQZ t0, LABEL79_elifs
+# begin scope
+    LI a0, 1
+    LA a1, StringLits27
+    LI a2, 20
+    call write
+    LI s0, 0
+    ADDI sp, sp, 8
+    LD ra, 0(sp)
+    ADDI sp, sp, 8
+    ret
+# end scope
+LABEL79_elifs:
+LABEL78_END:
+LABEL80_START:
+    LI t0, 0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## Number
+    LD t0, 8(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SLT t0, t0, t1
+    BEQZ t0, LABEL82_elifs
+# begin scope
+########## Number
+    LD t0, 0(sp)
+    NEG t0, t0
+    SD t0, 0(sp)
+    LI a0, 1
+    LA a1, StringLits28
+    LI a2, 1
+    call write
+# end scope
+LABEL82_elifs:
+LABEL81_END:
     ADDI sp, sp, -8
     SD a0, 0(sp)
 ########## Number
@@ -2365,7 +2232,7 @@ LABEL79_elifs:
     call write
 # end scope
     ADDI sp, sp, 16
-LABEL78_END:
+LABEL75_END:
     mv s0, zero
     ADDI sp, sp, 8
     LD ra, 0(sp)
@@ -2462,6 +2329,10 @@ StringLits25:
     .string "%d"
 StringLits26:
     .string "0"
+StringLits27:
+    .string "-9223372036854775808"
+StringLits28:
+    .string "-"
 .section .bss
 itoaTempBuffer:     
     .space 32

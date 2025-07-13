@@ -20,7 +20,7 @@ func FibRecursive()
     for (auto i = 0; i < SIZE; i = i + 1)
     {
         arr[i] = _FibRecursive(arr, i);
-        print("%ld ", arr[i]);
+        print("%d ", arr[i]);
     }
     print("\n");
 }
@@ -31,7 +31,7 @@ func FibIterative(auto n)
     auto c;
     for (auto i = 0; i < n; i = i + 1)
     {
-        print("%ld ", a);
+        print("%d ", a);
         c = a + b;
         a = b;
         b = c;
