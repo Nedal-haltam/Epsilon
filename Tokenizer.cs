@@ -340,7 +340,7 @@ namespace Epsilon
                         Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Error expected a single character between single quotes but got `{buffer}` on line {line}\n", 1);
                     }
                     Consume();
-                    m_tokens.Add(new() { Value = Convert.ToUInt32(buffer.ToString()[0]).ToString(), Type = TokenType.IntLit, Line = line });
+                    m_tokens.Add(new() { Value = Convert.ToByte(buffer.ToString()[0]).ToString(), Type = TokenType.IntLit, Line = line });
                 }
                 else if (Peek('(').HasValue)
                 {

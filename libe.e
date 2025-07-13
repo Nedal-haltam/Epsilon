@@ -8,6 +8,16 @@ func printnumber(auto Number)
     }
     else
     {
+        if (Number == 1 << 63)
+        {
+            write(1, "-9223372036854775808", 20);
+            return 0;
+        }
+        if (Number < 0)
+        {
+            Number = -Number;
+            write(1, "-", 1);
+        }
         auto NumberText = itoa(Number);
         auto NumberTextLen = strlen(NumberText);
         write(1, NumberText, NumberTextLen);
@@ -33,11 +43,6 @@ func printhelper(char msg[], auto msg_len, auto i, auto Number, auto IfPrintNumb
         auto NumberTextLen = strlen(Number);
         write(1, Number, NumberTextLen);
         return 2;
-    }
-    if (IfPrintNumber & msg[i] == '%' & i + 1 < msg_len & msg[i + 1] == 'l' & i + 2 < msg_len & msg[i + 2] == 'd')
-    {
-        printnumber(Number);
-        return 3;
     }
     write(1, msg + i, 1);
     return 1;

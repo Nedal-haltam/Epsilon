@@ -1,16 +1,6 @@
 ﻿
 
-using System.Collections.Generic;
-using System.Data;
-using System.Net.NetworkInformation;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
-using static System.Formats.Asn1.AsnWriter;
-
-
-
-
 namespace Epsilon
 {
     internal class Program
@@ -37,7 +27,7 @@ namespace Epsilon
         }
         static void Usage()
         {
-            Shartilities.Log(Shartilities.LogType.NORMAL, $"Usage: {Environment.ProcessPath} <input file> [-o output file]\n");
+            Console.WriteLine($"Usage: {Environment.ProcessPath} <input file> [-o output file]");
         }
         static void Main(string[] args)
         {
