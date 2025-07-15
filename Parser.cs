@@ -15,7 +15,7 @@ namespace Epsilon
         private int m_curr_index = 0;
         public Dictionary<string, List<uint>> DimensionsOfArrays = [];
         public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
-        public List<string> STD_FUNCTIONS = ["strlen", "itoa", "write"];
+        public List<string> STD_FUNCTIONS = ["strlen", "stoa", "unstoa", "write"];
 
         public string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
         {
@@ -886,10 +886,16 @@ namespace Epsilon
                         };
                         return [stmt];
                     }
-                    else if (CalledFunctionName.Value == "itoa")
+                    else if (CalledFunctionName.Value == "stoa")
                     {
-                        // TODO: change the implementation of `itoa` to operate on the desired buffer no the default one (i.e. `itoaTempBuffer`)
-                        Shartilities.TODO("calling itoa");
+                        // TODO: change the implementation of `stoa` to operate on the desired buffer no the default one (i.e. `stoaTempBuffer`)
+                        Shartilities.TODO("calling stoa");
+                        return [];
+                    }
+                    else if (CalledFunctionName.Value == "unstoa")
+                    {
+                        // TODO: change the implementation of `unstoa` to operate on the desired buffer no the default one (i.e. `unstoaTempBuffer`)
+                        Shartilities.TODO("calling unstoa");
                         return [];
                     }
                     else if (CalledFunctionName.Value == "write")

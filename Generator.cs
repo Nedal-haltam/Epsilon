@@ -1005,24 +1005,45 @@ namespace Epsilon
                 m_outputcode.AppendLine($"strlen_done:");
                 m_outputcode.AppendLine($"    ret");
             }
-            if (m_CalledFunctions.Contains("itoa"))
+            if (m_CalledFunctions.Contains("stoa"))
             {
-                m_outputcode.AppendLine($"itoa:");
+                m_outputcode.AppendLine($"stoa:");
                 m_outputcode.AppendLine($"    mv t1, a0");
                 //m_outputcode.AppendLine($"    ADDI t2, a1, 32");
                 m_outputcode.AppendLine($"    la t2, itoaTempBuffer");
                 m_outputcode.AppendLine($"    ADDI t2, t2, 32");
                 m_outputcode.AppendLine($"    sb zero, 0(t2)");
-                m_outputcode.AppendLine($"itoa_loop:");
-                m_outputcode.AppendLine($"    beqz t1, itoa_done");
+                m_outputcode.AppendLine($"stoa_loop:");
+                m_outputcode.AppendLine($"    beqz t1, stoa_done");
                 m_outputcode.AppendLine($"    li t3, 10");
                 m_outputcode.AppendLine($"    rem t4, t1, t3");
                 m_outputcode.AppendLine($"    ADDI t4, t4, '0'");
                 m_outputcode.AppendLine($"    ADDI t2, t2, -1");
                 m_outputcode.AppendLine($"    sb t4, 0(t2)");
                 m_outputcode.AppendLine($"    div t1, t1, t3");
-                m_outputcode.AppendLine($"    j itoa_loop");
-                m_outputcode.AppendLine($"itoa_done:");
+                m_outputcode.AppendLine($"    j stoa_loop");
+                m_outputcode.AppendLine($"stoa_done:");
+                m_outputcode.AppendLine($"    mv s0, t2");
+                m_outputcode.AppendLine($"    ret");
+            }
+            if (m_CalledFunctions.Contains("unstoa"))
+            {
+                m_outputcode.AppendLine($"unstoa:");
+                m_outputcode.AppendLine($"    mv t1, a0");
+                //m_outputcode.AppendLine($"    ADDI t2, a1, 32");
+                m_outputcode.AppendLine($"    la t2, itoaTempBuffer");
+                m_outputcode.AppendLine($"    ADDI t2, t2, 32");
+                m_outputcode.AppendLine($"    sb zero, 0(t2)");
+                m_outputcode.AppendLine($"unstoa_loop:");
+                m_outputcode.AppendLine($"    beqz t1, unstoa_done");
+                m_outputcode.AppendLine($"    li t3, 10");
+                m_outputcode.AppendLine($"    remu t4, t1, t3");
+                m_outputcode.AppendLine($"    ADDI t4, t4, '0'");
+                m_outputcode.AppendLine($"    ADDI t2, t2, -1");
+                m_outputcode.AppendLine($"    sb t4, 0(t2)");
+                m_outputcode.AppendLine($"    divu t1, t1, t3");
+                m_outputcode.AppendLine($"    j unstoa_loop");
+                m_outputcode.AppendLine($"unstoa_done:");
                 m_outputcode.AppendLine($"    mv s0, t2");
                 m_outputcode.AppendLine($"    ret");
             }
@@ -1044,7 +1065,6 @@ namespace Epsilon
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n", 1);
             }
-            // TODO: should resolve and generate global and keep them saved without resetting
             m_outputcode.AppendLine($"{MainFunctionName}:");
             GenFunctionDefinition("main");
             for (int i = 0; i < m_CalledFunctions.Count; i++)
@@ -1063,7 +1083,8 @@ namespace Epsilon
                 m_outputcode.AppendLine($"StringLits{i}:");
                 m_outputcode.AppendLine($"    .string \"{m_StringLits[i]}\"");
             }
-            if (!m_UserDefinedFunctions.ContainsKey("itoa") && m_CalledFunctions.Contains("itoa"))
+            if (!m_UserDefinedFunctions.ContainsKey("stoa") && m_CalledFunctions.Contains("stoa")
+            && !m_UserDefinedFunctions.ContainsKey("unstoa") && m_CalledFunctions.Contains("unstoa"))
             {
                 m_outputcode.AppendLine($".section .bss");
                 m_outputcode.AppendLine($"itoaTempBuffer:     ");

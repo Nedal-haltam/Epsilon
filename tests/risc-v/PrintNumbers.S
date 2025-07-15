@@ -1,104 +1,29 @@
 .section .text
 .globl main
 main:
-    LI t0, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-# begin forloop
-# begin scope
-# begin init
-    LI t0, 1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-# end init
-# begin condition
-TEMP_LABEL0_START:
-    LI t0, 1000
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## i
-    LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL1_END
-# end condition
-# begin scope
-LABEL3_START:
-    LI t0, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 5
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## i
-    LD t0, 16(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    rem t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 3
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## i
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    rem t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    OR t0, t0, t1
-    BEQZ t0, LABEL5_elifs
-# begin scope
-########## i
-    LD t0, 0(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## ans
-    LD t0, 16(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    SD t0, 8(sp)
-# end scope
-LABEL5_elifs:
-LABEL4_END:
-# end scope
-# begin update
-TEMP_LABEL2_START:
-    LI t0, 1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-########## i
-    LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    SD t0, 0(sp)
-# end update
-    J TEMP_LABEL0_START
-TEMP_LABEL1_END:
-# end scope
-    ADDI sp, sp, 8
-# end forloop
     LA a0, StringLits0
-########## ans
-    LD a1, 0(sp)
+    LI a1, -9223372036854775808
+    call print
+    LA a0, StringLits0
+    LI a1, 9223372036854775807
+    call print
+    LA a0, StringLits0
+    LI a1, 1
+    NEG a1, a1
+    call print
+    LA a0, StringLits1
+    LI a1, -9223372036854775808
+    call print
+    LA a0, StringLits1
+    LI a1, 9223372036854775807
+    call print
+    LA a0, StringLits1
+    LI a1, 1
+    NEG a1, a1
+    call print
+    LA a0, StringLits2
     call print
     LI s0, 0
-    ADDI sp, sp, 8
     mv a0, s0
     call exit
 print:
@@ -139,7 +64,7 @@ print:
 # begin whileloop
 # begin scope
 # begin condition
-TEMP_LABEL6_START:
+TEMP_LABEL0_START:
 ########## msg_len
     LD t0, 16(sp)
     ADDI sp, sp, -8
@@ -149,10 +74,10 @@ TEMP_LABEL6_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL7_END
+    BEQZ t0, TEMP_LABEL1_END
 # end condition
 # begin scope
-LABEL8_START:
+LABEL2_START:
     LI t0, 7
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -161,7 +86,7 @@ LABEL8_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, LABEL10_elifs
+    BEQZ t0, LABEL4_elifs
 # begin scope
     ADDI sp, sp, -40
     SD a0, 0(sp)
@@ -206,7 +131,7 @@ LABEL8_START:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 16(sp)
-LABEL11_START:
+LABEL5_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -216,7 +141,7 @@ LABEL11_START:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SNEZ t0, t0
-    BEQZ t0, LABEL13_elifs
+    BEQZ t0, LABEL7_elifs
 # begin scope
     LI t0, 1
     ADDI sp, sp, -8
@@ -228,12 +153,12 @@ LABEL11_START:
     ADD t0, t0, t1
     SD t0, 8(sp)
 # end scope
-LABEL13_elifs:
-LABEL12_END:
+LABEL7_elifs:
+LABEL6_END:
 # end scope
     ADDI sp, sp, 8
-    J LABEL9_END
-LABEL10_elifs:
+    J LABEL3_END
+LABEL4_elifs:
 # begin scope
     ADDI sp, sp, -40
     SD a0, 0(sp)
@@ -271,10 +196,10 @@ LABEL10_elifs:
     SD t0, 16(sp)
 # end scope
     ADDI sp, sp, 8
-LABEL9_END:
+LABEL3_END:
 # end scope
-    J TEMP_LABEL6_START
-TEMP_LABEL7_END:
+    J TEMP_LABEL0_START
+TEMP_LABEL1_END:
 # end scope
 # end whileloop
     mv s0, zero
@@ -295,7 +220,7 @@ printhelper:
     SD a3, 0(sp)
     ADDI sp, sp, -8
     SD a4, 0(sp)
-LABEL14_START:
+LABEL8_START:
     LI t0, 100
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -384,7 +309,7 @@ LABEL14_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
-    BEQZ t0, LABEL16_elifs
+    BEQZ t0, LABEL10_elifs
 # begin scope
 ########## Number
     LD a0, 8(sp)
@@ -396,9 +321,9 @@ LABEL14_START:
     ADDI sp, sp, 8
     ret
 # end scope
-LABEL16_elifs:
-LABEL15_END:
-LABEL17_START:
+LABEL10_elifs:
+LABEL9_END:
+LABEL11_START:
     LI t0, 117
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -543,7 +468,7 @@ LABEL17_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
-    BEQZ t0, LABEL19_elifs
+    BEQZ t0, LABEL13_elifs
 # begin scope
 ########## Number
     LD a0, 8(sp)
@@ -555,9 +480,9 @@ LABEL17_START:
     ADDI sp, sp, 8
     ret
 # end scope
-LABEL19_elifs:
-LABEL18_END:
-LABEL20_START:
+LABEL13_elifs:
+LABEL12_END:
+LABEL14_START:
     LI t0, 99
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -646,7 +571,7 @@ LABEL20_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
-    BEQZ t0, LABEL22_elifs
+    BEQZ t0, LABEL16_elifs
 # begin scope
     LI a0, 1
     ADDI a1, sp, 8
@@ -658,9 +583,9 @@ LABEL20_START:
     ADDI sp, sp, 8
     ret
 # end scope
-LABEL22_elifs:
-LABEL21_END:
-LABEL23_START:
+LABEL16_elifs:
+LABEL15_END:
+LABEL17_START:
     LI t0, 115
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -749,7 +674,7 @@ LABEL23_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
-    BEQZ t0, LABEL25_elifs
+    BEQZ t0, LABEL19_elifs
 # begin scope
     ADDI sp, sp, -8
     SD a0, 0(sp)
@@ -774,8 +699,8 @@ LABEL23_START:
     ret
 # end scope
     ADDI sp, sp, 8
-LABEL25_elifs:
-LABEL24_END:
+LABEL19_elifs:
+LABEL18_END:
     LI a0, 1
 ########## i
     LD t0, 16(sp)
@@ -800,26 +725,26 @@ printnumber:
     SD a0, 0(sp)
     ADDI sp, sp, -1
     SB a1, 0(sp)
-LABEL26_START:
+LABEL20_START:
 ########## Number
     LD t0, 1(sp)
     SEQZ t0, t0
-    BEQZ t0, LABEL28_elifs
+    BEQZ t0, LABEL22_elifs
 # begin scope
     LI a0, 1
-    LA a1, StringLits1
+    LA a1, StringLits3
     LI a2, 1
     call write
 # end scope
-    J LABEL27_END
-LABEL28_elifs:
+    J LABEL21_END
+LABEL22_elifs:
 # begin scope
-LABEL29_START:
+LABEL23_START:
 ########## IsSigned
     LB t0, 0(sp)
-    BEQZ t0, LABEL31_elifs
+    BEQZ t0, LABEL25_elifs
 # begin scope
-LABEL32_START:
+LABEL26_START:
     LI t0, -9223372036854775808
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -829,10 +754,10 @@ LABEL32_START:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SEQZ t0, t0
-    BEQZ t0, LABEL34_elifs
+    BEQZ t0, LABEL28_elifs
 # begin scope
     LI a0, 1
-    LA a1, StringLits2
+    LA a1, StringLits4
     LI a2, 20
     call write
     LI s0, 0
@@ -841,9 +766,9 @@ LABEL32_START:
     ADDI sp, sp, 8
     ret
 # end scope
-LABEL34_elifs:
-LABEL33_END:
-LABEL35_START:
+LABEL28_elifs:
+LABEL27_END:
+LABEL29_START:
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -852,19 +777,19 @@ LABEL35_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, LABEL37_elifs
+    BEQZ t0, LABEL31_elifs
 # begin scope
 ########## Number
     LD t0, 1(sp)
     NEG t0, t0
     SD t0, 1(sp)
     LI a0, 1
-    LA a1, StringLits3
+    LA a1, StringLits5
     LI a2, 1
     call write
 # end scope
-LABEL37_elifs:
-LABEL36_END:
+LABEL31_elifs:
+LABEL30_END:
     ADDI sp, sp, -8
     SD a0, 0(sp)
 ########## Number
@@ -893,8 +818,8 @@ LABEL36_END:
     call write
 # end scope
     ADDI sp, sp, 16
-    J LABEL30_END
-LABEL31_elifs:
+    J LABEL24_END
+LABEL25_elifs:
 # begin scope
     ADDI sp, sp, -8
     SD a0, 0(sp)
@@ -924,9 +849,9 @@ LABEL31_elifs:
     call write
 # end scope
     ADDI sp, sp, 16
-LABEL30_END:
+LABEL24_END:
 # end scope
-LABEL27_END:
+LABEL21_END:
     mv s0, zero
     ADDI sp, sp, 9
     LD ra, 0(sp)
@@ -987,12 +912,16 @@ write:
     ret
 .section .data
 StringLits0:
-    .string "sum of all the multiples of 3 or 5 below 1000 is: %d\n"
+    .string "%d\n"
 StringLits1:
-    .string "0"
+    .string "%zu\n"
 StringLits2:
-    .string "-9223372036854775808"
+    .string "--------------------------------------------------------------\n"
 StringLits3:
+    .string "0"
+StringLits4:
+    .string "-9223372036854775808"
+StringLits5:
     .string "-"
 .section .bss
 itoaTempBuffer:     

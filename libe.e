@@ -1,6 +1,6 @@
 
 
-func printnumber(auto Number)
+func printnumber(auto Number, char IsSigned)
 {
     if (!Number)
     {
@@ -8,19 +8,28 @@ func printnumber(auto Number)
     }
     else
     {
-        if (Number == 1 << 63)
+        if (IsSigned)
         {
-            write(1, "-9223372036854775808", 20);
-            return 0;
+            if (Number == 1 << 63)
+            {
+                write(1, "-9223372036854775808", 20);
+                return 0;
+            }
+            if (Number < 0)
+            {
+                Number = -Number;
+                write(1, "-", 1);
+            }
+            auto NumberText = stoa(Number);
+            auto NumberTextLen = strlen(NumberText);
+            write(1, NumberText, NumberTextLen);
         }
-        if (Number < 0)
+        else
         {
-            Number = -Number;
-            write(1, "-", 1);
+            auto NumberText = unstoa(Number);
+            auto NumberTextLen = strlen(NumberText);
+            write(1, NumberText, NumberTextLen);
         }
-        auto NumberText = itoa(Number);
-        auto NumberTextLen = strlen(NumberText);
-        write(1, NumberText, NumberTextLen);
     }
 }
 
@@ -28,8 +37,13 @@ func printhelper(char msg[], auto msg_len, auto i, auto Number, auto IfPrintNumb
 {
     if (IfPrintNumber & msg[i] == '%' & i + 1 < msg_len & msg[i + 1] == 'd')
     {
-        printnumber(Number);
+        printnumber(Number, 1);
         return 2;
+    }
+    if (IfPrintNumber & msg[i] == '%' & i + 1 < msg_len & msg[i + 1] == 'z' & i + 2 < msg_len & msg[i + 2] == 'u')
+    {
+        printnumber(Number, 0);
+        return 3;
     }
     if (IfPrintNumber & msg[i] == '%' & i + 1 < msg_len & msg[i + 1] == 'c')
     {

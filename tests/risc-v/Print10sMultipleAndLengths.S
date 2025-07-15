@@ -263,7 +263,7 @@ TEMP_LABEL8_START:
     SD a0, 0(sp)
 ########## x
     LD a0, 40(sp)
-    call itoa
+    call stoa
     LD a0, 0(sp)
     ADDI sp, sp, 8
     MV a0, s0
@@ -439,6 +439,7 @@ LABEL14_START:
 # begin scope
 ########## Number
     LD a0, 8(sp)
+    LI a1, 1
     call printnumber
     LI s0, 2
     ADDI sp, sp, 40
@@ -449,12 +450,12 @@ LABEL14_START:
 LABEL16_elifs:
 LABEL15_END:
 LABEL17_START:
-    LI t0, 99
+    LI t0, 117
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## msg
 # begin array address
-    LI t0, 1
+    LI t0, 2
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## i
@@ -486,7 +487,7 @@ LABEL17_START:
     LD t0, 32(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 1
+    LI t0, 2
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## i
@@ -499,13 +500,19 @@ LABEL17_START:
     SLT t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 37
+    LI t0, 122
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## msg
 # begin array address
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
 ########## i
-    LD t0, 40(sp)
+    LD t0, 48(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 1
@@ -526,8 +533,58 @@ LABEL17_START:
     SEQZ t0, t0
     ADDI sp, sp, -8
     SD t0, 0(sp)
+########## msg_len
+    LD t0, 48(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## i
+    LD t0, 56(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SLT t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 37
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## msg
+# begin array address
+########## i
+    LD t0, 56(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    MUL t0, t0, t1
+    LD t1, 72(sp)
+    ADD t0, t1, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+# end array address
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    LB t0, 0(t1)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    XOR t0, t0, t1
+    SEQZ t0, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
 ########## IfPrintNumber
-    LD t0, 24(sp)
+    LD t0, 40(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    AND t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    AND t0, t0, t1
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
@@ -539,11 +596,11 @@ LABEL17_START:
     AND t0, t0, t1
     BEQZ t0, LABEL19_elifs
 # begin scope
-    LI a0, 1
-    ADDI a1, sp, 8
-    LI a2, 1
-    call write
-    LI s0, 2
+########## Number
+    LD a0, 8(sp)
+    LI a1, 0
+    call printnumber
+    LI s0, 3
     ADDI sp, sp, 40
     LD ra, 0(sp)
     ADDI sp, sp, 8
@@ -552,7 +609,7 @@ LABEL17_START:
 LABEL19_elifs:
 LABEL18_END:
 LABEL20_START:
-    LI t0, 115
+    LI t0, 99
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## msg
@@ -642,6 +699,109 @@ LABEL20_START:
     AND t0, t0, t1
     BEQZ t0, LABEL22_elifs
 # begin scope
+    LI a0, 1
+    ADDI a1, sp, 8
+    LI a2, 1
+    call write
+    LI s0, 2
+    ADDI sp, sp, 40
+    LD ra, 0(sp)
+    ADDI sp, sp, 8
+    ret
+# end scope
+LABEL22_elifs:
+LABEL21_END:
+LABEL23_START:
+    LI t0, 115
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## msg
+# begin array address
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## i
+    LD t0, 32(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    MUL t0, t0, t1
+    LD t1, 40(sp)
+    ADD t0, t1, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+# end array address
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    LB t0, 0(t1)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    XOR t0, t0, t1
+    SEQZ t0, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## msg_len
+    LD t0, 32(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## i
+    LD t0, 40(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SLT t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 37
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## msg
+# begin array address
+########## i
+    LD t0, 40(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    MUL t0, t0, t1
+    LD t1, 56(sp)
+    ADD t0, t1, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+# end array address
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    LB t0, 0(t1)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    XOR t0, t0, t1
+    SEQZ t0, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## IfPrintNumber
+    LD t0, 24(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    AND t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    AND t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    AND t0, t0, t1
+    BEQZ t0, LABEL25_elifs
+# begin scope
     ADDI sp, sp, -8
     SD a0, 0(sp)
 ########## Number
@@ -665,8 +825,8 @@ LABEL20_START:
     ret
 # end scope
     ADDI sp, sp, 8
-LABEL22_elifs:
-LABEL21_END:
+LABEL25_elifs:
+LABEL24_END:
     LI a0, 1
 ########## i
     LD t0, 16(sp)
@@ -689,71 +849,78 @@ printnumber:
     SD ra, 0(sp)
     ADDI sp, sp, -8
     SD a0, 0(sp)
-LABEL23_START:
+    ADDI sp, sp, -1
+    SB a1, 0(sp)
+LABEL26_START:
 ########## Number
-    LD t0, 0(sp)
+    LD t0, 1(sp)
     SEQZ t0, t0
-    BEQZ t0, LABEL25_elifs
+    BEQZ t0, LABEL28_elifs
 # begin scope
     LI a0, 1
     LA a1, StringLits3
     LI a2, 1
     call write
 # end scope
-    J LABEL24_END
-LABEL25_elifs:
+    J LABEL27_END
+LABEL28_elifs:
 # begin scope
-LABEL26_START:
+LABEL29_START:
+########## IsSigned
+    LB t0, 0(sp)
+    BEQZ t0, LABEL31_elifs
+# begin scope
+LABEL32_START:
     LI t0, -9223372036854775808
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## Number
-    LD t0, 8(sp)
+    LD t0, 9(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SEQZ t0, t0
-    BEQZ t0, LABEL28_elifs
+    BEQZ t0, LABEL34_elifs
 # begin scope
     LI a0, 1
     LA a1, StringLits4
     LI a2, 20
     call write
     LI s0, 0
-    ADDI sp, sp, 8
+    ADDI sp, sp, 9
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
 # end scope
-LABEL28_elifs:
-LABEL27_END:
-LABEL29_START:
+LABEL34_elifs:
+LABEL33_END:
+LABEL35_START:
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## Number
-    LD t0, 8(sp)
+    LD t0, 9(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, LABEL31_elifs
+    BEQZ t0, LABEL37_elifs
 # begin scope
 ########## Number
-    LD t0, 0(sp)
+    LD t0, 1(sp)
     NEG t0, t0
-    SD t0, 0(sp)
+    SD t0, 1(sp)
     LI a0, 1
     LA a1, StringLits5
     LI a2, 1
     call write
 # end scope
-LABEL31_elifs:
-LABEL30_END:
+LABEL37_elifs:
+LABEL36_END:
     ADDI sp, sp, -8
     SD a0, 0(sp)
 ########## Number
-    LD a0, 8(sp)
-    call itoa
+    LD a0, 9(sp)
+    call stoa
     LD a0, 0(sp)
     ADDI sp, sp, 8
     MV t0, s0
@@ -777,9 +944,42 @@ LABEL30_END:
     call write
 # end scope
     ADDI sp, sp, 16
-LABEL24_END:
-    mv s0, zero
+    J LABEL30_END
+LABEL31_elifs:
+# begin scope
+    ADDI sp, sp, -8
+    SD a0, 0(sp)
+########## Number
+    LD a0, 9(sp)
+    call unstoa
+    LD a0, 0(sp)
     ADDI sp, sp, 8
+    MV t0, s0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    ADDI sp, sp, -8
+    SD a0, 0(sp)
+########## NumberText
+    LD a0, 8(sp)
+    call strlen
+    LD a0, 0(sp)
+    ADDI sp, sp, 8
+    MV t0, s0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI a0, 1
+########## NumberText
+    LD a1, 8(sp)
+########## NumberTextLen
+    LD a2, 0(sp)
+    call write
+# end scope
+    ADDI sp, sp, 16
+LABEL30_END:
+# end scope
+LABEL27_END:
+    mv s0, zero
+    ADDI sp, sp, 9
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
@@ -798,21 +998,38 @@ strlen_loop:
     j strlen_loop
 strlen_done:
     ret
-itoa:
+stoa:
     mv t1, a0
     la t2, itoaTempBuffer
     ADDI t2, t2, 32
     sb zero, 0(t2)
-itoa_loop:
-    beqz t1, itoa_done
+stoa_loop:
+    beqz t1, stoa_done
     li t3, 10
     rem t4, t1, t3
     ADDI t4, t4, '0'
     ADDI t2, t2, -1
     sb t4, 0(t2)
     div t1, t1, t3
-    j itoa_loop
-itoa_done:
+    j stoa_loop
+stoa_done:
+    mv s0, t2
+    ret
+unstoa:
+    mv t1, a0
+    la t2, itoaTempBuffer
+    ADDI t2, t2, 32
+    sb zero, 0(t2)
+unstoa_loop:
+    beqz t1, unstoa_done
+    li t3, 10
+    remu t4, t1, t3
+    ADDI t4, t4, '0'
+    ADDI t2, t2, -1
+    sb t4, 0(t2)
+    divu t1, t1, t3
+    j unstoa_loop
+unstoa_done:
     mv s0, t2
     ret
 write:

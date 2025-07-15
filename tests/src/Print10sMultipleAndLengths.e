@@ -8,7 +8,7 @@ func Print10sMultipleAndLengths()
     auto bound = 1000;
     for (auto i = 1; i < bound + 1; i = i + 1)
     {
-        auto len = strlen(itoa(x));
+        auto len = strlen(stoa(x));
         if (count != len)
         {
             print("number = %d\n", x);
