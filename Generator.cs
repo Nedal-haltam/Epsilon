@@ -247,20 +247,18 @@ namespace Epsilon
                             uint TypeSize = var.IsArray && var.IsParameter ? 8 : var.TypeSize;
                             uint Count = var.Size / var.TypeSize;
                             uint relative_location = m_StackSize - VariableLocation(var.Value) - TypeSize;
-                            //if (!var.IsParameter)
+                            if (!var.IsParameter)
                                 m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location - (TypeSize * (Count - 1))}");
-                            //else
-                            //    m_outputcode.AppendLine($"    ADD {reg}, sp, {relative_location}");
-                            if (DestReg == null)
-                                GenPush(reg, size);
+                            else
+                                m_outputcode.AppendLine($"    ADD {reg}, sp, {relative_location}");
                         }
                         else
                         {
                             Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.ident.Line}:1:  variable `{ident.ident.Value}` is undeclared\n", 1);
                         }
+                        if (DestReg == null)
+                            GenPush(reg, size);
                     }
-                    if (DestReg == null)
-                        GenPush(reg, size);
                 }
                 else
                 {
