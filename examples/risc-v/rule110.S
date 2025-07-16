@@ -1250,7 +1250,7 @@ stoa_loop:
     beqz t1, stoa_done
     li t3, 10
     rem t4, t1, t3
-    ADDI t4, t4, '0'
+    ADDI t4, t4, 48
     ADDI t2, t2, -1
     sb t4, 0(t2)
     div t1, t1, t3
@@ -1267,7 +1267,7 @@ unstoa_loop:
     beqz t1, unstoa_done
     li t3, 10
     remu t4, t1, t3
-    ADDI t4, t4, '0'
+    ADDI t4, t4, 48
     ADDI t2, t2, -1
     sb t4, 0(t2)
     divu t1, t1, t3

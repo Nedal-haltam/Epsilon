@@ -250,7 +250,7 @@ namespace Epsilon
                             if (!var.IsParameter)
                                 m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location - (TypeSize * (Count - 1))}");
                             else
-                                m_outputcode.AppendLine($"    ADD {reg}, sp, {relative_location}");
+                                m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location}");
                         }
                         else
                         {
@@ -1015,7 +1015,7 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    beqz t1, stoa_done");
                 m_outputcode.AppendLine($"    li t3, 10");
                 m_outputcode.AppendLine($"    rem t4, t1, t3");
-                m_outputcode.AppendLine($"    ADDI t4, t4, '0'");
+                m_outputcode.AppendLine($"    ADDI t4, t4, 48");
                 m_outputcode.AppendLine($"    ADDI t2, t2, -1");
                 m_outputcode.AppendLine($"    sb t4, 0(t2)");
                 m_outputcode.AppendLine($"    div t1, t1, t3");
@@ -1036,7 +1036,7 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    beqz t1, unstoa_done");
                 m_outputcode.AppendLine($"    li t3, 10");
                 m_outputcode.AppendLine($"    remu t4, t1, t3");
-                m_outputcode.AppendLine($"    ADDI t4, t4, '0'");
+                m_outputcode.AppendLine($"    ADDI t4, t4, 48");
                 m_outputcode.AppendLine($"    ADDI t2, t2, -1");
                 m_outputcode.AppendLine($"    sb t4, 0(t2)");
                 m_outputcode.AppendLine($"    divu t1, t1, t3");
