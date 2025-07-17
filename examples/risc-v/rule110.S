@@ -192,12 +192,14 @@ LABEL7_START:
     BEQZ t0, LABEL9_elifs
 # begin scope
     LA a0, StringLits0
+    LI a1, 0
     call print
 # end scope
     J LABEL8_END
 LABEL9_elifs:
 # begin scope
     LA a0, StringLits1
+    LI a1, 0
     call print
 # end scope
 LABEL8_END:
@@ -216,6 +218,7 @@ TEMP_LABEL6_END:
 # end scope
 # end whileloop
     LA a0, StringLits2
+    LI a1, 0
     call print
     mv s0, zero
     ADDI sp, sp, 24
@@ -427,7 +430,18 @@ print:
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t1, 8
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    MUL t1, t1, t0
+    SUB t1, sp, t1
+    LD t0, 72(t1)
     ADDI sp, sp, -8
     SD t0, 0(sp)
 # begin whileloop
@@ -435,11 +449,11 @@ print:
 # begin condition
 TEMP_LABEL12_START:
 ########## msg_len
-    LD t0, 16(sp)
+    LD t0, 24(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## i
-    LD t0, 16(sp)
+    LD t0, 24(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
@@ -447,14 +461,27 @@ TEMP_LABEL12_START:
 # end condition
 # begin scope
 LABEL14_START:
+########## VariadicCount
+    LD t0, 0(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 0
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SLT t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
     LI t0, 7
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## n
-    LD t0, 8(sp)
+    LD t0, 24(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    AND t0, t0, t1
     BEQZ t0, LABEL16_elifs
 # begin scope
     ADDI sp, sp, -40
@@ -464,13 +491,13 @@ LABEL14_START:
     SD a3, 24(sp)
     SD a4, 32(sp)
 ########## msg
-    LD a0, 120(sp)
+    LD a0, 128(sp)
 ########## msg_len
-    LD a1, 56(sp)
+    LD a1, 64(sp)
 ########## i
-    LD a2, 48(sp)
+    LD a2, 56(sp)
 ########## n
-    LD t0, 40(sp)
+    LD t0, 48(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 8
@@ -478,7 +505,7 @@ LABEL14_START:
     ADDI sp, sp, 8
     MUL t0, t0, t1
     SUB t0, sp, t0
-    LD a3, 112(t0)
+    LD a3, 120(t0)
     LI a4, 1
     call printhelper
     LD a4, 32(sp)
@@ -495,11 +522,11 @@ LABEL14_START:
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## i
-    LD t0, 24(sp)
+    LD t0, 32(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
     ADD t0, t0, t1
-    SD t0, 16(sp)
+    SD t0, 24(sp)
 LABEL17_START:
     LI t0, 1
     ADDI sp, sp, -8
@@ -516,10 +543,19 @@ LABEL17_START:
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## n
-    LD t0, 16(sp)
+    LD t0, 24(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
     ADD t0, t0, t1
+    SD t0, 16(sp)
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+########## VariadicCount
+    LD t0, 16(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SUB t0, t0, t1
     SD t0, 8(sp)
 # end scope
 LABEL19_elifs:
@@ -536,11 +572,11 @@ LABEL16_elifs:
     SD a3, 24(sp)
     SD a4, 32(sp)
 ########## msg
-    LD a0, 120(sp)
+    LD a0, 128(sp)
 ########## msg_len
-    LD a1, 56(sp)
+    LD a1, 64(sp)
 ########## i
-    LD a2, 48(sp)
+    LD a2, 56(sp)
     LI a3, 0
     LI a4, 0
     call printhelper
@@ -558,11 +594,11 @@ LABEL16_elifs:
     ADDI sp, sp, -8
     SD t0, 0(sp)
 ########## i
-    LD t0, 24(sp)
+    LD t0, 32(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
     ADD t0, t0, t1
-    SD t0, 16(sp)
+    SD t0, 24(sp)
 # end scope
     ADDI sp, sp, 8
 LABEL15_END:
@@ -572,7 +608,7 @@ TEMP_LABEL13_END:
 # end scope
 # end whileloop
     mv s0, zero
-    ADDI sp, sp, 88
+    ADDI sp, sp, 96
     LD ra, 0(sp)
     ADDI sp, sp, 8
     ret
