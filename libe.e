@@ -64,15 +64,19 @@ func print(char msg[], variadic)
 {
     auto msg_len = strlen(msg);
     auto i = 0;
-    auto n = 0;
+    auto n = 1;
+    auto VariadicCount = variadic(0);
     while (i < msg_len)
     {
-        if (n < 7)
+        if (n < 7 & 0 < VariadicCount)
         {
             auto skip = printhelper(msg, msg_len, i, variadic(n), 1);
             i = i + skip;
             if (skip != 1)
+            {
                 n = n + 1;
+                VariadicCount = VariadicCount - 1;
+            }
         }
         else
         {

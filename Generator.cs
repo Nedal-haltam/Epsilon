@@ -774,7 +774,7 @@ namespace Epsilon
         {
             if (m_UserDefinedFunctions.TryGetValue(Function.FunctionName.Value, out NodeStmtFunction CalledFunction))
             {
-                int MaxParamsCount = 8;
+                int MaxParamsCount = 7;
                 int ProvidedParamsCount = Function.parameters.Count;
                 if (ProvidedParamsCount > MaxParamsCount)
                     Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{Function.FunctionName.Line}:1: Generator: Function call to `{CalledFunction.FunctionName.Value}` provided too much parameters to function (bigger than {MaxParamsCount})\n", 1);
@@ -808,15 +808,17 @@ namespace Epsilon
 
             if (m_UserDefinedFunctions.ContainsKey(Function.FunctionName.Value))
             {
+                bool filled = false;
                 for (int i = 0; i < Function.parameters.Count; i++)
                 {
                     if (CalledFunction.parameters[i].IsVariadic)
                     {
+                        filled = true;
                         Shartilities.Assert(i == CalledFunction.parameters.Count - 1, $"variadic should be the last argument\n");
-
+                        GenExpr(NodeExpr.Number((Function.parameters.Count - i).ToString(), -1), $"a{i}", 8);
                         for (int j = i; j < Function.parameters.Count; j++)
                         {
-                            GenExpr(Function.parameters[j], $"a{j}", 8);
+                            GenExpr(Function.parameters[j], $"a{j + 1}", 8);
                         }
                         break;
                     }
@@ -825,6 +827,8 @@ namespace Epsilon
                         GenExpr(Function.parameters[i], $"a{i}", CalledFunction.parameters[i].TypeSize);
                     }
                 }
+                if (!filled && CalledFunction.parameters[^1].IsVariadic)
+                    GenExpr(NodeExpr.Number("0", -1), $"a{Function.parameters.Count}", 8);
             }
             else
             {
