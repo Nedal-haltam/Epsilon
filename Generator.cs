@@ -827,7 +827,7 @@ namespace Epsilon
                         GenExpr(Function.parameters[i], $"a{i}", CalledFunction.parameters[i].TypeSize);
                     }
                 }
-                if (!filled && CalledFunction.parameters[^1].IsVariadic)
+                if (!filled && CalledFunction.parameters.Count > 0 && CalledFunction.parameters[^1].IsVariadic)
                     GenExpr(NodeExpr.Number("0", -1), $"a{Function.parameters.Count}", 8);
             }
             else
