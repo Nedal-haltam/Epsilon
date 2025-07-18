@@ -1,6 +1,8 @@
 .section .text
 .globl main
 main:
+    ADDI sp, sp, -8
+    SD ra, 0(sp)
     ADDI sp, sp, -800
 # begin forloop
 # begin scope
@@ -973,7 +975,7 @@ TEMP_LABEL13_END:
     ADDI sp, sp, 8
 # end forloop
     mv s0, zero
-    ADDI sp, sp, 1600
+    ADDI sp, sp, 1608
     mv a0, s0
     call exit
 print:

@@ -1,6 +1,8 @@
 .section .text
 .globl main
 main:
+    ADDI sp, sp, -8
+    SD ra, 0(sp)
     LA a0, StringLits0
     LI a1, 0
     call print
@@ -16,6 +18,7 @@ main:
     call print
     call PointerTest
     LI s0, 0
+    ADDI sp, sp, 8
     mv a0, s0
     call exit
 print:

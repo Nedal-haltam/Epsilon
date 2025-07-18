@@ -1,6 +1,8 @@
 .section .text
 .globl main
 main:
+    ADDI sp, sp, -8
+    SD ra, 0(sp)
     LI t0, 100
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -143,7 +145,7 @@ TEMP_LABEL4_END:
 # end scope
 # end whileloop
     mv s0, zero
-    ADDI sp, sp, 816
+    ADDI sp, sp, 824
     mv a0, s0
     call exit
 display:

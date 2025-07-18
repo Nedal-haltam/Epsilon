@@ -1,6 +1,8 @@
 .section .text
 .globl main
 main:
+    ADDI sp, sp, -8
+    SD ra, 0(sp)
     LA a0, StringLits0
     LI a1, 1
     ADDI sp, sp, -16
@@ -16,6 +18,7 @@ main:
     call print
     call Print10sMultipleAndLengths
     mv s0, zero
+    ADDI sp, sp, 8
     mv a0, s0
     call exit
 print:

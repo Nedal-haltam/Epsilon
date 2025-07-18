@@ -1,6 +1,8 @@
 .section .text
 .globl main
 main:
+    ADDI sp, sp, -8
+    SD ra, 0(sp)
     LI t0, 30
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -9,7 +11,7 @@ main:
     LD a0, 0(sp)
     call FibIterative
     LI s0, 0
-    ADDI sp, sp, 8
+    ADDI sp, sp, 16
     mv a0, s0
     call exit
 FibRecursive:

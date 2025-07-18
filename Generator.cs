@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Epsilon
 {
@@ -61,7 +62,6 @@ namespace Epsilon
         public List<Var> m_parameters = [];
         public string m_CurrentFunction = "NO_FUNCTION_NAME";
         ////////////////////////////////////////////////////////
-        
         void GenPush(string reg, uint size)
         {
             m_outputcode.AppendLine($"    ADDI sp, sp, -{size}");
@@ -609,7 +609,7 @@ namespace Epsilon
             }
         }
         //////////////////////////////////////////
-        void GenFunctionDefinition(string FunctionName)
+        void PreGenFunctionDefinition()
         {
             m_vars = new();
             m_StackSize = new();
@@ -618,27 +618,14 @@ namespace Epsilon
             m_scopeend = new();
             m_CurrentFunction = "NO_FUNCTION_NAME";
             m_parameters = [];
-
-            if (FunctionName != "main")
-                m_outputcode.AppendLine($"{FunctionName}:");
-            m_CurrentFunction = FunctionName;
-            m_parameters = m_UserDefinedFunctions[FunctionName].parameters;
-
-            NodeStmtFunction Function = m_UserDefinedFunctions[m_CurrentFunction];
-
-
-            if (m_CurrentFunction != "main")
+        }
+        void GenPushFunctionParametersInDefinition(List<Var> parameters)
+        {
+            for (int i = 0; i < parameters.Count; i++)
             {
-                m_outputcode.AppendLine($"    ADDI sp, sp, -8");
-                m_outputcode.AppendLine($"    SD ra, 0(sp)");
-                m_StackSize += 8;
-                m_vars.m_vars.Add(new("", 8, 8, [], false, false, false));
-            }
-            for (int i = 0; i < Function.parameters.Count; i++)
-            {
-                if (Function.parameters[i].IsVariadic)
+                if (parameters[i].IsVariadic)
                 {
-                    Shartilities.Assert(i == Function.parameters.Count - 1, $"variadic should be the last argument\n");
+                    Shartilities.Assert(i == parameters.Count - 1, $"variadic should be the last argument\n");
                     // up until a7
                     for (int j = i; j <= 7; j++)
                     {
@@ -649,20 +636,35 @@ namespace Epsilon
                 }
                 else
                 {
-                    uint TypeSize = Function.parameters[i].TypeSize;
-                    uint Size = Function.parameters[i].Size;
-                    bool IsArray = Function.parameters[i].IsArray;
+                    uint TypeSize = parameters[i].TypeSize;
+                    uint Size = parameters[i].Size;
+                    bool IsArray = parameters[i].IsArray;
                     if (IsArray)
                         GenPush($"a{i}", 8);
                     else
                         GenPush($"a{i}", TypeSize);
-                    m_vars.m_vars.Add(new(Function.parameters[i].Value, Size, TypeSize, Function.parameters[i].Dimensions, IsArray, true, false));
+                    m_vars.m_vars.Add(new(parameters[i].Value, Size, TypeSize, parameters[i].Dimensions, IsArray, true, false));
                 }
             }
-            foreach (NodeStmt stmt in Function.FunctionBody.stmts)
-            {
+        }
+        void GenFunctionBody(NodeStmtScope FunctionBody)
+        {
+            foreach (NodeStmt stmt in FunctionBody.stmts)
                 GenStmt(stmt);
-            }
+        }
+        void GenFunctionDefinition(string FunctionName)
+        {
+            PreGenFunctionDefinition();
+
+            m_outputcode.AppendLine($"{FunctionName}:");
+            m_CurrentFunction = FunctionName;
+            m_parameters = m_UserDefinedFunctions[FunctionName].parameters;
+            NodeStmtFunction Function = m_UserDefinedFunctions[m_CurrentFunction];
+
+            GenPush("ra", 8);
+            m_vars.m_vars.Add(new("", 8, 8, [], false, false, false));
+            GenPushFunctionParametersInDefinition(Function.parameters);
+            GenFunctionBody(Function.FunctionBody);
 
             if (Function.FunctionBody.stmts.Count == 0 || Function.FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
             {
@@ -688,15 +690,13 @@ namespace Epsilon
         }
         public StringBuilder GenProg()
         {
-            string MainFunctionName = "main";
             m_outputcode.AppendLine($".section .text");
-            m_outputcode.AppendLine($".globl {MainFunctionName}");
+            m_outputcode.AppendLine($".globl main");
 
             if (!m_UserDefinedFunctions.ContainsKey("main"))
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n", 1);
             }
-            m_outputcode.AppendLine($"{MainFunctionName}:");
 
             GenFunctionDefinition("main");
             for (int i = 0; i < m_CalledFunctions.Count; i++)
@@ -724,7 +724,6 @@ namespace Epsilon
             }
             return m_outputcode;
         }
-        //////////////////////////////////////////
         //List<Var> GenGlobalVariables()
         //{
         //    List<Var> GlobalVariables = [];
@@ -745,6 +744,7 @@ namespace Epsilon
         //    if (size > 0)
         //        m_outputcode.AppendLine($"    addi sp, sp, {size}");
         //}
+        //////////////////////////////////////////
         void GenBinExpr(NodeBinExpr binExpr, string? DestReg, uint size)
         {
             string reg = DestReg ?? m_FirstTempReg;

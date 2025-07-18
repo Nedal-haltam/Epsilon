@@ -1,6 +1,8 @@
 .section .text
 .globl main
 main:
+    ADDI sp, sp, -8
+    SD ra, 0(sp)
     LI t0, 100
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -137,7 +139,7 @@ TEMP_LABEL1_END:
     LD a2, 0(sp)
     call print
     LI s0, 0
-    ADDI sp, sp, 24
+    ADDI sp, sp, 32
     mv a0, s0
     call exit
 IsPalindrome:

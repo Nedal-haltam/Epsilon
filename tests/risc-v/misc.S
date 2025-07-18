@@ -1,6 +1,8 @@
 .section .text
 .globl main
 main:
+    ADDI sp, sp, -8
+    SD ra, 0(sp)
     LI t0, 420
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -290,7 +292,7 @@ TEMP_LABEL4_END:
     LI a1, 0
     call print
     LI s0, 0
-    ADDI sp, sp, 1145
+    ADDI sp, sp, 1153
     mv a0, s0
     call exit
 foo:
