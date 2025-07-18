@@ -33,6 +33,15 @@ namespace Epsilon
                 Environment.Exit(1);
             }
             string? OutputFilePath = null;
+		    //	- if the input is `.e`: you do compile -> assemble -> link for qemu and output (MC/DM) for CAS
+		    //		- but if the -S flag is specified (it should be `.e` file) you just compile (i.e. generate assembly `.S` file)
+		    //	- add the -run flag/feature in Epsilon so you can 
+		    //	compile (epsilon) -> assemble (risc-v-assembler) -> run (risc-v-CAS) all at once
+		    //		- NOTE: running it internally in the code is easier (i.e. calling assembler/CAS APIs), 
+		    //		you have to run it using both qemu (external command) and risc-v-assembler/CAS (internal code) to ensure consistent results
+		    //		- needs to integrate/include
+		    //			- risc-v-assembler
+		    //			- risc-v-CAS
             while (Shartilities.ShiftArgs(ref args, out string arg))
             {
                 if (arg == "-o")
