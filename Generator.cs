@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Win32;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -19,7 +20,40 @@ namespace Epsilon
         public readonly List<string> m_CalledFunctions = [];
         public List<string> m_StringLits = [];
         ////////////////////////////////////////////////////////
-        public List<Var> m_vars = [];
+        public struct variables
+        {
+            public List<Var> m_vars = [];
+            public variables()
+            {
+                m_vars = [];
+            }
+            public uint GetStackSize()
+            {
+                uint stacksize = 0;
+                for (int i = 0; i < m_vars.Count; i++)
+                {
+                    if (m_vars[i].IsParameter && m_vars[i].IsArray)
+                        stacksize += 8;
+                    else
+                        stacksize += m_vars[i].Size;
+                }
+                return stacksize;
+            }
+            public readonly Var this[int index]
+            {
+                get
+                {
+                    Shartilities.Assert(0 <= index && index < m_vars.Count, $"index out of bound in register file\n");
+                    return m_vars[index];
+                }
+                set
+                {
+                    Shartilities.Assert(0 <= index && index < m_vars.Count, $"index out of bound in register file\n");
+                    m_vars[index] = value;
+                }
+            }
+        }
+        variables m_vars = new();
         public Stack<int> m_scopes = [];
         public uint m_StackSize;
         public Stack<string?> m_scopestart = new();
@@ -41,8 +75,11 @@ namespace Epsilon
         }
         void GenPush(uint size)
         {
-            m_outputcode.AppendLine($"    ADDI sp, sp, -{size}");
-            m_StackSize += size;
+            if (size > 0)
+            {
+                m_outputcode.AppendLine($"    ADDI sp, sp, -{size}");
+                m_StackSize += size;
+            }
         }
         void GenPushMany(List<string> regs)
         {
@@ -63,6 +100,14 @@ namespace Epsilon
                 Shartilities.UNREACHABLE("GenPop");
             m_outputcode.AppendLine($"    ADDI sp, sp, {size}");
             m_StackSize -= size;
+        }
+        void GenPop(uint size, bool Change_m_stacksize)
+        {
+            if (size > 0)
+            {
+                m_outputcode.AppendLine($"    ADDI sp, sp, {size}");
+                if (Change_m_stacksize) m_StackSize -= size;
+            }
         }
         void GenPopMany(List<string> regs)
         {
@@ -91,13 +136,13 @@ namespace Epsilon
         void BeginScope()
         {
             m_outputcode.AppendLine($"# begin scope");
-            m_scopes.Push(m_vars.Count);
+            m_scopes.Push(m_vars.m_vars.Count);
         }
         void EndScope()
         {
             m_outputcode.AppendLine($"# end scope");
-            int Vars_topop = m_vars.Count - m_scopes.Pop();
-            int i = m_vars.Count - 1;
+            int Vars_topop = m_vars.m_vars.Count - m_scopes.Pop();
+            int i = m_vars.m_vars.Count - 1;
             int iterations = Vars_topop;
             uint popcount = 0;
             while (iterations-- > 0)
@@ -106,7 +151,7 @@ namespace Epsilon
             }
             StackPopEndScope(popcount);
             m_StackSize -= popcount;
-            m_vars.RemoveRange(m_vars.Count - Vars_topop, Vars_topop);
+            m_vars.m_vars.RemoveRange(m_vars.m_vars.Count - Vars_topop, Vars_topop);
         }
         void GenScope(NodeStmtScope scope)
         {
@@ -120,7 +165,7 @@ namespace Epsilon
         uint VariableLocation(string name)
         {
             uint size = 0;
-            int index = m_vars.FindIndex(x => x.Value == name);
+            int index = m_vars.m_vars.FindIndex(x => x.Value == name);
             for (int i = 0; i < index; i++)
             {
                 if (m_vars[i].IsArray && m_vars[i].IsParameter)
@@ -185,7 +230,7 @@ namespace Epsilon
         Var GenStmtDeclare(NodeStmtDeclare declare)
         {
             Token ident = declare.ident;
-            if (m_vars.Any(x => x.Value == ident.Value))
+            if (m_vars.m_vars.Any(x => x.Value == ident.Value))
                 Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: Generator: variable `{ident.Value}` is alread declared\n", 1);
             if (declare.type == NodeStmtIdentifierType.SingleVar)
             {
@@ -286,7 +331,7 @@ namespace Epsilon
                     NodeTermIdent ident = term.unary.term.ident;
                     if (ident.indexes.Count == 0)
                     {
-                        int index = m_vars.FindIndex(x => x.Value == ident.ident.Value);
+                        int index = m_vars.m_vars.FindIndex(x => x.Value == ident.ident.Value);
                         if (index == -1)
                             Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.ident.Line}:1:  variable `{ident.ident.Value}` is undeclared\n", 1);
                         Var var = m_vars[index];
@@ -340,7 +385,7 @@ namespace Epsilon
                 NodeTermIdent ident = term.ident;
                 if (ident.indexes.Count == 0)
                 {
-                    int index = m_vars.FindIndex(x => x.Value == ident.ident.Value);
+                    int index = m_vars.m_vars.FindIndex(x => x.Value == ident.ident.Value);
                     if (index == -1)
                         Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.ident.Line}:1:  variable `{ident.ident.Value}` is undeclared\n", 1);
                     Var var = m_vars[index];
@@ -372,7 +417,7 @@ namespace Epsilon
                 {
                     string reg = DestReg ?? m_FirstTempReg;
                     string reg_addr = reg == m_FirstTempReg ? m_SecondTempReg : m_FirstTempReg;
-                    int index = m_vars.FindIndex(x => x.Value == ident.ident.Value);
+                    int index = m_vars.m_vars.FindIndex(x => x.Value == ident.ident.Value);
                     if (index == -1)
                         Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.ident.Line}:1: variable `{ident.ident.Value}` is not declared\n", 1);
                     Var var = m_vars[index];
@@ -400,7 +445,7 @@ namespace Epsilon
             }
             else if (term.type == NodeTerm.NodeTermType.Variadic)
             {
-                int index = m_vars.FindIndex(x => x.IsVariadic);
+                int index = m_vars.m_vars.FindIndex(x => x.IsVariadic);
                 if (index == -1)
                     Shartilities.Log(Shartilities.LogType.ERROR, $"no variadic are declared\n", 1);
                 Var var = m_vars[index];
@@ -435,7 +480,7 @@ namespace Epsilon
             {
                 Token ident = assign.singlevar.ident;
                 string reg = m_FirstTempReg;
-                int index = m_vars.FindIndex(x => x.Value == ident.Value);
+                int index = m_vars.m_vars.FindIndex(x => x.Value == ident.Value);
                 if (index == -1)
                     Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: variable `{ident.Value}` is not declared\n", 1);
                 Var var = m_vars[index];
@@ -450,7 +495,7 @@ namespace Epsilon
             else if (assign.type == NodeStmtIdentifierType.Array)
             {
                 Token ident = assign.array.ident;
-                int index = m_vars.FindIndex(x => x.Value == ident.Value);
+                int index = m_vars.m_vars.FindIndex(x => x.Value == ident.Value);
                 if (index == -1)
                     Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: variable `{ident.Value}` is not declared\n", 1);
                 string reg_addr = m_FirstTempReg;
@@ -566,7 +611,7 @@ namespace Epsilon
         //////////////////////////////////////////
         void GenFunctionDefinition(string FunctionName)
         {
-            m_vars = [];
+            m_vars = new();
             m_StackSize = new();
             m_scopes = new();
             m_scopestart = new();
@@ -587,7 +632,7 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    ADDI sp, sp, -8");
                 m_outputcode.AppendLine($"    SD ra, 0(sp)");
                 m_StackSize += 8;
-                m_vars.Add(new("", 8, 8, [], false, false, false));
+                m_vars.m_vars.Add(new("", 8, 8, [], false, false, false));
             }
             for (int i = 0; i < Function.parameters.Count; i++)
             {
@@ -598,7 +643,7 @@ namespace Epsilon
                     for (int j = i; j <= 7; j++)
                     {
                         GenPush($"a{j}", 8);
-                        m_vars.Add(new($"variadic({j - i})", 8, 8, [], false, true, true));
+                        m_vars.m_vars.Add(new($"variadic({j - i})", 8, 8, [], false, true, true));
                     }
                     break;
                 }
@@ -611,7 +656,7 @@ namespace Epsilon
                         GenPush($"a{i}", 8);
                     else
                         GenPush($"a{i}", TypeSize);
-                    m_vars.Add(new(Function.parameters[i].Value, Size, TypeSize, Function.parameters[i].Dimensions, IsArray, true, false));
+                    m_vars.m_vars.Add(new(Function.parameters[i].Value, Size, TypeSize, Function.parameters[i].Dimensions, IsArray, true, false));
                 }
             }
             foreach (NodeStmt stmt in Function.FunctionBody.stmts)
@@ -627,30 +672,19 @@ namespace Epsilon
         }
         void GenReturnFromFunction()
         {
-            uint stacksize = 0;
-            for (int i = 0; i < m_vars.Count; i++)
-            {
-                if (m_vars[i].IsParameter && m_vars[i].IsArray)
-                    stacksize += 8;
-                else
-                    stacksize += m_vars[i].Size;
-            }
+            uint stacksize = m_vars.GetStackSize();
             Shartilities.Assert(stacksize == m_StackSize, $"stack sizes are not equal");
             if (m_CurrentFunction == "main")
             {
-                if (stacksize > 0)
-                    m_outputcode.AppendLine($"    ADDI sp, sp, {stacksize}");
+                GenPop(stacksize, false);
                 m_outputcode.AppendLine($"    mv a0, s0");
                 m_outputcode.AppendLine($"    call exit");
+                return;
             }
-            else
-            {
-                if (stacksize - 8 > 0)
-                    m_outputcode.AppendLine($"    ADDI sp, sp, {stacksize - 8}");
-                m_outputcode.AppendLine($"    LD ra, 0(sp)");
-                m_outputcode.AppendLine($"    ADDI sp, sp, 8");
-                m_outputcode.AppendLine($"    ret");
-            }
+            GenPop(stacksize - 8, false);
+            m_outputcode.AppendLine($"    LD ra, 0(sp)");
+            m_outputcode.AppendLine($"    ADDI sp, sp, 8");
+            m_outputcode.AppendLine($"    ret");
         }
         public StringBuilder GenProg()
         {
@@ -829,7 +863,7 @@ namespace Epsilon
             {
                 m_outputcode.AppendLine($"# begin init");
                 if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.Declare)
-                    m_vars.Add(GenStmtDeclare(forr.pred.init.Value.declare));
+                    m_vars.m_vars.Add(GenStmtDeclare(forr.pred.init.Value.declare));
                 else if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.Assign)
                     GenStmtAssign(forr.pred.init.Value.assign);
                 else
@@ -959,7 +993,7 @@ namespace Epsilon
         {
             if (stmt.type == NodeStmt.NodeStmtType.Declare)
             {
-                m_vars.Add(GenStmtDeclare(stmt.declare));
+                m_vars.m_vars.Add(GenStmtDeclare(stmt.declare));
             }
             else if (stmt.type == NodeStmt.NodeStmtType.Assign)
             {
