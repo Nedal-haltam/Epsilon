@@ -464,6 +464,7 @@ LABEL19_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
+# array address using another base register
     LD t1, 40(sp)
     ADD t0, t1, t0
     ADDI sp, sp, -8
@@ -508,6 +509,7 @@ LABEL19_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
+# array address using another base register
     LD t1, 56(sp)
     ADD t0, t1, t0
     ADDI sp, sp, -8
@@ -567,6 +569,7 @@ LABEL22_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
+# array address using another base register
     LD t1, 40(sp)
     ADD t0, t1, t0
     ADDI sp, sp, -8
@@ -617,6 +620,7 @@ LABEL22_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
+# array address using another base register
     LD t1, 56(sp)
     ADD t0, t1, t0
     ADDI sp, sp, -8
@@ -661,6 +665,7 @@ LABEL22_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
+# array address using another base register
     LD t1, 72(sp)
     ADD t0, t1, t0
     ADDI sp, sp, -8
@@ -726,6 +731,7 @@ LABEL25_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
+# array address using another base register
     LD t1, 40(sp)
     ADD t0, t1, t0
     ADDI sp, sp, -8
@@ -770,6 +776,7 @@ LABEL25_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
+# array address using another base register
     LD t1, 56(sp)
     ADD t0, t1, t0
     ADDI sp, sp, -8
@@ -829,6 +836,7 @@ LABEL28_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
+# array address using another base register
     LD t1, 40(sp)
     ADD t0, t1, t0
     ADDI sp, sp, -8
@@ -873,6 +881,7 @@ LABEL28_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
+# array address using another base register
     LD t1, 56(sp)
     ADD t0, t1, t0
     ADDI sp, sp, -8

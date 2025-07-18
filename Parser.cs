@@ -706,6 +706,7 @@ namespace Epsilon
         }
         void PreParseFunctionDefinition(Token FunctionName)
         {
+            ArraysNames.Clear();
             CurrentFunctionName = FunctionName.Value;
             if (STD_FUNCTIONS.Contains(FunctionName.Value) || UserDefinedFunctions.ContainsKey(FunctionName.Value))
             {

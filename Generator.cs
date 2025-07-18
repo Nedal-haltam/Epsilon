@@ -191,7 +191,6 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{var.Value}` is not declared as an array\n", 1);
             List<uint> dims = var.Dimensions;
             Shartilities.Assert(var.IsVariadic || indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
-
             NodeExpr IndexExpr = GenIndexExpr(ref indexes, ref dims, 0);
             GenExpr(
                 NodeExpr.BinExpr(
@@ -200,21 +199,20 @@ namespace Epsilon
                     IndexExpr), 
                 reg, 8
             );
-
-            string BaseReg = "sp";
             if (relative_location_of_base_reg.HasValue)
             {
-                BaseReg = m_SecondTempReg;
+                m_outputcode.AppendLine($"# array address using another base register");
+                string BaseReg = m_SecondTempReg;
                 m_outputcode.AppendLine($"    LD {BaseReg}, {relative_location_of_base_reg}(sp)");
+                m_outputcode.AppendLine($"    ADD {reg}, {BaseReg}, {reg}"); // plus the index
             }
-            m_outputcode.AppendLine($"    ADD {reg}, {BaseReg}, {reg}");
-
-            if (BaseReg == "sp")
+            else
             {
+                m_outputcode.AppendLine($"# array address using sp as a base register");
                 uint relative_location = m_StackSize - VariableLocation(var.Value) - var.Size;
-                m_outputcode.AppendLine($"    ADDI {reg}, {reg}, {relative_location}");
+                m_outputcode.AppendLine($"    ADDI {reg}, {reg}, {relative_location}"); // plus the relative location of the variable if "sp"
+                m_outputcode.AppendLine($"    ADD {reg}, sp, {reg}"); // plus the index
             }
-
             GenPush(reg, 8);
             m_outputcode.AppendLine($"# end array address");
         }
@@ -253,21 +251,16 @@ namespace Epsilon
                     if (ident.indexes.Count == 0)
                     {
                         int index = m_vars.FindIndex(x => x.Value == ident.ident.Value);
-                        if (index != -1)
-                        {
-                            Var var = m_vars[index];
-                            uint TypeSize = var.IsArray && var.IsParameter ? 8 : var.TypeSize;
-                            uint Count = var.Size / var.TypeSize;
-                            uint relative_location = m_StackSize - VariableLocation(var.Value) - TypeSize;
-                            if (!var.IsParameter)
-                                m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location - (TypeSize * (Count - 1))}");
-                            else
-                                m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location}");
-                        }
-                        else
-                        {
+                        if (index == -1)
                             Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.ident.Line}:1:  variable `{ident.ident.Value}` is undeclared\n", 1);
-                        }
+                        Var var = m_vars[index];
+                        uint TypeSize = var.IsArray && var.IsParameter ? 8 : var.TypeSize;
+                        uint Count = var.Size / var.TypeSize;
+                        uint relative_location = m_StackSize - VariableLocation(var.Value) - TypeSize;
+                        if (!var.IsParameter)
+                            m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location - (TypeSize * (Count - 1))}");
+                        else
+                            m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location}");
                         if (DestReg == null)
                             GenPush(reg, size);
                     }
@@ -312,97 +305,81 @@ namespace Epsilon
                 if (ident.indexes.Count == 0)
                 {
                     int index = m_vars.FindIndex(x => x.Value == ident.ident.Value);
-                    if (index != -1)
-                    {
-                        Var var = m_vars[index];
-                        string reg = DestReg ?? m_FirstTempReg;
-                        uint TypeSize = var.IsArray && var.IsParameter ? 8 : var.TypeSize;
-                        uint Count = var.Size / var.TypeSize;
-                        uint relative_location = m_StackSize - VariableLocation(var.Value) - TypeSize;
+                    if (index == -1)
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.ident.Line}:1:  variable `{ident.ident.Value}` is undeclared\n", 1);
+                    Var var = m_vars[index];
+                    string reg = DestReg ?? m_FirstTempReg;
+                    uint TypeSize = var.IsArray && var.IsParameter ? 8 : var.TypeSize;
+                    uint Count = var.Size / var.TypeSize;
+                    uint relative_location = m_StackSize - VariableLocation(var.Value) - TypeSize;
 
-                        if (ident.ByRef)
-                        {
-                            if (!var.IsParameter)
-                                m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location - (TypeSize * (Count - 1))}");
-                            else
-                                m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
-                        }
+                    if (ident.ByRef)
+                    {
+                        if (!var.IsParameter)
+                            m_outputcode.AppendLine($"    ADDI {reg}, sp, {relative_location - (TypeSize * (Count - 1))}");
                         else
-                        {
-                            if (TypeSize == 1)
-                                m_outputcode.AppendLine($"    LB {reg}, {relative_location}(sp)");
-                            else if (TypeSize == 8)
-                                m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
-                            else
-                                Shartilities.UNREACHABLE("GenTerm:Ident:SingleVar");
-                        }
-                        if (DestReg == null)
-                            GenPush(reg, size);
+                            m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
                     }
                     else
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.ident.Line}:1:  variable `{ident.ident.Value}` is undeclared\n", 1);
+                        if (TypeSize == 1)
+                            m_outputcode.AppendLine($"    LB {reg}, {relative_location}(sp)");
+                        else if (TypeSize == 8)
+                            m_outputcode.AppendLine($"    LD {reg}, {relative_location}(sp)");
+                        else
+                            Shartilities.UNREACHABLE("GenTerm:Ident:SingleVar");
                     }
+                    if (DestReg == null)
+                        GenPush(reg, size);
                 }
                 else
                 {
                     string reg = DestReg ?? m_FirstTempReg;
                     string reg_addr = reg == m_FirstTempReg ? m_SecondTempReg : m_FirstTempReg;
                     int index = m_vars.FindIndex(x => x.Value == ident.ident.Value);
-                    if (index != -1)
+                    if (index == -1)
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.ident.Line}:1: variable `{ident.ident.Value}` is not declared\n", 1);
+                    Var var = m_vars[index];
+                    if (var.IsParameter)
                     {
-                        Var var = m_vars[index];
-                        if (var.IsParameter)
-                        {
-                            uint relative_location_of_base_reg = m_StackSize - VariableLocation(ident.ident.Value) - 8;
-                            GenArrayAddrFrom_m_vars(ident.indexes, var, relative_location_of_base_reg);
-                        }
-                        else
-                        {
-                            GenArrayAddrFrom_m_vars(ident.indexes, var);
-                        }
-                        GenPop(reg_addr, 8);
-
-                        if (var.TypeSize == 1)
-                            m_outputcode.AppendLine($"    LB {reg}, 0({reg_addr})");
-                        else if (var.TypeSize == 8)
-                            m_outputcode.AppendLine($"    LD {reg}, 0({reg_addr})");
-                        else
-                            Shartilities.UNREACHABLE("No valid size");
-
-                        if (DestReg == null)
-                            GenPush(reg, size);
+                        uint relative_location_of_base_reg = m_StackSize - VariableLocation(ident.ident.Value) - 8;
+                        GenArrayAddrFrom_m_vars(ident.indexes, var, relative_location_of_base_reg);
                     }
                     else
                     {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.ident.Line}:1: variable `{ident.ident.Value}` is not declared\n", 1);
+                        GenArrayAddrFrom_m_vars(ident.indexes, var);
                     }
+                    GenPop(reg_addr, 8);
+
+                    if (var.TypeSize == 1)
+                        m_outputcode.AppendLine($"    LB {reg}, 0({reg_addr})");
+                    else if (var.TypeSize == 8)
+                        m_outputcode.AppendLine($"    LD {reg}, 0({reg_addr})");
+                    else
+                        Shartilities.UNREACHABLE("No valid size");
+
+                    if (DestReg == null)
+                        GenPush(reg, size);
                 }
             }
             else if (term.type == NodeTerm.NodeTermType.Variadic)
             {
                 int index = m_vars.FindIndex(x => x.IsVariadic);
-                if (index != -1)
-                {
-                    Var var = m_vars[index];
-                    string reg = DestReg ?? m_FirstTempReg;
-                    string reg_addr = reg == m_FirstTempReg ? m_SecondTempReg : m_FirstTempReg;
-                    uint TypeSize = var.TypeSize;
-                    uint Count = var.Size / var.TypeSize;
-                    uint relative_location = m_StackSize - VariableLocation(var.Value) - 8;
-
-                    GenExpr(NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Mul, NodeExpr.Number("8", -1), term.variadic.VariadicIndex), reg_addr, 8);
-                    m_outputcode.AppendLine($"    SUB {reg_addr}, sp, {reg_addr}");
-                    m_outputcode.AppendLine($"    LD {reg}, {relative_location}({reg_addr})");
-
-                    if (DestReg == null)
-                        GenPush(reg, size);
-                }
-                else
-                {
+                if (index == -1)
                     Shartilities.Log(Shartilities.LogType.ERROR, $"no variadic are declared\n", 1);
-                }
+                Var var = m_vars[index];
+                string reg = DestReg ?? m_FirstTempReg;
+                string reg_addr = reg == m_FirstTempReg ? m_SecondTempReg : m_FirstTempReg;
+                uint TypeSize = var.TypeSize;
+                uint Count = var.Size / var.TypeSize;
+                uint relative_location = m_StackSize - VariableLocation(var.Value) - 8;
 
+                GenExpr(NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Mul, NodeExpr.Number("8", -1), term.variadic.VariadicIndex), reg_addr, 8);
+                m_outputcode.AppendLine($"    SUB {reg_addr}, sp, {reg_addr}");
+                m_outputcode.AppendLine($"    LD {reg}, {relative_location}({reg_addr})");
+
+                if (DestReg == null)
+                    GenPush(reg, size);
             }
             else if (term.type == NodeTerm.NodeTermType.Paren)
             {
@@ -493,7 +470,6 @@ namespace Epsilon
                 {
                     GenArrayAddrFrom_m_vars(assign.array.indexes, var);
                 }
-
                 GenExpr(assign.array.expr, reg_data, var.TypeSize);
                 GenPop(reg_addr, 8);
 
