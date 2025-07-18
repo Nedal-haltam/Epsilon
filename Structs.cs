@@ -288,37 +288,9 @@ namespace Epsilon
     {
         public Token ident;
         public List<NodeExpr> indexes;
-        private bool m_ByValue = true;
-        private bool m_ByRef = false;
-        public bool ByValue
-        {
-            get
-            {
-                return m_ByValue;
-            }
-            set
-            {
-                m_ByValue = value;
-                m_ByRef = !value;
-            }
-        }
-        public bool ByRef
-        {
-            get
-            {
-                return m_ByRef;
-            }
-            set
-            {
-                m_ByRef = value;
-                m_ByValue = !value;
-            }
-        }
         public NodeTermIdent()
         {
             indexes = [];
-            m_ByValue = true;
-            m_ByRef = false;
         }
     }
     public class NodeTermParen

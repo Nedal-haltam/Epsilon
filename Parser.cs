@@ -230,7 +230,6 @@ namespace Epsilon
                 {
                     term.ident.indexes.Add(Parseindex());
                 }
-                term.ident.ByRef = ArraysNames.Contains(term.ident.ident.Value) && term.ident.indexes.Count == 0;
                 return term;
             }
             else if (Peek(TokenType.Variadic).HasValue)
