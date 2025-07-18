@@ -1,29 +1,23 @@
 ﻿
 
+using System.Reflection.Metadata;
 using System.Text;
 namespace Epsilon
 {
     internal class Program
     {
-        static void Compile(string InputFilePath, string? OutputFilePath = null)
+        static StringBuilder Compile(string InputFilePath)
         {
             if (!File.Exists(InputFilePath))
                 Shartilities.Log(Shartilities.LogType.ERROR, $"file `{InputFilePath}` doesn't exists\n", 1);
             string InputCode = File.ReadAllText(InputFilePath);
             Tokenizer Tokenizer = new(InputCode, InputFilePath);
-            List<Token> TokenizedProgram = Tokenizer.Tokenize();
+            List<Token> TokenizedProgram = Tokenizer.TokenizeProg();
             Parser Parser = new(TokenizedProgram, InputFilePath);
             NodeProg ParsedProgram = Parser.ParseProg();
             RISCVGenerator Generator = new(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
             StringBuilder GeneratedProgram = Generator.GenProg();
-            if (OutputFilePath == null)
-            {
-                File.WriteAllText("./a.S", GeneratedProgram.ToString());
-            }
-            else
-            {
-                File.WriteAllText(OutputFilePath, GeneratedProgram.ToString());
-            }
+            return GeneratedProgram;
         }
         static void Usage()
         {
@@ -56,8 +50,11 @@ namespace Epsilon
                     Environment.Exit(1);
                 }
             }
-
-            Compile(InputFilePath, OutputFilePath);
+            StringBuilder Assembly = Compile(InputFilePath);
+            if (OutputFilePath == null)
+                File.WriteAllText("./a.S", Assembly.ToString());
+            else
+                File.WriteAllText(OutputFilePath, Assembly.ToString());
         }
     }
 }

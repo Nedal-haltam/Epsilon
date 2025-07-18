@@ -5,9 +5,11 @@ namespace Epsilon
     public struct NodeProg
     {
         public NodeStmtScope scope;
+        public NodeStmtScope GlobalScope;
         public NodeProg()
         {
             scope = new();
+            GlobalScope = new();
         }
     }
     public struct NodeStmtScope
@@ -49,6 +51,7 @@ namespace Epsilon
     {
         public NodeStmtIdentifierType type;
         public NodeStmtDataType datatype;
+        public Token ident;
         public NodeStmtDeclareSingleVar singlevar;
         public NodeStmtDeclareArray array;
     }
@@ -60,16 +63,16 @@ namespace Epsilon
     }
     public struct NodeStmtDeclareSingleVar
     {
-        public Token ident;
         public NodeExpr expr;
     }
     public struct NodeStmtDeclareArray
     {
-        public Token ident;
         public List<NodeExpr> values;
+        public List<uint> Dimensions;
         public NodeStmtDeclareArray()
         {
             values = [];
+            Dimensions = [];
         }
     }
     public struct NodeStmtAssignSingleVar
@@ -178,7 +181,6 @@ namespace Epsilon
         public Token FunctionName;
         public List<Var> parameters;
         public NodeStmtScope FunctionBody;
-        public Dictionary<string, List<uint>> DimensionsOfArrays;
     }
     public struct NodeStmtReturn
     {
@@ -332,5 +334,16 @@ namespace Epsilon
         public NodeBinExprType type;
         public NodeExpr lhs;
         public NodeExpr rhs;
+    }
+
+    public struct Var(string value, uint size, uint TypeSize, List<uint> Dimensions, bool IsArray, bool IsParameter, bool IsVariadic)
+    {
+        public uint TypeSize { get; set; } = TypeSize;
+        public string Value { get; set; } = value;
+        public uint Size { get; set; } = size;
+        public bool IsParameter = IsParameter;
+        public bool IsArray = IsArray;
+        public bool IsVariadic = IsVariadic;
+        public List<uint> Dimensions = new(Dimensions);
     }
 }

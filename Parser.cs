@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 
 #pragma warning disable IDE0017
@@ -10,11 +11,13 @@ namespace Epsilon
 {
     class Parser(List<Token> tokens, string InputFilePath)
     {
+        NodeProg prog = new();
         private readonly List<Token> m_tokens = tokens;
         private readonly string m_inputFilePath = InputFilePath;
         private int m_curr_index = 0;
-        public Dictionary<string, List<uint>> DimensionsOfArrays = [];
+        public string? CurrentFunctionName = null;
         public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
+        List<string> ArraysNames = [];
         public List<string> STD_FUNCTIONS = ["strlen", "stoa", "unstoa", "write"];
 
         public string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
@@ -65,6 +68,7 @@ namespace Epsilon
         }
         Token? PeekAndConsume(TokenType type, int offset = 0) => Peek(type, offset).HasValue ? Consume() : null;
         Token Consume() => m_tokens.ElementAt(m_curr_index++);
+        void ConsumeMany(int n = 1) => m_curr_index += n;
         Token TryConsumeError(TokenType type)
         {
             if (!Peek(type).HasValue)
@@ -226,7 +230,7 @@ namespace Epsilon
                 {
                     term.ident.indexes.Add(Parseindex());
                 }
-                term.ident.ByRef = DimensionsOfArrays.ContainsKey(term.ident.ident.Value) && term.ident.indexes.Count == 0;
+                term.ident.ByRef = ArraysNames.Contains(term.ident.ident.Value) && term.ident.indexes.Count == 0;
                 return term;
             }
             else if (Peek(TokenType.Variadic).HasValue)
@@ -263,7 +267,6 @@ namespace Epsilon
             }
             return null;
         }
-
         static int? GetPrec(TokenType type)
         {
             int? prec = type switch
@@ -372,7 +375,6 @@ namespace Epsilon
                 return exprlhs;
             }
         }
-
         NodeStmtScope ParseScope()
         {
             NodeStmtScope scope = new()
@@ -425,7 +427,6 @@ namespace Epsilon
             }
             return null;
         }
-
         NodeIfPredicate ParseIfPredicate()
         {
             if (!Peek(TokenType.OpenParen).HasValue)
@@ -488,13 +489,6 @@ namespace Epsilon
             TryConsumeError(TokenType.SemiColon);
             return forcond;
         }
-        NodeExpr ParseWhileCond()
-        {
-            TryConsumeError(TokenType.OpenParen);
-            NodeExpr cond = ExpectedExpression(ParseExpr());
-            TryConsumeError(TokenType.CloseParen);
-            return cond;
-        }
         NodeStmtAssign? ParseForUpdateStmt()
         {
             if (!IsStmtAssign())
@@ -527,6 +521,13 @@ namespace Epsilon
             NodeStmtScope scope = ParseScope();
             pred.scope = scope;
             return pred;
+        }
+        NodeExpr ParseWhileCond()
+        {
+            TryConsumeError(TokenType.OpenParen);
+            NodeExpr cond = ExpectedExpression(ParseExpr());
+            TryConsumeError(TokenType.CloseParen);
+            return cond;
         }
         Token Parsedimension()
         {
@@ -564,30 +565,20 @@ namespace Epsilon
                 }
                 Token Ident = Consume();
                 NodeStmtIdentifierType IdentifierType = NodeStmtIdentifierType.SingleVar;
-
                 if (Peek(TokenType.OpenSquare).HasValue)
                 {
                     IdentifierType = NodeStmtIdentifierType.Array;
                     stmt.declare.array = new()
                     {
-                        ident = Ident,
                         values = [],
+                        Dimensions = [],
                     };
-                    if (DimensionsOfArrays.ContainsKey(Ident.Value))
-                    {
-                        Token? peeked = Peek(-1);
-                        int line = peeked.HasValue ? peeked.Value.Line : 1;
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: array `{Ident.Value}` is alread delcared\n", 1);
-                    }
-                    else
-                    {
-                        DimensionsOfArrays.Add(Ident.Value, []);
-                    }
                     while (Peek(TokenType.OpenSquare).HasValue)
                     {
                         Token dim = Parsedimension();
-                        DimensionsOfArrays[Ident.Value].Add(uint.Parse(dim.Value));
+                        stmt.declare.array.Dimensions.Add(uint.Parse(dim.Value));
                     }
+                    ArraysNames.Add(Ident.Value);
                 }
                 else
                 {
@@ -596,15 +587,20 @@ namespace Epsilon
                         DeclareExpr = ExpectedExpression(ParseExpr());
                     stmt.declare.singlevar = new()
                     {
-                        ident = Ident,
                         expr = DeclareExpr,
                     };
                 }
+                stmt.declare.ident = Ident;
                 stmt.declare.type = IdentifierType;
                 stmt.declare.datatype = DataType;
                 stmts.Add(stmt);
             } while (PeekAndConsume(TokenType.Comma).HasValue);
             TryConsumeError(TokenType.SemiColon);
+            if (CurrentFunctionName == null) // it is in Global scope
+            {
+                prog.GlobalScope.stmts.AddRange(stmts);
+                return [];
+            }
             return stmts;
         }
         NodeStmt ParseAssign()
@@ -644,6 +640,111 @@ namespace Epsilon
             }
             stmt.assign.type = IdentifierType;
             return stmt;
+        }
+        List<Var> ParseFunctionDefinitionParameters()
+        {
+            List<Var> parameters = [];
+            do
+            {
+                if (Peek(TokenType.Variadic).HasValue)
+                {
+                    Consume();
+                    //int NumberofVariadics = 8 - parameters.Count;
+                    parameters.Add(new($"NO_NEED_TO_FILL", 0, 0, [0], false, true, true));
+                    if (Peek(TokenType.Comma).HasValue)
+                    {
+                        Token? peeked = Peek(-1);
+                        int line = peeked.HasValue ? peeked.Value.Line : 1;
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: cannot declare afer variadic argument\n", 1);
+                    }
+                }
+                else if (IsStmtDeclare())
+                {
+                    Token vartype = Consume();
+                    Token ident = Consume();
+                    uint TotalSize = 1;
+                    List<uint> dims = [];
+                    bool IsArray = false;
+                    if (parameters.FindIndex(x => x.Value == ident.Value) != -1 || prog.GlobalScope.stmts.FindIndex(x => x.declare.ident.Value == ident.Value) != -1)
+                        Shartilities.Logln(Shartilities.LogType.ERROR, $"variable `{ident.Value}` is already declared", 1);
+                    if (Peek(TokenType.OpenSquare).HasValue)
+                    {
+                        IsArray = true;
+                        while (Peek(TokenType.OpenSquare).HasValue)
+                        {
+                            ArraysNames.Add(ident.Value);
+                            uint DimValue = 0;
+                            if (Peek(TokenType.CloseSquare, 1).HasValue)
+                                ConsumeMany(2);
+                            else
+                            {
+                                DimValue = uint.Parse(Parsedimension().Value);
+                                TotalSize *= DimValue;
+                            }
+                            dims.Add(DimValue);
+                        }
+                    }
+                    uint TypeSize = 0;
+                    if (vartype.Type == TokenType.Auto)
+                        TypeSize = 8;
+                    else if (vartype.Type == TokenType.Char)
+                        TypeSize = 1;
+                    else
+                        Shartilities.Logln(Shartilities.LogType.ERROR, $"invalid variable type `{vartype.Type}`", 1);
+
+                    TotalSize *= TypeSize;
+                    parameters.Add(new(ident.Value, TotalSize, TypeSize, dims, IsArray, true, false));
+                }
+                else
+                {
+                    Token? peeked = Peek(-1);
+                    int line = peeked.HasValue ? peeked.Value.Line : 1;
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: error in definition of function `{CurrentFunctionName}`\n", 1);
+                }
+            } while (PeekAndConsume(TokenType.Comma).HasValue);
+            return parameters;
+        }
+        void PreParseFunctionDefinition(Token FunctionName)
+        {
+            CurrentFunctionName = FunctionName.Value;
+            if (STD_FUNCTIONS.Contains(FunctionName.Value) || UserDefinedFunctions.ContainsKey(FunctionName.Value))
+            {
+                Token? peeked = Peek(-1);
+                int line = peeked.HasValue ? peeked.Value.Line : 1;
+                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: function with the name `{FunctionName.Value}` is already defined\n", 1);
+            }
+        }
+
+        void PostParseFunctionDefinition()
+        {
+            CurrentFunctionName = null;
+        }
+        void ParseFunctionDefinition()
+        {
+            Token FunctionName = Consume();
+            PreParseFunctionDefinition(FunctionName);
+            List<Var> parameters = [];
+            TryConsumeError(TokenType.OpenParen);
+            if (PeekAndConsume(TokenType.CloseParen).HasValue)
+                goto SkipParseParameters;
+            parameters = ParseFunctionDefinitionParameters();
+            TryConsumeError(TokenType.CloseParen);
+        SkipParseParameters:
+            if (!Peek(TokenType.OpenCurly).HasValue)
+            {
+                Token? peeked = Peek(-1);
+                int line = peeked.HasValue ? peeked.Value.Line : 1;
+                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: expected a scope for function `{FunctionName.Value}`\n", 1);
+            }
+            NodeStmtScope FunctionBody = ParseScope();
+            NodeStmtFunction Function = new()
+            {
+                FunctionName = FunctionName,
+                parameters = parameters,
+                FunctionBody = FunctionBody,
+            };
+            UserDefinedFunctions.Add(FunctionName.Value, Function);
+            PostParseFunctionDefinition();
         }
         List<NodeStmt> ParseStmt()
         {
@@ -744,114 +845,8 @@ namespace Epsilon
             }
             else if (Peek(TokenType.Func).HasValue)
             {
-                Dictionary<string, List<uint>> saved = new(DimensionsOfArrays);
-                DimensionsOfArrays.Clear();
                 Consume();
-                Token FunctionName = Consume();
-                if (STD_FUNCTIONS.Contains(FunctionName.Value) || UserDefinedFunctions.ContainsKey(FunctionName.Value))
-                {
-                    Token? peeked = Peek(-1);
-                    int line = peeked.HasValue ? peeked.Value.Line : 1;
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: function with the name `{FunctionName.Value}` is already defined\n", 1);
-                }
-                List<Var> parameters = [];
-                TryConsumeError(TokenType.OpenParen);
-                if (!Peek(TokenType.CloseParen).HasValue)
-                {
-                    do
-                    {
-                        if (Peek(TokenType.Variadic).HasValue)
-                        {
-                            Consume();
-                            int NumberofVariadics = 8 - parameters.Count;
-                            while (NumberofVariadics-- > 0)
-                                DimensionsOfArrays.Add($"variadic({NumberofVariadics})", [0]);
-                            parameters.Add(new("", 0, 0, false, true, true));
-                            if (Peek(TokenType.Comma).HasValue)
-                            {
-                                Token? peeked = Peek(-1);
-                                int line = peeked.HasValue ? peeked.Value.Line : 1;
-                                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: cannod declare afer variadic argument\n", 1);
-                            }
-                        }
-                        else if (IsStmtDeclare())
-                        {
-                            Token vartype = Consume();
-                            Token ident = Consume();
-                            Var parameter = new();
-
-                            parameter.Size = 1;
-                            if (Peek(TokenType.OpenSquare).HasValue)
-                            {
-                                if (DimensionsOfArrays.ContainsKey(ident.Value))
-                                {
-                                    Token? peeked = Peek(-1);
-                                    int line = peeked.HasValue ? peeked.Value.Line : 1;
-                                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: array `{ident.Value}` is alread delcared\n", 1);
-                                }
-                                else
-                                {
-                                    DimensionsOfArrays.Add(ident.Value, []);
-                                }
-                                while (Peek(TokenType.OpenSquare).HasValue)
-                                {
-                                    uint DimValue;
-                                    if (Peek(TokenType.CloseSquare, 1).HasValue)
-                                    {
-                                        Consume();
-                                        Consume();
-                                        DimValue = 0;
-                                    }
-                                    else
-                                    {
-                                        Token dim = Parsedimension();
-                                        DimValue = uint.Parse(dim.Value);
-                                    }
-                                    DimensionsOfArrays[ident.Value].Add(DimValue);
-                                    parameter.Size *= DimValue;
-                                }
-                            }
-                            uint TypeSize = 0;
-                            if (vartype.Type == TokenType.Auto)
-                                TypeSize = 8;
-                            else if (vartype.Type == TokenType.Char)
-                                TypeSize = 1;
-                            else
-                                Shartilities.UNREACHABLE("");
-
-                            parameter.Value = ident.Value;
-                            parameter.TypeSize = TypeSize;
-                            parameter.Size *= TypeSize;
-                            parameters.Add(parameter);
-                        }
-                        else
-                        {
-                            Token? peeked = Peek(-1);
-                            int line = peeked.HasValue ? peeked.Value.Line : 1;
-                            Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: error in definition of function `{FunctionName.Value}`\n", 1);
-                        }
-                    } while (PeekAndConsume(TokenType.Comma).HasValue);
-                }
-                TryConsumeError(TokenType.CloseParen);
-                if (!Peek(TokenType.OpenCurly).HasValue)
-                {
-                    Token? peeked = Peek(-1);
-                    int line = peeked.HasValue ? peeked.Value.Line : 1;
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: expected a scope for function `{FunctionName.Value}`\n", 1);
-                }
-
-                NodeStmtScope FunctionBody = ParseScope();
-                NodeStmtFunction Function = new()
-                {
-                    FunctionName = FunctionName,
-                    parameters = parameters,
-                    FunctionBody = FunctionBody,
-                    DimensionsOfArrays = new(DimensionsOfArrays),
-                };
-                UserDefinedFunctions.Add(FunctionName.Value, Function);
-
-                DimensionsOfArrays.Clear();
-                DimensionsOfArrays = saved;
+                ParseFunctionDefinition();
                 return [];
             }
             else if (Peek(TokenType.Ident).HasValue && Peek(TokenType.OpenParen, 1).HasValue)
@@ -949,12 +944,6 @@ namespace Epsilon
                         type = NodeStmt.NodeStmtType.Function,
                         CalledFunction = CalledFunction
                     };
-                    if (CalledFunctionName.Value == "main")
-                    {
-                        Token? peeked = Peek(-1);
-                        int line = peeked.HasValue ? peeked.Value.Line : 1;
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: cannot call function `main`\n", 1);
-                    }
                     return [stmt];
                 }
                 Shartilities.UNREACHABLE("parsing function call");
@@ -979,8 +968,7 @@ namespace Epsilon
             }
             else if (IsStmtExit())
             {
-                Consume();
-                Consume();
+                ConsumeMany(2);
                 NodeStmtExit exit = new();
                 NodeExpr expr = ExpectedExpression(ParseExpr());
                 exit.expr = expr;
@@ -1011,12 +999,11 @@ namespace Epsilon
         }
         public NodeProg ParseProg()
         {
-            NodeProg prog = new();
-            
+            prog = new();
             while (Peek().HasValue)
             {
-                List<NodeStmt> stmt = ParseStmt();
-                prog.scope.stmts.AddRange(stmt);
+                List<NodeStmt> stmts = ParseStmt();
+                prog.scope.stmts.AddRange(stmts);
             }
             return prog;
         }

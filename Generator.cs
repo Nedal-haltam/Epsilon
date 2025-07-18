@@ -1,31 +1,24 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Epsilon
 {
-    public struct Var(string value, uint size, uint TypeSize, bool IsArray, bool IsParameter, bool IsVariadic)
-    {
-        public uint TypeSize { get; set; } = TypeSize;
-        public string Value { get; set; } = value;
-        public uint Size { get; set; } = size;
-        public bool IsParameter = IsParameter;
-        public bool IsArray = IsArray;
-        public bool IsVariadic = IsVariadic;
-    }
     class RISCVGenerator(NodeProg prog, Dictionary<string, NodeStmtFunction> UserDefinedFunctions, string InputFilePath, List<string> std_functions)
     {
+        ////////////////////////////////////////////////////////
+        public NodeProg m_prog = prog;
+        public Dictionary<string, NodeStmtFunction> m_UserDefinedFunctions = UserDefinedFunctions;
+        private readonly string m_inputFilePath = InputFilePath;
+        readonly List<string> STD_FUNCTIONS = std_functions;
+        ////////////////////////////////////////////////////////
         public readonly string m_FirstTempReg = "t0";
         public readonly string m_SecondTempReg = "t1";
         public readonly StringBuilder m_outputcode = new();
         public int m_labels_count = 0;
         public readonly List<string> m_CalledFunctions = [];
         public List<string> m_StringLits = [];
-
-        private readonly string m_inputFilePath = InputFilePath;
-        public NodeProg m_prog = prog;
-        public Dictionary<string, NodeStmtFunction> m_UserDefinedFunctions = UserDefinedFunctions;
-
-        public Dictionary<string, List<uint>> m_DimensionsOfArrays = [];
+        ////////////////////////////////////////////////////////
         public List<Var> m_vars = [];
         public Stack<int> m_scopes = [];
         public uint m_StackSize;
@@ -33,9 +26,8 @@ namespace Epsilon
         public Stack<string?> m_scopeend = new();
         public List<Var> m_parameters = [];
         public string m_CurrentFunction = "NO_FUNCTION_NAME";
-        readonly List<string> STD_FUNCTIONS = std_functions;
-
-
+        ////////////////////////////////////////////////////////
+        
         void GenPush(string reg, uint size)
         {
             m_outputcode.AppendLine($"    ADDI sp, sp, -{size}");
@@ -47,6 +39,11 @@ namespace Epsilon
                 Shartilities.UNREACHABLE($"GenPush: size: {size}");
             m_StackSize += size;
         }
+        void GenPush(uint size)
+        {
+            m_outputcode.AppendLine($"    ADDI sp, sp, -{size}");
+            m_StackSize += size;
+        }
         void GenPushMany(List<string> regs)
         {
             m_outputcode.AppendLine($"    ADDI sp, sp, -{regs.Count * 8}");
@@ -56,7 +53,6 @@ namespace Epsilon
             }
             m_StackSize += (uint)(8 * regs.Count);
         }
-
         void GenPop(string reg, uint size)
         {
             if (size == 1)
@@ -153,7 +149,7 @@ namespace Epsilon
         }
         static NodeExpr GenIndexExpr(ref List<NodeExpr> indexes, ref List<uint> dims, int i)
         {
-            if (i == dims.Count - 1)
+            if (i == indexes.Count - 1)
             {
                 return new()
                 {
@@ -169,15 +165,31 @@ namespace Epsilon
             NodeExpr rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
             return NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Add, lhs, rhs);
         }
+        void GenExpr(NodeExpr expr, string? DestReg, uint size)
+        {
+            if (expr.type == NodeExpr.NodeExprType.Term)
+            {
+                GenTerm(expr.term, DestReg, size);
+            }
+            else if (expr.type == NodeExpr.NodeExprType.BinExpr)
+            {
+                GenBinExpr(expr.binexpr, DestReg, size);
+            }
+            else if (expr.type == NodeExpr.NodeExprType.None)
+            {
+                GenPush(size);
+            }
+            else
+                Shartilities.UNREACHABLE("no valid expression");
+        }
+        //////////////////////////////////////////
         void GenArrayAddrFrom_m_vars(List<NodeExpr> indexes, Var var, uint? relative_location_of_base_reg = null)
         {
             m_outputcode.AppendLine($"# begin array address");
             string reg = m_FirstTempReg;
-
             if (!var.IsArray)
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: variable `{var.Value}` is not declared as an array\n", 1);
-
-            List<uint> dims = m_DimensionsOfArrays[var.Value];
+            List<uint> dims = var.Dimensions;
             Shartilities.Assert(var.IsVariadic || indexes.Count == dims.Count, "Generator: indexes and dimensionality are not equal");
 
             NodeExpr IndexExpr = GenIndexExpr(ref indexes, ref dims, 0);
@@ -404,6 +416,317 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: invalid term `{term.type}`\n", 1);
             }
         }
+        Var GenStmtDeclare(NodeStmtDeclare declare)
+        {
+            Token ident = declare.ident;
+            if (m_vars.Any(x => x.Value == ident.Value))
+                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: Generator: variable `{ident.Value}` is alread declared\n", 1);
+            if (declare.type == NodeStmtIdentifierType.SingleVar)
+            {
+                if (declare.datatype == NodeStmtDataType.Auto)
+                {
+                    GenExpr(declare.singlevar.expr, null, 8);
+                    return new(ident.Value, 8, 8, [], false, false, false);
+                }
+                else if (declare.datatype == NodeStmtDataType.Char)
+                {
+                    GenExpr(declare.singlevar.expr, null, 1);
+                    return new(ident.Value, 1, 1, [], false, false, false);
+                }
+                else
+                    Shartilities.UNREACHABLE("not valid data type");
+            }
+            else if (declare.type == NodeStmtIdentifierType.Array)
+            {
+                List<uint> dims = declare.array.Dimensions;
+                uint count = 1;
+                foreach (uint d in dims)
+                {
+                    count *= d;
+                }
+                uint SizePerVar = 0;
+                if (declare.datatype == NodeStmtDataType.Auto)
+                    SizePerVar = 8;
+                else if (declare.datatype == NodeStmtDataType.Char)
+                    SizePerVar = 1;
+                else
+                    Shartilities.UNREACHABLE("SizePerVar");
+                GenPush(SizePerVar * count);
+                return new(ident.Value, SizePerVar * count, SizePerVar, dims, true, false, false);
+            }
+            Shartilities.UNREACHABLE($"invalid identifier type");
+            return new();
+        }
+        void GenStmtAssign(NodeStmtAssign assign)
+        {
+            if (assign.type == NodeStmtIdentifierType.SingleVar)
+            {
+                Token ident = assign.singlevar.ident;
+                string reg = m_FirstTempReg;
+                int index = m_vars.FindIndex(x => x.Value == ident.Value);
+                if (index == -1)
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: variable `{ident.Value}` is not declared\n", 1);
+                Var var = m_vars[index];
+                GenExpr(assign.singlevar.expr, reg, var.TypeSize);
+                uint relative_location = m_StackSize - VariableLocation(ident.Value);
+                if (var.TypeSize == 1)
+                    m_outputcode.AppendLine($"    SB {reg}, {relative_location - var.TypeSize}(sp)");
+                if (var.TypeSize == 8)
+                    m_outputcode.AppendLine($"    SD {reg}, {relative_location - var.TypeSize}(sp)");
+                return;
+            }
+            else if (assign.type == NodeStmtIdentifierType.Array)
+            {
+                Token ident = assign.array.ident;
+                int index = m_vars.FindIndex(x => x.Value == ident.Value);
+                if (index == -1)
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: variable `{ident.Value}` is not declared\n", 1);
+                string reg_addr = m_FirstTempReg;
+                string reg_data = m_SecondTempReg;
+                Var var = m_vars[index];
+                if (var.IsParameter)
+                {
+                    uint relative_location_of_base_reg = m_StackSize - VariableLocation(ident.Value) - 8;
+                    GenArrayAddrFrom_m_vars(assign.array.indexes, var, relative_location_of_base_reg);
+                }
+                else
+                {
+                    GenArrayAddrFrom_m_vars(assign.array.indexes, var);
+                }
+
+                GenExpr(assign.array.expr, reg_data, var.TypeSize);
+                GenPop(reg_addr, 8);
+
+                if (var.TypeSize == 1)
+                    m_outputcode.AppendLine($"    SB {reg_data}, 0({reg_addr})");
+                else if (var.TypeSize == 8)
+                    m_outputcode.AppendLine($"    SD {reg_data}, 0({reg_addr})");
+                else
+                    Shartilities.UNREACHABLE("not valid size");
+                return;
+            }
+            Shartilities.UNREACHABLE("not valid identifier type");
+        }
+        void GenStmtFunctionCall(NodeStmtFunctionCall Function, bool WillPushParams)
+        {
+            if (m_UserDefinedFunctions.TryGetValue(Function.FunctionName.Value, out NodeStmtFunction CalledFunction))
+            {
+                int MaxParamsCount = 7;
+                int ProvidedParamsCount = Function.parameters.Count;
+                if (ProvidedParamsCount > MaxParamsCount)
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{Function.FunctionName.Line}:1: Generator: Function call to `{CalledFunction.FunctionName.Value}` provided too much parameters to function (bigger than {MaxParamsCount})\n", 1);
+                if (CalledFunction.parameters.Count > 0 && CalledFunction.parameters[^1].IsVariadic)
+                {
+                    if (ProvidedParamsCount < CalledFunction.parameters.Count - 1)
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{Function.FunctionName.Line}:1: Generator: Function call to `{CalledFunction.FunctionName.Value}` is not valid, check function arity\n", 1);
+                }
+                else
+                {
+                    if (ProvidedParamsCount != CalledFunction.parameters.Count)
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{Function.FunctionName.Line}:1: Generator: Function call to `{CalledFunction.FunctionName.Value}` is not valid, check function arity\n", 1);
+                }
+            }
+            else if (!STD_FUNCTIONS.Contains(Function.FunctionName.Value))
+            {
+                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{Function.FunctionName.Line}:1: Generator: Function `{Function.FunctionName.Value}` is not defined\n", 1);
+            }
+
+            if (!m_CalledFunctions.Contains(Function.FunctionName.Value))
+                m_CalledFunctions.Add(Function.FunctionName.Value);
+            List<string> regs = [];
+            if (WillPushParams)
+            {
+                for (int i = 0; i < Function.parameters.Count; i++)
+                {
+                    regs.Add($"a{i}");
+                }
+                GenPushMany(regs);
+            }
+
+            if (m_UserDefinedFunctions.ContainsKey(Function.FunctionName.Value))
+            {
+                bool filled = false;
+                for (int i = 0; i < Function.parameters.Count; i++)
+                {
+                    if (CalledFunction.parameters[i].IsVariadic)
+                    {
+                        filled = true;
+                        Shartilities.Assert(i == CalledFunction.parameters.Count - 1, $"variadic should be the last argument\n");
+                        GenExpr(NodeExpr.Number((Function.parameters.Count - i).ToString(), -1), $"a{i}", 8);
+                        for (int j = i; j < Function.parameters.Count; j++)
+                        {
+                            GenExpr(Function.parameters[j], $"a{j + 1}", 8);
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        GenExpr(Function.parameters[i], $"a{i}", CalledFunction.parameters[i].TypeSize);
+                    }
+                }
+                if (!filled && CalledFunction.parameters.Count > 0 && CalledFunction.parameters[^1].IsVariadic)
+                    GenExpr(NodeExpr.Number("0", -1), $"a{Function.parameters.Count}", 8);
+            }
+            else
+            {
+                for (int i = 0; i < Function.parameters.Count; i++)
+                {
+                    GenExpr(Function.parameters[i], $"a{i}", 8);
+                }
+            }
+            m_outputcode.AppendLine($"    call {Function.FunctionName.Value}");
+            if (WillPushParams)
+            {
+                GenPopMany(regs);
+            }
+        }
+        void GenReturnFromFunction()
+        {
+            uint stacksize = 0;
+            for (int i = 0; i < m_vars.Count; i++)
+            {
+                if (m_vars[i].IsParameter && m_vars[i].IsArray)
+                    stacksize += 8;
+                else
+                    stacksize += m_vars[i].Size;
+            }
+            Shartilities.Assert(stacksize == m_StackSize, $"stack sizes are not equal");
+            if (m_CurrentFunction == "main")
+            {
+                if (stacksize > 0)
+                    m_outputcode.AppendLine($"    ADDI sp, sp, {stacksize}");
+                m_outputcode.AppendLine($"    mv a0, s0");
+                m_outputcode.AppendLine($"    call exit");
+            }
+            else
+            {
+                if (stacksize - 8 > 0)
+                    m_outputcode.AppendLine($"    ADDI sp, sp, {stacksize - 8}");
+                m_outputcode.AppendLine($"    LD ra, 0(sp)");
+                m_outputcode.AppendLine($"    ADDI sp, sp, 8");
+                m_outputcode.AppendLine($"    ret");
+            }
+        }
+        void GenFunctionDefinition(string FunctionName)
+        {
+            m_vars = [];
+            m_StackSize = new();
+            m_scopes = new();
+            m_scopestart = new();
+            m_scopeend = new();
+            m_CurrentFunction = "NO_FUNCTION_NAME";
+            m_parameters = [];
+
+            if (FunctionName != "main")
+                m_outputcode.AppendLine($"{FunctionName}:");
+            m_CurrentFunction = FunctionName;
+            m_parameters = m_UserDefinedFunctions[FunctionName].parameters;
+
+            NodeStmtFunction Function = m_UserDefinedFunctions[m_CurrentFunction];
+
+
+            if (m_CurrentFunction != "main")
+            {
+                m_outputcode.AppendLine($"    ADDI sp, sp, -8");
+                m_outputcode.AppendLine($"    SD ra, 0(sp)");
+                m_StackSize += 8;
+                m_vars.Add(new("", 8, 8, [], false, false, false));
+            }
+            for (int i = 0; i < Function.parameters.Count; i++)
+            {
+                if (Function.parameters[i].IsVariadic)
+                {
+                    Shartilities.Assert(i == Function.parameters.Count - 1, $"variadic should be the last argument\n");
+                    // up until a7
+                    for (int j = i; j <= 7; j++)
+                    {
+                        GenPush($"a{j}", 8);
+                        m_vars.Add(new($"variadic({j - i})", 8, 8, [], false, true, true));
+                    }
+                    break;
+                }
+                else
+                {
+                    uint TypeSize = Function.parameters[i].TypeSize;
+                    uint Size = Function.parameters[i].Size;
+                    bool IsArray = Function.parameters[i].IsArray;
+                    if (IsArray)
+                        GenPush($"a{i}", 8);
+                    else
+                        GenPush($"a{i}", TypeSize);
+                    m_vars.Add(new(Function.parameters[i].Value, Size, TypeSize, Function.parameters[i].Dimensions, IsArray, true, false));
+                }
+            }
+            foreach (NodeStmt stmt in Function.FunctionBody.stmts)
+            {
+                GenStmt(stmt);
+            }
+
+            if (Function.FunctionBody.stmts.Count == 0 || Function.FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
+            {
+                m_outputcode.AppendLine($"    mv s0, zero");
+                GenReturnFromFunction();
+            }
+        }
+        //List<Var> GenGlobalVariables()
+        //{
+        //    List<Var> GlobalVariables = [];
+        //    for (int i = 0; i < m_prog.GlobalScope.stmts.Count; i++)
+        //    {
+        //        NodeStmt stmt = m_prog.GlobalScope.stmts[i];
+        //        if (stmt.type != NodeStmt.NodeStmtType.Declare)
+        //            Shartilities.Logln(Shartilities.LogType.ERROR, $"global statements should be variables declaration", 1);
+        //        GlobalVariables.Add(GenStmtDeclare(stmt.declare));
+        //    }
+        //    return GlobalVariables;
+        //}
+        //void PopGlobalVariables()
+        //{
+        //    uint size = 0;
+        //    foreach (Var v in GlobalVariables)
+        //        size += v.Size;
+        //    if (size > 0)
+        //        m_outputcode.AppendLine($"    addi sp, sp, {size}");
+        //}
+        public StringBuilder GenProg()
+        {
+            string MainFunctionName = "main";
+            m_outputcode.AppendLine($".section .text");
+            m_outputcode.AppendLine($".globl {MainFunctionName}");
+
+            if (!m_UserDefinedFunctions.ContainsKey("main"))
+            {
+                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n", 1);
+            }
+            m_outputcode.AppendLine($"{MainFunctionName}:");
+
+            GenFunctionDefinition("main");
+            for (int i = 0; i < m_CalledFunctions.Count; i++)
+            {
+                if (m_UserDefinedFunctions.ContainsKey(m_CalledFunctions[i]))
+                {
+                    GenFunctionDefinition(m_CalledFunctions[i]);
+                }
+            }
+
+            GenStdFunctions();
+            if (m_StringLits.Count > 0)
+                m_outputcode.AppendLine($".section .data");
+            for (int i = 0; i < m_StringLits.Count; i++)
+            {
+                m_outputcode.AppendLine($"StringLits{i}:");
+                m_outputcode.AppendLine($"    .string \"{m_StringLits[i]}\"");
+            }
+            if (!m_UserDefinedFunctions.ContainsKey("stoa") && m_CalledFunctions.Contains("stoa")
+            && !m_UserDefinedFunctions.ContainsKey("unstoa") && m_CalledFunctions.Contains("unstoa"))
+            {
+                m_outputcode.AppendLine($".section .bss");
+                m_outputcode.AppendLine($"itoaTempBuffer:     ");
+                m_outputcode.AppendLine($"    .space 32");
+            }
+            return m_outputcode;
+        }
+        //////////////////////////////////////////
         void GenBinExpr(NodeBinExpr binExpr, string? DestReg, uint size)
         {
             string reg = DestReg ?? m_FirstTempReg;
@@ -461,139 +784,6 @@ namespace Epsilon
             }
             if (DestReg == null)
                 GenPush(reg, size);
-        }
-        void GenExpr(NodeExpr expr, string? DestReg, uint size)
-        {
-            if (expr.type == NodeExpr.NodeExprType.Term)
-            {
-                GenTerm(expr.term, DestReg, size);
-            }
-            else if (expr.type == NodeExpr.NodeExprType.BinExpr)
-            {
-                GenBinExpr(expr.binexpr, DestReg, size);
-            }
-            else if (expr.type == NodeExpr.NodeExprType.None)
-            {
-                m_outputcode.AppendLine($"    ADDI sp, sp, -{size}");
-                m_StackSize += size;
-            }
-            else
-                Shartilities.UNREACHABLE("no valid expression");
-        }
-        void GenStmtDeclare(NodeStmtDeclare declare)
-        {
-            if (declare.type == NodeStmtIdentifierType.SingleVar)
-            {
-                Token ident = declare.singlevar.ident;
-                if (m_vars.Any(x => x.Value == ident.Value))
-                {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: Generator: variable `{ident.Value}` is alread declared\n", 1);
-                }
-                else
-                {
-                    if (declare.datatype == NodeStmtDataType.Auto)
-                    {
-                        GenExpr(declare.singlevar.expr, null, 8);
-                        m_vars.Add(new(ident.Value, 8, 8, false, false, false));
-                    }
-                    else if (declare.datatype == NodeStmtDataType.Char)
-                    {
-                        GenExpr(declare.singlevar.expr, null, 1);
-                        m_vars.Add(new(ident.Value, 1, 1, false, false, false));
-                    }
-                    else
-                        Shartilities.UNREACHABLE("not valid data type");
-                }
-            }
-            else if (declare.type == NodeStmtIdentifierType.Array)
-            {
-                Token ident = declare.array.ident;
-                if (m_vars.Any(x => x.Value == ident.Value))
-                {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: Generator: variable `{ident.Value}` is alread declared\n", 1);
-                }
-                else
-                {
-                    List<uint> dims = m_DimensionsOfArrays[ident.Value];
-                    uint count = 1;
-                    foreach (uint d in dims)
-                    {
-                        count *= d;
-                    }
-                    uint SizePerVar = 0;
-                    if (declare.datatype == NodeStmtDataType.Auto)
-                        SizePerVar = 8;
-                    else if (declare.datatype == NodeStmtDataType.Char)
-                        SizePerVar = 1;
-                    else
-                        Shartilities.UNREACHABLE("SizePerVar");
-
-                    m_outputcode.AppendLine($"    ADDI sp, sp, -{SizePerVar * count}");
-                    m_StackSize += SizePerVar * count;
-                    m_vars.Add(new(ident.Value, SizePerVar * count, SizePerVar, true, false, false));
-                }
-            }
-            else
-                Shartilities.UNREACHABLE("not valid identifier type");
-        }
-        void GenStmtAssign(NodeStmtAssign assign)
-        {
-            if (assign.type == NodeStmtIdentifierType.SingleVar)
-            {
-                Token ident = assign.singlevar.ident;
-                string reg = m_FirstTempReg;
-                int index = m_vars.FindIndex(x => x.Value == ident.Value);
-                if (index != -1)
-                {
-                    Var var = m_vars[index];
-                    GenExpr(assign.singlevar.expr, reg, var.TypeSize);
-                    uint relative_location = m_StackSize - VariableLocation(ident.Value);
-                    if (var.TypeSize == 1)
-                        m_outputcode.AppendLine($"    SB {reg}, {relative_location - var.TypeSize}(sp)");
-                    if (var.TypeSize == 8)
-                        m_outputcode.AppendLine($"    SD {reg}, {relative_location - var.TypeSize}(sp)");
-                }
-                else
-                {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: variable `{ident.Value}` is not declared\n", 1);
-                }
-            }
-            else if (assign.type == NodeStmtIdentifierType.Array)
-            {
-                Token ident = assign.array.ident;
-                int index = m_vars.FindIndex(x => x.Value == ident.Value);
-                if (index != -1)
-                {
-                    string reg_addr = m_FirstTempReg;
-                    string reg_data = m_SecondTempReg;
-                    Var var = m_vars[index];
-                    if (var.IsParameter)
-                    {
-                        uint relative_location_of_base_reg = m_StackSize - VariableLocation(ident.Value) - 8;
-                        GenArrayAddrFrom_m_vars(assign.array.indexes, var, relative_location_of_base_reg);
-                    }
-                    else
-                    {
-                        GenArrayAddrFrom_m_vars(assign.array.indexes, var);
-                    }
-
-                    GenExpr(assign.array.expr, reg_data, var.TypeSize);
-                    GenPop(reg_addr, 8);
-
-                    if (var.TypeSize == 1)
-                        m_outputcode.AppendLine($"    SB {reg_data}, 0({reg_addr})");
-                    else if (var.TypeSize == 8)
-                        m_outputcode.AppendLine($"    SD {reg_data}, 0({reg_addr})");
-                    else
-                        Shartilities.UNREACHABLE("not valid size");
-                }
-                else
-                {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: variable `{ident.Value}` is not declared\n", 1);
-                }
-            }
-            else
-                Shartilities.UNREACHABLE("not valid identifier type");
         }
         void GenElifs(NodeIfElifs elifs, string label_end)
         {
@@ -655,7 +845,7 @@ namespace Epsilon
             {
                 m_outputcode.AppendLine($"# begin init");
                 if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.Declare)
-                    GenStmtDeclare(forr.pred.init.Value.declare);
+                    m_vars.Add(GenStmtDeclare(forr.pred.init.Value.declare));
                 else if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.Assign)
                     GenStmtAssign(forr.pred.init.Value.assign);
                 else
@@ -770,165 +960,6 @@ namespace Epsilon
             }
             m_outputcode.AppendLine($"    J {m_scopestart.Peek()}");
         }
-        void GenStmtFunctionCall(NodeStmtFunctionCall Function, bool WillPushParams)
-        {
-            if (m_UserDefinedFunctions.TryGetValue(Function.FunctionName.Value, out NodeStmtFunction CalledFunction))
-            {
-                int MaxParamsCount = 7;
-                int ProvidedParamsCount = Function.parameters.Count;
-                if (ProvidedParamsCount > MaxParamsCount)
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{Function.FunctionName.Line}:1: Generator: Function call to `{CalledFunction.FunctionName.Value}` provided too much parameters to function (bigger than {MaxParamsCount})\n", 1);
-                if (CalledFunction.parameters.Count > 0 && CalledFunction.parameters[^1].IsVariadic)
-                {
-                    if (ProvidedParamsCount < CalledFunction.parameters.Count - 1)
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{Function.FunctionName.Line}:1: Generator: Function call to `{CalledFunction.FunctionName.Value}` is not valid, check function arity\n", 1);
-                }
-                else
-                {
-                    if (ProvidedParamsCount != CalledFunction.parameters.Count)
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{Function.FunctionName.Line}:1: Generator: Function call to `{CalledFunction.FunctionName.Value}` is not valid, check function arity\n", 1);
-                }
-            }
-            else if (!STD_FUNCTIONS.Contains(Function.FunctionName.Value))
-            {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{Function.FunctionName.Line}:1: Generator: Function `{Function.FunctionName.Value}` is not defined\n", 1);
-            }
-
-            if (!m_CalledFunctions.Contains(Function.FunctionName.Value))
-                m_CalledFunctions.Add(Function.FunctionName.Value);
-            List<string> regs = [];
-            if (WillPushParams)
-            {
-                for (int i = 0; i < Function.parameters.Count; i++)
-                {
-                    regs.Add($"a{i}");
-                }
-                GenPushMany(regs);
-            }
-
-            if (m_UserDefinedFunctions.ContainsKey(Function.FunctionName.Value))
-            {
-                bool filled = false;
-                for (int i = 0; i < Function.parameters.Count; i++)
-                {
-                    if (CalledFunction.parameters[i].IsVariadic)
-                    {
-                        filled = true;
-                        Shartilities.Assert(i == CalledFunction.parameters.Count - 1, $"variadic should be the last argument\n");
-                        GenExpr(NodeExpr.Number((Function.parameters.Count - i).ToString(), -1), $"a{i}", 8);
-                        for (int j = i; j < Function.parameters.Count; j++)
-                        {
-                            GenExpr(Function.parameters[j], $"a{j + 1}", 8);
-                        }
-                        break;
-                    }
-                    else
-                    {
-                        GenExpr(Function.parameters[i], $"a{i}", CalledFunction.parameters[i].TypeSize);
-                    }
-                }
-                if (!filled && CalledFunction.parameters.Count > 0 && CalledFunction.parameters[^1].IsVariadic)
-                    GenExpr(NodeExpr.Number("0", -1), $"a{Function.parameters.Count}", 8);
-            }
-            else
-            {
-                for (int i = 0; i < Function.parameters.Count; i++)
-                {
-                    GenExpr(Function.parameters[i], $"a{i}", 8);
-                }
-            }
-            m_outputcode.AppendLine($"    call {Function.FunctionName.Value}");
-            if (WillPushParams)
-            {
-                GenPopMany(regs);
-            }
-        }
-        void GenReturnFromFunction()
-        {
-            uint stacksize = 0;
-            foreach (Var v in m_vars)
-            {
-                if (v.IsParameter && v.IsArray)
-                    stacksize += 8;
-                else
-                    stacksize += v.Size;
-            }
-            Shartilities.Assert(stacksize == m_StackSize, $"stack sizes are not equal");
-            if (stacksize > 0)
-                m_outputcode.AppendLine($"    ADDI sp, sp, {stacksize}");
-            if (m_CurrentFunction == "main")
-            {
-                m_outputcode.AppendLine($"    mv a0, s0");
-                m_outputcode.AppendLine($"    call exit");
-            }
-            else
-            {
-                m_outputcode.AppendLine($"    LD ra, 0(sp)");
-                m_outputcode.AppendLine($"    ADDI sp, sp, 8");
-                m_outputcode.AppendLine($"    ret");
-            }
-        }
-        void GenFunctionDefinition(string FunctionName)
-        {
-            m_vars = [];
-            m_scopes = new();
-            m_StackSize = new();
-            m_scopestart = new();
-            m_scopeend = new();
-            m_CurrentFunction = "NO_FUNCTION_NAME";
-            m_DimensionsOfArrays = [];
-            m_parameters = [];
-
-            if (FunctionName != "main")
-                m_outputcode.AppendLine($"{FunctionName}:");
-            m_CurrentFunction = FunctionName;
-            m_DimensionsOfArrays = m_UserDefinedFunctions[FunctionName].DimensionsOfArrays;
-            m_parameters = m_UserDefinedFunctions[FunctionName].parameters;
-
-            NodeStmtFunction Function = m_UserDefinedFunctions[m_CurrentFunction];
-
-
-            if (m_CurrentFunction != "main")
-            {
-                m_outputcode.AppendLine($"    ADDI sp, sp, -8");
-                m_outputcode.AppendLine($"    SD ra, 0(sp)");
-            }
-            for (int i = 0; i < Function.parameters.Count; i++)
-            {
-                if (Function.parameters[i].IsVariadic)
-                {
-                    Shartilities.Assert(i == Function.parameters.Count - 1, $"variadic should be the last argument\n");
-                    // up until a7
-                    for (int j = i; j <= 7; j++)
-                    {
-                        GenPush($"a{j}", 8);
-                        m_vars.Add(new($"variadic({j - i})", 8, 8, false, true, true));
-                    }
-                    break;
-                }
-                else
-                {
-                    uint TypeSize = Function.parameters[i].TypeSize;
-                    uint Size = Function.parameters[i].Size;
-                    bool IsArray = Function.DimensionsOfArrays.ContainsKey(Function.parameters[i].Value);
-                    if (IsArray)
-                        GenPush($"a{i}", 8);
-                    else
-                        GenPush($"a{i}", TypeSize);
-                    m_vars.Add(new(Function.parameters[i].Value, Size, TypeSize, IsArray, true, false));
-                }
-            }
-            foreach (NodeStmt stmt in Function.FunctionBody.stmts)
-            {
-                GenStmt(stmt);
-            }
-
-            if (Function.FunctionBody.stmts.Count == 0 || Function.FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
-            {
-                m_outputcode.AppendLine($"    mv s0, zero");
-                GenReturnFromFunction();
-            }
-        }
         void GenStmtExit(NodeStmtExit exit)
         {
             string reg = "a0";
@@ -944,7 +975,7 @@ namespace Epsilon
         {
             if (stmt.type == NodeStmt.NodeStmtType.Declare)
             {
-                GenStmtDeclare(stmt.declare);
+                m_vars.Add(GenStmtDeclare(stmt.declare));
             }
             else if (stmt.type == NodeStmt.NodeStmtType.Assign)
             {
@@ -1057,42 +1088,6 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    ret");
             }
         }
-        public StringBuilder GenProg()
-        {
-            string MainFunctionName = "main";
-            m_outputcode.AppendLine($".section .text");
-            m_outputcode.AppendLine($".globl {MainFunctionName}");
 
-            if (!m_UserDefinedFunctions.ContainsKey("main"))
-            {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n", 1);
-            }
-            m_outputcode.AppendLine($"{MainFunctionName}:");
-            GenFunctionDefinition("main");
-            for (int i = 0; i < m_CalledFunctions.Count; i++)
-            {
-                if (m_UserDefinedFunctions.ContainsKey(m_CalledFunctions[i]))
-                {
-                    GenFunctionDefinition(m_CalledFunctions[i]);
-                }
-            }
-
-            GenStdFunctions();
-            if (m_StringLits.Count > 0)
-                m_outputcode.AppendLine($".section .data");
-            for (int i = 0; i < m_StringLits.Count; i++)
-            {
-                m_outputcode.AppendLine($"StringLits{i}:");
-                m_outputcode.AppendLine($"    .string \"{m_StringLits[i]}\"");
-            }
-            if (!m_UserDefinedFunctions.ContainsKey("stoa") && m_CalledFunctions.Contains("stoa")
-            && !m_UserDefinedFunctions.ContainsKey("unstoa") && m_CalledFunctions.Contains("unstoa"))
-            {
-                m_outputcode.AppendLine($".section .bss");
-                m_outputcode.AppendLine($"itoaTempBuffer:     ");
-                m_outputcode.AppendLine($"    .space 32");
-            }
-            return m_outputcode;
-        }
     }
 }

@@ -201,7 +201,7 @@ namespace Epsilon
             public string src;
         }
         private readonly Dictionary<string, Macro> macro = [];
-        public List<Token> Tokenize()
+        public List<Token> TokenizeProg()
         {
             m_tokens = [];
             StringBuilder buffer = new(); // this buffer is for multiple letter tokens
@@ -266,7 +266,7 @@ namespace Epsilon
                     string FileContent = File.ReadAllText(IncludeFilePath);
                     Tokenizer temp = new(FileContent, IncludeFilePath);
 
-                    List<Token> FileContentTokenized = temp.Tokenize();
+                    List<Token> FileContentTokenized = temp.TokenizeProg();
                     {
                         Parser parser = new(FileContentTokenized, IncludeFilePath);
                         parser.ParseProg();
@@ -289,7 +289,7 @@ namespace Epsilon
                     Consume();
                     string MacroSrc = buffer.ToString();
                     Tokenizer temp = new(MacroSrc, m_inputFilePath);
-                    List<Token> macrovalue = temp.Tokenize();
+                    List<Token> macrovalue = temp.TokenizeProg();
                     macro.Add(macroname, new() { src = MacroSrc, tokens = macrovalue });
                 }
                 else if (IsComment())
