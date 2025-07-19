@@ -21,14 +21,14 @@ namespace Epsilon
         public readonly List<string> m_CalledFunctions = [];
         public List<string> m_StringLits = [];
         ////////////////////////////////////////////////////////
-        public struct variables
+        public struct Variables
         {
             public List<Var> m_vars = [];
-            public variables()
+            public Variables()
             {
                 m_vars = [];
             }
-            public uint GetStackSize()
+            public readonly uint GetAllocatedStackSize()
             {
                 uint stacksize = 0;
                 for (int i = 0; i < m_vars.Count; i++)
@@ -44,23 +44,23 @@ namespace Epsilon
             {
                 get
                 {
-                    Shartilities.Assert(0 <= index && index < m_vars.Count, $"index out of bound in register file\n");
+                    Shartilities.Assert(0 <= index && index < m_vars.Count, $"index out of bound in variable indexing\n");
                     return m_vars[index];
                 }
                 set
                 {
-                    Shartilities.Assert(0 <= index && index < m_vars.Count, $"index out of bound in register file\n");
+                    Shartilities.Assert(0 <= index && index < m_vars.Count, $"index out of bound in variable indexing\n");
                     m_vars[index] = value;
                 }
             }
         }
-        variables m_vars = new();
+        Variables m_vars = new();
         public Stack<int> m_scopes = [];
         public uint m_StackSize;
         public Stack<string?> m_scopestart = new();
         public Stack<string?> m_scopeend = new();
         public List<Var> m_parameters = [];
-        public string m_CurrentFunction = "NO_FUNCTION_NAME";
+        public string m_CurrentFunctionName = "NO_FUNCTION_NAME";
         ////////////////////////////////////////////////////////
         void GenPush(string reg, uint size)
         {
@@ -609,16 +609,6 @@ namespace Epsilon
             }
         }
         //////////////////////////////////////////
-        void PreGenFunctionDefinition()
-        {
-            m_vars = new();
-            m_StackSize = new();
-            m_scopes = new();
-            m_scopestart = new();
-            m_scopeend = new();
-            m_CurrentFunction = "NO_FUNCTION_NAME";
-            m_parameters = [];
-        }
         void GenPushFunctionParametersInDefinition(List<Var> parameters)
         {
             for (int i = 0; i < parameters.Count; i++)
@@ -647,26 +637,33 @@ namespace Epsilon
                 }
             }
         }
-        void GenFunctionBody(NodeStmtScope FunctionBody)
+        void PreGenFunctionBody(string FunctionName)
         {
-            foreach (NodeStmt stmt in FunctionBody.stmts)
-                GenStmt(stmt);
-        }
-        void GenFunctionDefinition(string FunctionName)
-        {
-            PreGenFunctionDefinition();
+            m_vars = new();
+            m_StackSize = new();
+            m_scopes = new();
+            m_scopestart = new();
+            m_scopeend = new();
+            m_CurrentFunctionName = FunctionName;
+            m_parameters = [];
 
             m_outputcode.AppendLine($"{FunctionName}:");
-            m_CurrentFunction = FunctionName;
             m_parameters = m_UserDefinedFunctions[FunctionName].parameters;
-            NodeStmtFunction Function = m_UserDefinedFunctions[m_CurrentFunction];
 
             GenPush("ra", 8);
             m_vars.m_vars.Add(new("", 8, 8, [], false, false, false));
-            GenPushFunctionParametersInDefinition(Function.parameters);
-            GenFunctionBody(Function.FunctionBody);
-
-            if (Function.FunctionBody.stmts.Count == 0 || Function.FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
+            GenPushFunctionParametersInDefinition(m_UserDefinedFunctions[FunctionName].parameters);
+        }
+        void GenFunctionBody()
+        {
+            NodeStmtScope FunctionBody = m_UserDefinedFunctions[m_CurrentFunctionName].FunctionBody;
+            foreach (NodeStmt stmt in FunctionBody.stmts)
+                GenStmt(stmt);
+        }
+        void PostGenFunctionBody()
+        {
+            NodeStmtScope FunctionBody = m_UserDefinedFunctions[m_CurrentFunctionName].FunctionBody;
+            if (FunctionBody.stmts.Count == 0 || FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
             {
                 m_outputcode.AppendLine($"    mv s0, zero");
                 GenReturnFromFunction();
@@ -674,19 +671,24 @@ namespace Epsilon
         }
         void GenReturnFromFunction()
         {
-            uint stacksize = m_vars.GetStackSize();
-            Shartilities.Assert(stacksize == m_StackSize, $"stack sizes are not equal");
-            if (m_CurrentFunction == "main")
+            uint AllocatedStackSize = m_vars.GetAllocatedStackSize();
+            Shartilities.Assert(AllocatedStackSize == m_StackSize, $"stack sizes are not equal");
+            if (m_CurrentFunctionName == "main")
             {
-                GenPop(stacksize, false);
+                GenPop(AllocatedStackSize, false);
                 m_outputcode.AppendLine($"    mv a0, s0");
                 m_outputcode.AppendLine($"    call exit");
                 return;
             }
-            GenPop(stacksize - 8, false);
-            m_outputcode.AppendLine($"    LD ra, 0(sp)");
-            m_outputcode.AppendLine($"    ADDI sp, sp, 8");
+            GenPop(AllocatedStackSize, false);
+            m_outputcode.AppendLine($"    LD ra, -8(sp)");
             m_outputcode.AppendLine($"    ret");
+        }
+        void GenFunction(string FunctionName)
+        {
+            PreGenFunctionBody(FunctionName);
+            GenFunctionBody();
+            PostGenFunctionBody();
         }
         public StringBuilder GenProg()
         {
@@ -698,12 +700,12 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n", 1);
             }
 
-            GenFunctionDefinition("main");
+            GenFunction("main");
             for (int i = 0; i < m_CalledFunctions.Count; i++)
             {
                 if (m_UserDefinedFunctions.ContainsKey(m_CalledFunctions[i]))
                 {
-                    GenFunctionDefinition(m_CalledFunctions[i]);
+                    GenFunction(m_CalledFunctions[i]);
                 }
             }
 
@@ -731,7 +733,7 @@ namespace Epsilon
         //    {
         //        NodeStmt stmt = m_prog.GlobalScope.stmts[i];
         //        if (stmt.type != NodeStmt.NodeStmtType.Declare)
-        //            Shartilities.Logln(Shartilities.LogType.ERROR, $"global statements should be variables declaration", 1);
+        //            Shartilities.Logln(Shartilities.LogType.ERROR, $"global statements should be Variables declaration", 1);
         //        GlobalVariables.Add(GenStmtDeclare(stmt.declare));
         //    }
         //    return GlobalVariables;

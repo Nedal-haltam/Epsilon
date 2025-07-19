@@ -503,9 +503,8 @@ LABEL14_elifs:
 # end scope
 LABEL13_END:
     mv s0, zero
-    ADDI sp, sp, 33
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 41
+    LD ra, -8(sp)
     ret
 bar:
     ADDI sp, sp, -8
@@ -684,9 +683,8 @@ TEMP_LABEL19_END:
     LI a1, 0
     call print
     mv s0, zero
-    ADDI sp, sp, 33
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 41
+    LD ra, -8(sp)
     ret
 print:
     ADDI sp, sp, -8
@@ -898,9 +896,8 @@ TEMP_LABEL22_END:
 # end scope
 # end whileloop
     mv s0, zero
-    ADDI sp, sp, 96
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 104
+    LD ra, -8(sp)
     ret
 TwoD:
     ADDI sp, sp, -8
@@ -936,9 +933,8 @@ TwoD:
     LI a1, 0
     call print
     mv s0, zero
-    ADDI sp, sp, 16
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 24
+    LD ra, -8(sp)
     ret
 PassArrayWithOffset:
     ADDI sp, sp, -8
@@ -1017,9 +1013,8 @@ TEMP_LABEL30_END:
     LI a1, 0
     call print
     LI s0, 0
-    ADDI sp, sp, 32
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 40
+    LD ra, -8(sp)
     ret
 StringLitManipulate:
     ADDI sp, sp, -8
@@ -1303,9 +1298,8 @@ TEMP_LABEL36_END:
     LB a2, 0(t0)
     call print
     mv s0, zero
-    ADDI sp, sp, 16
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 24
+    LD ra, -8(sp)
     ret
 printhelper:
     ADDI sp, sp, -8
@@ -1418,9 +1412,8 @@ LABEL38_START:
     LI a1, 1
     call printnumber
     LI s0, 2
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL40_elifs:
@@ -1580,9 +1573,8 @@ LABEL41_START:
     LI a1, 0
     call printnumber
     LI s0, 3
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL43_elifs:
@@ -1685,9 +1677,8 @@ LABEL44_START:
     LI a2, 1
     call write
     LI s0, 2
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL46_elifs:
@@ -1802,9 +1793,8 @@ LABEL47_START:
     LD a2, 0(sp)
     call write
     LI s0, 2
-    ADDI sp, sp, 48
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 56
+    LD ra, -8(sp)
     ret
 # end scope
     ADDI sp, sp, 8
@@ -1823,9 +1813,8 @@ LABEL48_END:
     LI a2, 1
     call write
     LI s0, 1
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 FillAutoTwoD:
     ADDI sp, sp, -8
@@ -1957,9 +1946,8 @@ TEMP_LABEL51_END:
     ADDI sp, sp, 8
 # end forloop
     mv s0, zero
-    ADDI sp, sp, 16
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 24
+    LD ra, -8(sp)
     ret
 PrintAutoTwoD:
     ADDI sp, sp, -8
@@ -2081,9 +2069,8 @@ TEMP_LABEL57_END:
     ADDI sp, sp, 8
 # end forloop
     mv s0, zero
-    ADDI sp, sp, 8
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 16
+    LD ra, -8(sp)
     ret
 FillCharTwoD:
     ADDI sp, sp, -8
@@ -2216,9 +2203,8 @@ TEMP_LABEL63_END:
     ADDI sp, sp, 8
 # end forloop
     mv s0, zero
-    ADDI sp, sp, 9
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 17
+    LD ra, -8(sp)
     ret
 PrintCharTwoD:
     ADDI sp, sp, -8
@@ -2340,9 +2326,8 @@ TEMP_LABEL69_END:
     ADDI sp, sp, 8
 # end forloop
     mv s0, zero
-    ADDI sp, sp, 8
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 16
+    LD ra, -8(sp)
     ret
 pass_array_with_offset:
     ADDI sp, sp, -8
@@ -2421,9 +2406,8 @@ TEMP_LABEL75_END:
     ADDI sp, sp, 8
 # end forloop
     mv s0, zero
-    ADDI sp, sp, 16
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 24
+    LD ra, -8(sp)
     ret
 printnumber:
     ADDI sp, sp, -8
@@ -2468,9 +2452,8 @@ LABEL83_START:
     LI a2, 20
     call write
     LI s0, 0
-    ADDI sp, sp, 9
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 17
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL85_elifs:
@@ -2560,9 +2543,8 @@ LABEL81_END:
 # end scope
 LABEL78_END:
     mv s0, zero
-    ADDI sp, sp, 9
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 17
+    LD ra, -8(sp)
     ret
 exit:
     li a7, 93

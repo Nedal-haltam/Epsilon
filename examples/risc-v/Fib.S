@@ -170,9 +170,8 @@ TEMP_LABEL4_END:
     LI a1, 0
     call print
     mv s0, zero
-    ADDI sp, sp, 240
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 248
+    LD ra, -8(sp)
     ret
 FibIterative:
     ADDI sp, sp, -8
@@ -250,9 +249,8 @@ TEMP_LABEL7_END:
     LI a1, 0
     call print
     mv s0, zero
-    ADDI sp, sp, 32
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 40
+    LD ra, -8(sp)
     ret
 _FibRecursive:
     ADDI sp, sp, -8
@@ -310,9 +308,8 @@ LABEL9_START:
     LD t0, 0(sp)
     ADDI sp, sp, 8
     LD s0, 0(t0)
-    ADDI sp, sp, 16
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 24
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL11_elifs:
@@ -345,9 +342,8 @@ LABEL12_START:
 # begin scope
 ########## i
     LD s0, 0(sp)
-    ADDI sp, sp, 16
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 24
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL14_elifs:
@@ -393,9 +389,8 @@ LABEL13_END:
     LD t0, 0(sp)
     ADDI sp, sp, 8
     ADD s0, s0, t0
-    ADDI sp, sp, 16
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 24
+    LD ra, -8(sp)
     ret
 print:
     ADDI sp, sp, -8
@@ -607,9 +602,8 @@ TEMP_LABEL16_END:
 # end scope
 # end whileloop
     mv s0, zero
-    ADDI sp, sp, 96
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 104
+    LD ra, -8(sp)
     ret
 printhelper:
     ADDI sp, sp, -8
@@ -722,9 +716,8 @@ LABEL23_START:
     LI a1, 1
     call printnumber
     LI s0, 2
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL25_elifs:
@@ -884,9 +877,8 @@ LABEL26_START:
     LI a1, 0
     call printnumber
     LI s0, 3
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL28_elifs:
@@ -989,9 +981,8 @@ LABEL29_START:
     LI a2, 1
     call write
     LI s0, 2
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL31_elifs:
@@ -1106,9 +1097,8 @@ LABEL32_START:
     LD a2, 0(sp)
     call write
     LI s0, 2
-    ADDI sp, sp, 48
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 56
+    LD ra, -8(sp)
     ret
 # end scope
     ADDI sp, sp, 8
@@ -1127,9 +1117,8 @@ LABEL33_END:
     LI a2, 1
     call write
     LI s0, 1
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 printnumber:
     ADDI sp, sp, -8
@@ -1174,9 +1163,8 @@ LABEL41_START:
     LI a2, 20
     call write
     LI s0, 0
-    ADDI sp, sp, 9
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 17
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL43_elifs:
@@ -1266,9 +1254,8 @@ LABEL39_END:
 # end scope
 LABEL36_END:
     mv s0, zero
-    ADDI sp, sp, 9
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 17
+    LD ra, -8(sp)
     ret
 exit:
     li a7, 93

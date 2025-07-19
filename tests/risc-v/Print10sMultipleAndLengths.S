@@ -231,9 +231,8 @@ TEMP_LABEL1_END:
 # end scope
 # end whileloop
     mv s0, zero
-    ADDI sp, sp, 96
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 104
+    LD ra, -8(sp)
     ret
 foo:
     ADDI sp, sp, -8
@@ -251,9 +250,8 @@ foo:
     LD t0, 0(sp)
     ADDI sp, sp, 8
     ADD s0, s0, t0
-    ADDI sp, sp, 16
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 24
+    LD ra, -8(sp)
     ret
 Print10sMultipleAndLengths:
     ADDI sp, sp, -8
@@ -368,9 +366,8 @@ TEMP_LABEL9_END:
     ADDI sp, sp, 8
 # end forloop
     mv s0, zero
-    ADDI sp, sp, 24
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 32
+    LD ra, -8(sp)
     ret
 printhelper:
     ADDI sp, sp, -8
@@ -483,9 +480,8 @@ LABEL14_START:
     LI a1, 1
     call printnumber
     LI s0, 2
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL16_elifs:
@@ -645,9 +641,8 @@ LABEL17_START:
     LI a1, 0
     call printnumber
     LI s0, 3
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL19_elifs:
@@ -750,9 +745,8 @@ LABEL20_START:
     LI a2, 1
     call write
     LI s0, 2
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL22_elifs:
@@ -867,9 +861,8 @@ LABEL23_START:
     LD a2, 0(sp)
     call write
     LI s0, 2
-    ADDI sp, sp, 48
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 56
+    LD ra, -8(sp)
     ret
 # end scope
     ADDI sp, sp, 8
@@ -888,9 +881,8 @@ LABEL24_END:
     LI a2, 1
     call write
     LI s0, 1
-    ADDI sp, sp, 40
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 48
+    LD ra, -8(sp)
     ret
 printnumber:
     ADDI sp, sp, -8
@@ -935,9 +927,8 @@ LABEL32_START:
     LI a2, 20
     call write
     LI s0, 0
-    ADDI sp, sp, 9
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 17
+    LD ra, -8(sp)
     ret
 # end scope
 LABEL34_elifs:
@@ -1027,9 +1018,8 @@ LABEL30_END:
 # end scope
 LABEL27_END:
     mv s0, zero
-    ADDI sp, sp, 9
-    LD ra, 0(sp)
-    ADDI sp, sp, 8
+    ADDI sp, sp, 17
+    LD ra, -8(sp)
     ret
 exit:
     li a7, 93
