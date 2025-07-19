@@ -412,4 +412,9 @@ namespace Epsilon
         Exit,
         Return,
     }
+    public struct Macro
+    {
+        public List<Token> tokens;
+        public string src;
+    }
 }

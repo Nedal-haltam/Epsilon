@@ -3,6 +3,8 @@ namespace Epsilon
 {
     public class Tokenizer(string thecode, string InputFilePath)
     {
+        readonly string m_thecode = thecode;
+        readonly string m_inputFilePath = InputFilePath;
         readonly Dictionary<string, TokenType> KeyWords = new()
         {
             { "auto", TokenType.Auto},
@@ -19,10 +21,9 @@ namespace Epsilon
             { "return", TokenType.Return},
             { "exit", TokenType.Exit},
         };
-        private readonly string m_thecode = thecode;
-        private readonly string m_inputFilePath = InputFilePath;
-        private int m_curr_index = 0;
-        private List<Token> m_tokens = [];
+        int m_curr_index = 0;
+        List<Token> m_tokens = [];
+        readonly Dictionary<string, Macro> macro = [];
         char? Peek(int offset = 0)
         {
             if (0 <= m_curr_index + offset && m_curr_index + offset < m_thecode.Length)
@@ -130,12 +131,6 @@ namespace Epsilon
             }
             return sb;
         }
-        public struct Macro
-        {
-            public List<Token> tokens;
-            public string src;
-        }
-        private readonly Dictionary<string, Macro> macro = [];
         public List<Token> TokenizeProg()
         {
             m_tokens = [];

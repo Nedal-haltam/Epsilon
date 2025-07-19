@@ -940,7 +940,7 @@ namespace Epsilon
         {
             if (m_scopeend.Count == 0)
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{breakk.breakk.Line}:1: Generator: no enclosing loop out of which to break from on line {breakk.breakk.Line}\n", 1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{breakk.breakk.Line}:1: Generator: no enclosing loop out of which to break from\n", 1);
             }
             m_outputcode.AppendLine($"    J {m_scopeend.Peek()}");
         }
@@ -948,7 +948,7 @@ namespace Epsilon
         {
             if (m_scopestart.Count == 0)
             {
-                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{continuee.continuee.Line}:1: Generator: no enclosing loop out of which to continue on line {continuee.continuee.Line}\n", 1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{continuee.continuee.Line}:1: Generator: no enclosing loop out of which to continue\n", 1);
             }
             m_outputcode.AppendLine($"    J {m_scopestart.Peek()}");
         }

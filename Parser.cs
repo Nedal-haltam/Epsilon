@@ -3,22 +3,17 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
-
-
-#pragma warning disable IDE0017
-
 namespace Epsilon
 {
     public class Parser(List<Token> tokens, string InputFilePath)
     {
         NodeProg prog = new();
-        private readonly List<Token> m_tokens = tokens;
-        private readonly string m_inputFilePath = InputFilePath;
-        private int m_curr_index = 0;
-        public string? CurrentFunctionName = null;
-        public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
-        List<string> ArraysNames = [];
-        public List<string> STD_FUNCTIONS = ["strlen", "stoa", "unstoa", "write"];
+        readonly List<Token> m_tokens = tokens;
+        readonly string m_inputFilePath = InputFilePath;
+        int m_curr_index = 0;
+        string? CurrentFunctionName = null;
+        public readonly Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
+        public readonly List<string> STD_FUNCTIONS = ["strlen", "stoa", "unstoa", "write"];
 
         public string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
         {
@@ -57,7 +52,7 @@ namespace Epsilon
             return "";
         }
         Token? Peek(int offset = 0) => 0 <= m_curr_index + offset && m_curr_index + offset < m_tokens.Count ? m_tokens[m_curr_index + offset] : null;
-        Token ? Peek(TokenType type, int offset = 0)
+        Token? Peek(TokenType type, int offset = 0)
         {
             Token? token = Peek(offset);
             if (token.HasValue && token.Value.Type == type)
@@ -66,19 +61,27 @@ namespace Epsilon
             }
             return null;
         }
-        Token? PeekAndConsume(TokenType type, int offset = 0) => Peek(type, offset).HasValue ? Consume() : null;
-        Token Consume() => m_tokens.ElementAt(m_curr_index++);
-        void ConsumeMany(int n = 1) => m_curr_index += n;
-        Token TryConsumeError(TokenType type)
+        void Expect(TokenType type, int offset = 0)
         {
-            if (!Peek(type).HasValue)
+            if (!Peek(type, offset).HasValue)
             {
                 Token? peeked = Peek(-1);
                 int line = peeked.HasValue ? peeked.Value.Line : 1;
-                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: Error expected `{type}` on line {line}\n", 1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: expected {type}\n", 1);
             }
-            return Consume();
         }
+        void ExpectAndConsume(TokenType type, int offset = 0)
+        {
+            if (!PeekAndConsume(type, offset).HasValue)
+            {
+                Token? peeked = Peek(-1);
+                int line = peeked.HasValue ? peeked.Value.Line : 1;
+                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: expected {type}\n", 1);
+            }
+        }
+        Token? PeekAndConsume(TokenType type, int offset = 0) => Peek(type, offset).HasValue ? Consume() : null;
+        Token Consume() => m_tokens.ElementAt(m_curr_index++);
+        void ConsumeMany(int n = 1) => m_curr_index += n;
         bool IsStmtDeclare()  => (Peek(TokenType.Auto).HasValue || Peek(TokenType.Char).HasValue) && Peek(TokenType.Ident, 1).HasValue;
         bool IsStmtAssign()   => Peek(TokenType.Ident).HasValue && (Peek(TokenType.OpenSquare, 1).HasValue || Peek(TokenType.Equal, 1).HasValue);
         bool IsStmtIF()       => Peek(TokenType.If).HasValue;
@@ -115,7 +118,7 @@ namespace Epsilon
         {
             Consume();
             NodeExpr index = ExpectedExpression(ParseExpr());
-            TryConsumeError(TokenType.CloseSquare);
+            ExpectAndConsume(TokenType.CloseSquare);
             return index;
         }
         NodeTerm? ParseTerm()
@@ -205,7 +208,7 @@ namespace Epsilon
                     FunctionName = Consume()
                 };
 
-                TryConsumeError(TokenType.OpenParen);
+                ExpectAndConsume(TokenType.OpenParen);
                 List<NodeExpr> parameters = [];
                 if (!Peek(TokenType.CloseParen).HasValue)
                     do
@@ -213,7 +216,7 @@ namespace Epsilon
                         NodeExpr expr = ExpectedExpression(ParseExpr());
                         parameters.Add(expr);
                     } while (PeekAndConsume(TokenType.Comma).HasValue);
-                TryConsumeError(TokenType.CloseParen);
+                ExpectAndConsume(TokenType.CloseParen);
 
                 term.functioncall.parameters = parameters;
                 return term;
@@ -235,9 +238,9 @@ namespace Epsilon
             else if (Peek(TokenType.Variadic).HasValue)
             {
                 Consume();
-                TryConsumeError(TokenType.OpenParen);
+                ExpectAndConsume(TokenType.OpenParen);
                 NodeExpr VariadicIndex = ExpectedExpression(ParseExpr());
-                TryConsumeError(TokenType.CloseParen);
+                ExpectAndConsume(TokenType.CloseParen);
                 term.type = NodeTerm.NodeTermType.Variadic;
                 term.variadic = new() { VariadicIndex = VariadicIndex };
                 return term;
@@ -246,7 +249,7 @@ namespace Epsilon
             {
                 Consume();
                 NodeExpr expr = ExpectedExpression(ParseExpr());
-                TryConsumeError(TokenType.CloseParen);
+                ExpectAndConsume(TokenType.CloseParen);
                 if (IsExprIntLit(expr))
                 {
                     term.type = NodeTerm.NodeTermType.IntLit;
@@ -376,27 +379,13 @@ namespace Epsilon
         }
         NodeStmtScope ParseScope()
         {
-            NodeStmtScope scope = new()
-            {
-                stmts = []
-            };
-            if (Peek(TokenType.OpenCurly).HasValue)
-            {
-                Consume();
-                while (!Peek(TokenType.CloseCurly).HasValue)
-                {
-                    List<NodeStmt> stmt = ParseStmt();
-                    scope.stmts.AddRange(stmt);
-                }
-                TryConsumeError(TokenType.CloseCurly);
-                return scope;
-            }
+            NodeStmtScope scope = new();
+            if (PeekAndConsume(TokenType.OpenCurly).HasValue)
+                while (!PeekAndConsume(TokenType.CloseCurly).HasValue)
+                    scope.stmts.AddRange(ParseStmt());
             else
-            {
-                List<NodeStmt> stmt = ParseStmt();
-                scope.stmts.AddRange(stmt);
-                return scope;
-            }
+                scope.stmts.AddRange(ParseStmt());
+            return scope;
         }
         NodeIfElifs? ParseElifs()
         {
@@ -438,7 +427,7 @@ namespace Epsilon
             NodeIfPredicate pred = new();
             NodeExpr cond = ExpectedExpression(ParseExpr());
             pred.cond = cond;
-            TryConsumeError(TokenType.CloseParen);
+            ExpectAndConsume(TokenType.CloseParen);
             NodeStmtScope scope = ParseScope();
             pred.scope = scope;
             return pred;
@@ -464,14 +453,14 @@ namespace Epsilon
             else if (IsStmtAssign())
             {
                 NodeStmt stmt = ParseAssign();
-                TryConsumeError(TokenType.SemiColon);
+                ExpectAndConsume(TokenType.SemiColon);
                 if (stmt.type != NodeStmt.NodeStmtType.Assign)
                     Shartilities.UNREACHABLE("");
                 forinit.type = NodeForInit.NodeForInitType.Assign;
                 forinit.assign = stmt.assign;
                 return forinit;
             }
-            TryConsumeError(TokenType.SemiColon);
+            ExpectAndConsume(TokenType.SemiColon);
             return null;
         }
         NodeForCond? ParseForCond()
@@ -485,7 +474,7 @@ namespace Epsilon
                     cond = cond.Value
                 };
             }
-            TryConsumeError(TokenType.SemiColon);
+            ExpectAndConsume(TokenType.SemiColon);
             return forcond;
         }
         NodeStmtAssign? ParseForUpdateStmt()
@@ -507,13 +496,13 @@ namespace Epsilon
                     break;
                 forupdate.updates.Add(update.Value);
             } while (PeekAndConsume(TokenType.Comma).HasValue);
-            TryConsumeError(TokenType.CloseParen);
+            ExpectAndConsume(TokenType.CloseParen);
             return forupdate;
         }
         NodeForPredicate ParseForPredicate()
         {
             NodeForPredicate pred = new();
-            TryConsumeError(TokenType.OpenParen);
+            ExpectAndConsume(TokenType.OpenParen);
             pred.init = ParseForInit();
             pred.cond = ParseForCond();
             pred.udpate = ParseForUpdate();
@@ -523,9 +512,9 @@ namespace Epsilon
         }
         NodeExpr ParseWhileCond()
         {
-            TryConsumeError(TokenType.OpenParen);
+            ExpectAndConsume(TokenType.OpenParen);
             NodeExpr cond = ExpectedExpression(ParseExpr());
-            TryConsumeError(TokenType.CloseParen);
+            ExpectAndConsume(TokenType.CloseParen);
             return cond;
         }
         Token Parsedimension()
@@ -536,9 +525,9 @@ namespace Epsilon
             {
                 Token? peeked = Peek(-1);
                 int line = peeked.HasValue ? peeked.Value.Line : 1;
-                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: Error Expected a constant size for the array on line: {size_token.Line}\n", 1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: Error Expected a constant size for the array\n", 1);
             }
-            TryConsumeError(TokenType.CloseSquare);
+            ExpectAndConsume(TokenType.CloseSquare);
             return size_token;
         }
         List<NodeStmt> ParseDeclare()
@@ -547,10 +536,11 @@ namespace Epsilon
             List<NodeStmt> stmts = [];
             do
             {
-                NodeStmt stmt = new();
-                stmt.type = NodeStmt.NodeStmtType.Declare;
-                stmt.declare = new();
-
+                NodeStmt stmt = new()
+                {
+                    type = NodeStmt.NodeStmtType.Declare,
+                    declare = new(),
+                };
                 NodeStmtDataType DataType = new();
                 if (vartype.Type == TokenType.Auto)
                     DataType = NodeStmtDataType.Auto;
@@ -567,17 +557,12 @@ namespace Epsilon
                 if (Peek(TokenType.OpenSquare).HasValue)
                 {
                     IdentifierType = NodeStmtIdentifierType.Array;
-                    stmt.declare.array = new()
-                    {
-                        values = [],
-                        Dimensions = [],
-                    };
+                    stmt.declare.array = new();
                     while (Peek(TokenType.OpenSquare).HasValue)
                     {
                         Token dim = Parsedimension();
                         stmt.declare.array.Dimensions.Add(uint.Parse(dim.Value));
                     }
-                    ArraysNames.Add(Ident.Value);
                 }
                 else
                 {
@@ -594,7 +579,7 @@ namespace Epsilon
                 stmt.declare.datatype = DataType;
                 stmts.Add(stmt);
             } while (PeekAndConsume(TokenType.Comma).HasValue);
-            TryConsumeError(TokenType.SemiColon);
+            ExpectAndConsume(TokenType.SemiColon);
             if (CurrentFunctionName == null) // it is in Global scope
             {
                 prog.GlobalScope.stmts.AddRange(stmts);
@@ -605,8 +590,10 @@ namespace Epsilon
         NodeStmt ParseAssign()
         {
             Token Ident = Consume();
-            NodeStmt stmt = new();
-            stmt.type = NodeStmt.NodeStmtType.Assign;
+            NodeStmt stmt = new()
+            {
+                type = NodeStmt.NodeStmtType.Assign,
+            };
             NodeStmtIdentifierType IdentifierType = new();
             if (Peek(TokenType.OpenSquare).HasValue)
             {
@@ -620,7 +607,7 @@ namespace Epsilon
                 {
                     stmt.assign.array.indexes.Add(Parseindex());
                 }
-                TryConsumeError(TokenType.Equal);
+                ExpectAndConsume(TokenType.Equal);
                 stmt.assign.array.expr = ExpectedExpression(ParseExpr());
             }
             else if (PeekAndConsume(TokenType.Equal).HasValue)
@@ -640,8 +627,9 @@ namespace Epsilon
             stmt.assign.type = IdentifierType;
             return stmt;
         }
-        List<Var> ParseFunctionDefinitionParameters()
+        List<Var> ParseFunctionParameters()
         {
+            ExpectAndConsume(TokenType.OpenParen);
             List<Var> parameters = [];
             do
             {
@@ -671,7 +659,6 @@ namespace Epsilon
                         IsArray = true;
                         while (Peek(TokenType.OpenSquare).HasValue)
                         {
-                            ArraysNames.Add(ident.Value);
                             uint DimValue = 0;
                             if (Peek(TokenType.CloseSquare, 1).HasValue)
                                 ConsumeMany(2);
@@ -694,18 +681,13 @@ namespace Epsilon
                     TotalSize *= TypeSize;
                     parameters.Add(new(ident.Value, TotalSize, TypeSize, dims, IsArray, true, false));
                 }
-                else
-                {
-                    Token? peeked = Peek(-1);
-                    int line = peeked.HasValue ? peeked.Value.Line : 1;
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: error in definition of function `{CurrentFunctionName}`\n", 1);
-                }
+                else break;
             } while (PeekAndConsume(TokenType.Comma).HasValue);
+            ExpectAndConsume(TokenType.CloseParen);
             return parameters;
         }
-        void PreParseFunctionDefinition(Token FunctionName)
+        void ParseFunctionPrologue(Token FunctionName)
         {
-            ArraysNames.Clear();
             CurrentFunctionName = FunctionName.Value;
             if (STD_FUNCTIONS.Contains(FunctionName.Value) || UserDefinedFunctions.ContainsKey(FunctionName.Value))
             {
@@ -714,29 +696,23 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: function with the name `{FunctionName.Value}` is already defined\n", 1);
             }
         }
-
-        void PostParseFunctionDefinition()
+        void ParseFunctionEpilogue()
         {
             CurrentFunctionName = null;
         }
-        void ParseFunctionDefinition()
+        NodeStmtScope ParseFunctionBody()
+        {
+            Expect(TokenType.OpenCurly);
+            return ParseScope();
+        }
+        void ParseFunction()
         {
             Token FunctionName = Consume();
-            PreParseFunctionDefinition(FunctionName);
-            List<Var> parameters = [];
-            TryConsumeError(TokenType.OpenParen);
-            if (PeekAndConsume(TokenType.CloseParen).HasValue)
-                goto SkipParseParameters;
-            parameters = ParseFunctionDefinitionParameters();
-            TryConsumeError(TokenType.CloseParen);
-        SkipParseParameters:
-            if (!Peek(TokenType.OpenCurly).HasValue)
-            {
-                Token? peeked = Peek(-1);
-                int line = peeked.HasValue ? peeked.Value.Line : 1;
-                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: expected a scope for function `{FunctionName.Value}`\n", 1);
-            }
-            NodeStmtScope FunctionBody = ParseScope();
+            ParseFunctionPrologue(FunctionName);
+            List<Var> parameters = ParseFunctionParameters();
+            NodeStmtScope FunctionBody = ParseFunctionBody();
+            ParseFunctionEpilogue();
+
             NodeStmtFunction Function = new()
             {
                 FunctionName = FunctionName,
@@ -744,7 +720,101 @@ namespace Epsilon
                 FunctionBody = FunctionBody,
             };
             UserDefinedFunctions.Add(FunctionName.Value, Function);
-            PostParseFunctionDefinition();
+        }
+        List<NodeStmt> ParseFunctionCall(Token CalledFunctionName)
+        {
+            if (STD_FUNCTIONS.Contains(CalledFunctionName.Value))
+            {
+                NodeStmtFunctionCall CalledFunction = new()
+                {
+                    FunctionName = CalledFunctionName,
+                    parameters = []
+                };
+                if (CalledFunctionName.Value == "strlen")
+                {
+                    ExpectAndConsume(TokenType.OpenParen);
+                    NodeExpr StrlenParameter = ExpectedExpression(ParseExpr());
+                    if (!(StrlenParameter.type == NodeExpr.NodeExprType.Term && StrlenParameter.term.type == NodeTerm.NodeTermType.StringLit))
+                    {
+                        Token? peeked = Peek(-1);
+                        int line = peeked.HasValue ? peeked.Value.Line : 1;
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: invalid paramter to function `{CalledFunctionName.Value}`\n", 1);
+                    }
+
+                    ExpectAndConsume(TokenType.CloseParen);
+                    ExpectAndConsume(TokenType.SemiColon);
+                    CalledFunction.parameters = [StrlenParameter];
+                    NodeStmt stmt = new()
+                    {
+                        type = NodeStmt.NodeStmtType.Function,
+                        CalledFunction = CalledFunction
+                    };
+                    return [stmt];
+                }
+                else if (CalledFunctionName.Value == "stoa")
+                {
+                    // TODO: change the implementation of `stoa` to operate on the desired buffer no the default one (i.e. `stoaTempBuffer`)
+                    Shartilities.TODO("calling stoa");
+                    return [];
+                }
+                else if (CalledFunctionName.Value == "unstoa")
+                {
+                    // TODO: change the implementation of `unstoa` to operate on the desired buffer no the default one (i.e. `unstoaTempBuffer`)
+                    Shartilities.TODO("calling unstoa");
+                    return [];
+                }
+                else if (CalledFunctionName.Value == "write")
+                {
+                    ExpectAndConsume(TokenType.OpenParen);
+                    List<NodeExpr> parameters = [];
+                    if (!Peek(TokenType.CloseParen).HasValue)
+                        do
+                        {
+                            NodeExpr expr = ExpectedExpression(ParseExpr());
+                            parameters.Add(expr);
+                        } while (PeekAndConsume(TokenType.Comma).HasValue);
+                    ExpectAndConsume(TokenType.CloseParen);
+                    ExpectAndConsume(TokenType.SemiColon);
+                    CalledFunction.parameters = parameters;
+                    NodeStmt stmt = new()
+                    {
+                        type = NodeStmt.NodeStmtType.Function,
+                        CalledFunction = CalledFunction
+                    };
+                    return [stmt];
+                }
+                else
+                {
+                    Token? peeked = Peek(-1);
+                    int line = peeked.HasValue ? peeked.Value.Line : 1;
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: undefined std function `{CalledFunctionName.Value}`\n", 1);
+                    return [];
+                }
+            }
+            else
+            {
+                ExpectAndConsume(TokenType.OpenParen);
+                List<NodeExpr> parameters = [];
+                if (!Peek(TokenType.CloseParen).HasValue)
+                    do
+                    {
+                        NodeExpr expr = ExpectedExpression(ParseExpr());
+                        parameters.Add(expr);
+                    } while (PeekAndConsume(TokenType.Comma).HasValue);
+                ExpectAndConsume(TokenType.CloseParen);
+                ExpectAndConsume(TokenType.SemiColon);
+                NodeStmtFunctionCall CalledFunction = new()
+                {
+                    FunctionName = CalledFunctionName,
+                    parameters = parameters
+                };
+                NodeStmt stmt = new()
+                {
+                    type = NodeStmt.NodeStmtType.Function,
+                    CalledFunction = CalledFunction
+                };
+                return [stmt];
+            }
         }
         List<NodeStmt> ParseStmt()
         {
@@ -755,7 +825,7 @@ namespace Epsilon
             else if (IsStmtAssign())
             {
                 NodeStmt stmt = ParseAssign();
-                TryConsumeError(TokenType.SemiColon);
+                ExpectAndConsume(TokenType.SemiColon);
                 return [stmt];
             }
             else if (IsStmtIF())
@@ -816,7 +886,7 @@ namespace Epsilon
             else if (IsStmtBreak())
             {
                 Token word = Consume();
-                TryConsumeError(TokenType.SemiColon);
+                ExpectAndConsume(TokenType.SemiColon);
                 NodeStmtBreak breakk = new()
                 {
                     breakk = word
@@ -831,7 +901,7 @@ namespace Epsilon
             else if (IsStmtContinue())
             {
                 Token word = Consume();
-                TryConsumeError(TokenType.SemiColon);
+                ExpectAndConsume(TokenType.SemiColon);
                 NodeStmtContinuee continuee = new()
                 {
                     continuee = word
@@ -846,115 +916,20 @@ namespace Epsilon
             else if (Peek(TokenType.Func).HasValue)
             {
                 Consume();
-                ParseFunctionDefinition();
+                ParseFunction();
                 return [];
             }
             else if (Peek(TokenType.Ident).HasValue && Peek(TokenType.OpenParen, 1).HasValue)
             {
-                Token? PotentialFunctionName = Peek();
-                if (PotentialFunctionName.HasValue && STD_FUNCTIONS.Contains(PotentialFunctionName.Value.Value))
-                {
-                    Token CalledFunctionName = Consume();
-                    NodeStmtFunctionCall CalledFunction = new()
-                    {
-                        FunctionName = CalledFunctionName,
-                        parameters = []
-                    };
-                    if (CalledFunctionName.Value == "strlen")
-                    {
-                        TryConsumeError(TokenType.OpenParen);
-                        NodeExpr StrlenParameter = ExpectedExpression(ParseExpr());
-                        if (!(StrlenParameter.type == NodeExpr.NodeExprType.Term && StrlenParameter.term.type == NodeTerm.NodeTermType.StringLit))
-                        {
-                            Token? peeked = Peek(-1);
-                            int line = peeked.HasValue ? peeked.Value.Line : 1;
-                            Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: invalid paramter to function `{CalledFunctionName.Value}` on line: {CalledFunctionName.Line}\n", 1);
-                        }
-
-                        TryConsumeError(TokenType.CloseParen);
-                        TryConsumeError(TokenType.SemiColon);
-                        CalledFunction.parameters = [StrlenParameter];
-                        NodeStmt stmt = new()
-                        {
-                            type = NodeStmt.NodeStmtType.Function,
-                            CalledFunction = CalledFunction
-                        };
-                        return [stmt];
-                    }
-                    else if (CalledFunctionName.Value == "stoa")
-                    {
-                        // TODO: change the implementation of `stoa` to operate on the desired buffer no the default one (i.e. `stoaTempBuffer`)
-                        Shartilities.TODO("calling stoa");
-                        return [];
-                    }
-                    else if (CalledFunctionName.Value == "unstoa")
-                    {
-                        // TODO: change the implementation of `unstoa` to operate on the desired buffer no the default one (i.e. `unstoaTempBuffer`)
-                        Shartilities.TODO("calling unstoa");
-                        return [];
-                    }
-                    else if (CalledFunctionName.Value == "write")
-                    {
-                        TryConsumeError(TokenType.OpenParen);
-                        List<NodeExpr> parameters = [];
-                        if (!Peek(TokenType.CloseParen).HasValue)
-                            do
-                            {
-                                NodeExpr expr = ExpectedExpression(ParseExpr());
-                                parameters.Add(expr);
-                            } while (PeekAndConsume(TokenType.Comma).HasValue);
-                        TryConsumeError(TokenType.CloseParen);
-                        TryConsumeError(TokenType.SemiColon);
-                        CalledFunction.parameters = parameters;
-                        NodeStmt stmt = new()
-                        {
-                            type = NodeStmt.NodeStmtType.Function,
-                            CalledFunction = CalledFunction
-                        };
-                        return [stmt];
-                    }
-                    else
-                    {
-                        Token? peeked = Peek(-1);
-                        int line = peeked.HasValue ? peeked.Value.Line : 1;
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: undefined std function `{CalledFunctionName.Value}`\n", 1);
-                        return [];
-                    }
-                }
-                else if (PotentialFunctionName.HasValue)
-                {
-                    Token CalledFunctionName = Consume();
-                    TryConsumeError(TokenType.OpenParen);
-                    List<NodeExpr> parameters = [];
-                    if (!Peek(TokenType.CloseParen).HasValue)
-                        do
-                        {
-                            NodeExpr expr = ExpectedExpression(ParseExpr());
-                            parameters.Add(expr);
-                        } while (PeekAndConsume(TokenType.Comma).HasValue);
-                    TryConsumeError(TokenType.CloseParen);
-                    TryConsumeError(TokenType.SemiColon);
-                    NodeStmtFunctionCall CalledFunction = new()
-                    {
-                        FunctionName = CalledFunctionName,
-                        parameters = parameters
-                    };
-                    NodeStmt stmt = new()
-                    {
-                        type = NodeStmt.NodeStmtType.Function,
-                        CalledFunction = CalledFunction
-                    };
-                    return [stmt];
-                }
-                Shartilities.UNREACHABLE("parsing function call");
-                return [];
+                Token FunctionName = Consume();
+                return ParseFunctionCall(FunctionName);
             }
 
             else if (Peek(TokenType.Return).HasValue)
             {
                 Consume();
                 NodeExpr expr = ExpectedExpression(ParseExpr());
-                TryConsumeError(TokenType.SemiColon);
+                ExpectAndConsume(TokenType.SemiColon);
                 NodeStmtReturn Return = new()
                 {
                     expr = expr
@@ -972,8 +947,8 @@ namespace Epsilon
                 NodeStmtExit exit = new();
                 NodeExpr expr = ExpectedExpression(ParseExpr());
                 exit.expr = expr;
-                TryConsumeError(TokenType.CloseParen);
-                TryConsumeError(TokenType.SemiColon);
+                ExpectAndConsume(TokenType.CloseParen);
+                ExpectAndConsume(TokenType.SemiColon);
                 NodeStmt stmt = new()
                 {
                     type = NodeStmt.NodeStmtType.Exit,
