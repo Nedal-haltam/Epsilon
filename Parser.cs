@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 
 namespace Epsilon
 {
-    class Parser(List<Token> tokens, string InputFilePath)
+    public class Parser(List<Token> tokens, string InputFilePath)
     {
         NodeProg prog = new();
         private readonly List<Token> m_tokens = tokens;

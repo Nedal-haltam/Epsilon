@@ -1,72 +1,7 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
-
+﻿using System.Text;
 namespace Epsilon
 {
-    public struct Token
-    {
-        public TokenType Type;
-        public string Value;
-        public int Line;
-    }
-    public enum TokenType
-    {
-        OpenParen,
-        CloseParen,
-        OpenSquare,
-        CloseSquare,
-        OpenCurly,
-        CloseCurly,
-
-        Comma,
-        Equal,
-        SemiColon,
-
-        ExclamationMark,
-        tilde,
-
-        Plus,
-        Minus,
-        Mul,
-        Rem,
-        Div,
-
-        And,
-        Or,
-        Xor,
-        Sll,
-        Srl,
-
-        EqualEqual,
-        NotEqual,
-        LessThan,
-
-        Ident,
-
-        IntLit,
-        StringLit,
-
-        Auto,
-        Char,
-
-        If,
-        Elif,
-        Else,
-        For,
-        While,
-
-        Func,
-        Variadic,
-
-        Continue,
-        Break,
-
-        Exit,
-        Return,
-    }
-    class Tokenizer(string thecode, string InputFilePath)
+    public class Tokenizer(string thecode, string InputFilePath)
     {
         readonly Dictionary<string, TokenType> KeyWords = new()
         {

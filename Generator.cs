@@ -1,68 +1,29 @@
-﻿using Microsoft.Win32;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿using System.Text;
 namespace Epsilon
 {
-    class RISCVGenerator(NodeProg prog, Dictionary<string, NodeStmtFunction> UserDefinedFunctions, string InputFilePath, List<string> std_functions)
+    public class RISCVGenerator(NodeProg prog, Dictionary<string, NodeStmtFunction> UserDefinedFunctions, string InputFilePath, List<string> std_functions)
     {
         ////////////////////////////////////////////////////////
         public NodeProg m_prog = prog;
         public Dictionary<string, NodeStmtFunction> m_UserDefinedFunctions = UserDefinedFunctions;
-        private readonly string m_inputFilePath = InputFilePath;
-        readonly List<string> STD_FUNCTIONS = std_functions;
+        public readonly string m_inputFilePath = InputFilePath;
+        public readonly List<string> STD_FUNCTIONS = std_functions;
         ////////////////////////////////////////////////////////
-        public readonly string m_FirstTempReg = "t0";
-        public readonly string m_SecondTempReg = "t1";
-        public readonly StringBuilder m_outputcode = new();
-        public int m_labels_count = 0;
-        public readonly List<string> m_CalledFunctions = [];
-        public List<string> m_StringLits = [];
+        readonly string m_FirstTempReg = "t0";
+        readonly string m_SecondTempReg = "t1";
+        readonly StringBuilder m_outputcode = new();
+        int m_labels_count = 0;
+        readonly List<string> m_CalledFunctions = [];
+        readonly List<string> m_StringLits = [];
         ////////////////////////////////////////////////////////
-        public struct Variables
-        {
-            public List<Var> m_vars = [];
-            public Variables()
-            {
-                m_vars = [];
-            }
-            public readonly uint GetAllocatedStackSize()
-            {
-                uint stacksize = 0;
-                for (int i = 0; i < m_vars.Count; i++)
-                {
-                    if (m_vars[i].IsParameter && m_vars[i].IsArray)
-                        stacksize += 8;
-                    else
-                        stacksize += m_vars[i].Size;
-                }
-                return stacksize;
-            }
-            public readonly Var this[int index]
-            {
-                get
-                {
-                    Shartilities.Assert(0 <= index && index < m_vars.Count, $"index out of bound in variable indexing\n");
-                    return m_vars[index];
-                }
-                set
-                {
-                    Shartilities.Assert(0 <= index && index < m_vars.Count, $"index out of bound in variable indexing\n");
-                    m_vars[index] = value;
-                }
-            }
-        }
         Variables m_vars = new();
-        public Stack<int> m_scopes = [];
-        public uint m_StackSize;
-        public Stack<string?> m_scopestart = new();
-        public Stack<string?> m_scopeend = new();
-        public List<Var> m_parameters = [];
-        public string m_CurrentFunctionName = "NO_FUNCTION_NAME";
+        Stack<int> m_scopes = [];
+        uint m_StackSize;
+        Stack<string?> m_scopestart = new();
+        Stack<string?> m_scopeend = new();
+        string m_CurrentFunctionName = "NO_FUNCTION_NAME";
         ////////////////////////////////////////////////////////
-        void GenPush(string reg, uint size)
+        void GenPush(string reg, uint size = 8)
         {
             m_outputcode.AppendLine($"    ADDI sp, sp, -{size}");
             if (size == 1)
@@ -90,7 +51,7 @@ namespace Epsilon
             }
             m_StackSize += (uint)(8 * regs.Count);
         }
-        void GenPop(string reg, uint size)
+        void GenPop(string reg, uint size = 8)
         {
             if (size == 1)
                 m_outputcode.AppendLine($"    LB {reg}, 0(sp)");
@@ -210,7 +171,7 @@ namespace Epsilon
             NodeExpr rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
             return NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Add, lhs, rhs);
         }
-        void GenExpr(NodeExpr expr, string? DestReg, uint size)
+        void GenExpr(NodeExpr expr, string? DestReg, uint size = 8)
         {
             if (expr.type == NodeExpr.NodeExprType.Term)
             {
@@ -236,7 +197,7 @@ namespace Epsilon
             {
                 if (declare.datatype == NodeStmtDataType.Auto)
                 {
-                    GenExpr(declare.singlevar.expr, null, 8);
+                    GenExpr(declare.singlevar.expr, null);
                     return new(ident.Value, 8, 8, [], false, false, false);
                 }
                 else if (declare.datatype == NodeStmtDataType.Char)
@@ -294,7 +255,7 @@ namespace Epsilon
                 m_outputcode.AppendLine($"    ADDI {reg}, {reg}, {relative_location}"); // plus the relative location of the variable if "sp"
                 m_outputcode.AppendLine($"    ADD {reg}, sp, {reg}"); // plus the index
             }
-            GenPush(reg, 8);
+            GenPush(reg);
             m_outputcode.AppendLine($"# end array address");
         }
         void GenTerm(NodeTerm term, string? DestReg, uint size)
@@ -430,7 +391,7 @@ namespace Epsilon
                     {
                         GenArrayAddrFrom_m_vars(ident.indexes, var);
                     }
-                    GenPop(reg_addr, 8);
+                    GenPop(reg_addr);
 
                     if (var.TypeSize == 1)
                         m_outputcode.AppendLine($"    LB {reg}, 0({reg_addr})");
@@ -455,7 +416,7 @@ namespace Epsilon
                 uint Count = var.Size / var.TypeSize;
                 uint relative_location = m_StackSize - VariableLocation(var.Value) - 8;
 
-                GenExpr(NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Mul, NodeExpr.Number("8", -1), term.variadic.VariadicIndex), reg_addr, 8);
+                GenExpr(NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Mul, NodeExpr.Number("8", -1), term.variadic.VariadicIndex), reg_addr);
                 m_outputcode.AppendLine($"    SUB {reg_addr}, sp, {reg_addr}");
                 m_outputcode.AppendLine($"    LD {reg}, {relative_location}({reg_addr})");
 
@@ -511,7 +472,7 @@ namespace Epsilon
                     GenArrayAddrFrom_m_vars(assign.array.indexes, var);
                 }
                 GenExpr(assign.array.expr, reg_data, var.TypeSize);
-                GenPop(reg_addr, 8);
+                GenPop(reg_addr);
 
                 if (var.TypeSize == 1)
                     m_outputcode.AppendLine($"    SB {reg_data}, 0({reg_addr})");
@@ -560,10 +521,10 @@ namespace Epsilon
                     {
                         filled = true;
                         Shartilities.Assert(i == CalledFunctionDefinition.parameters.Count - 1, $"variadic should be the last argument\n");
-                        GenExpr(NodeExpr.Number((CalledFunction.parameters.Count - i).ToString(), -1), $"a{i}", 8);
+                        GenExpr(NodeExpr.Number((CalledFunction.parameters.Count - i).ToString(), -1), $"a{i}");
                         for (int j = i; j < CalledFunction.parameters.Count; j++)
                         {
-                            GenExpr(CalledFunction.parameters[j], $"a{j + 1}", 8);
+                            GenExpr(CalledFunction.parameters[j], $"a{j + 1}");
                         }
                         break;
                     }
@@ -573,13 +534,13 @@ namespace Epsilon
                     }
                 }
                 if (!filled && CalledFunctionDefinition.parameters.Count > 0 && CalledFunctionDefinition.parameters[^1].IsVariadic)
-                    GenExpr(NodeExpr.Number("0", -1), $"a{CalledFunction.parameters.Count}", 8);
+                    GenExpr(NodeExpr.Number("0", -1), $"a{CalledFunction.parameters.Count}");
             }
             else // std function
             {
                 for (int i = 0; i < CalledFunction.parameters.Count; i++)
                 {
-                    GenExpr(CalledFunction.parameters[i], $"a{i}", 8);
+                    GenExpr(CalledFunction.parameters[i], $"a{i}");
                 }
             }
         }
@@ -619,7 +580,7 @@ namespace Epsilon
                     // up until a7
                     for (int j = i; j <= 7; j++)
                     {
-                        GenPush($"a{j}", 8);
+                        GenPush($"a{j}");
                         m_vars.m_vars.Add(new($"variadic({j - i})", 8, 8, [], false, true, true));
                     }
                     break;
@@ -630,14 +591,14 @@ namespace Epsilon
                     uint Size = parameters[i].Size;
                     bool IsArray = parameters[i].IsArray;
                     if (IsArray)
-                        GenPush($"a{i}", 8);
+                        GenPush($"a{i}");
                     else
                         GenPush($"a{i}", TypeSize);
                     m_vars.m_vars.Add(new(parameters[i].Value, Size, TypeSize, parameters[i].Dimensions, IsArray, true, false));
                 }
             }
         }
-        void PreGenFunctionBody(string FunctionName)
+        void GenFunctionPrologue(string FunctionName)
         {
             m_vars = new();
             m_StackSize = new();
@@ -645,12 +606,9 @@ namespace Epsilon
             m_scopestart = new();
             m_scopeend = new();
             m_CurrentFunctionName = FunctionName;
-            m_parameters = [];
 
             m_outputcode.AppendLine($"{FunctionName}:");
-            m_parameters = m_UserDefinedFunctions[FunctionName].parameters;
-
-            GenPush("ra", 8);
+            GenPush("ra");
             m_vars.m_vars.Add(new("", 8, 8, [], false, false, false));
             GenPushFunctionParametersInDefinition(m_UserDefinedFunctions[FunctionName].parameters);
         }
@@ -660,7 +618,7 @@ namespace Epsilon
             foreach (NodeStmt stmt in FunctionBody.stmts)
                 GenStmt(stmt);
         }
-        void PostGenFunctionBody()
+        void GenFunctionEpilogue()
         {
             NodeStmtScope FunctionBody = m_UserDefinedFunctions[m_CurrentFunctionName].FunctionBody;
             if (FunctionBody.stmts.Count == 0 || FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
@@ -686,30 +644,25 @@ namespace Epsilon
         }
         void GenFunction(string FunctionName)
         {
-            PreGenFunctionBody(FunctionName);
+            GenFunctionPrologue(FunctionName);
             GenFunctionBody();
-            PostGenFunctionBody();
+            GenFunctionEpilogue();
         }
-        public StringBuilder GenProg()
+        void GenProgramPrologue()
         {
             m_outputcode.AppendLine($".section .text");
             m_outputcode.AppendLine($".globl main");
-
             if (!m_UserDefinedFunctions.ContainsKey("main"))
             {
                 Shartilities.Log(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined\n", 1);
             }
+        }
+        void GenProgramEpilogue()
+        {
 
-            GenFunction("main");
-            for (int i = 0; i < m_CalledFunctions.Count; i++)
-            {
-                if (m_UserDefinedFunctions.ContainsKey(m_CalledFunctions[i]))
-                {
-                    GenFunction(m_CalledFunctions[i]);
-                }
-            }
-
-            GenStdFunctions();
+        }
+        void GenProgramDataSection()
+        {
             if (m_StringLits.Count > 0)
                 m_outputcode.AppendLine($".section .data");
             for (int i = 0; i < m_StringLits.Count; i++)
@@ -724,6 +677,25 @@ namespace Epsilon
                 m_outputcode.AppendLine($"itoaTempBuffer:     ");
                 m_outputcode.AppendLine($"    .space 32");
             }
+        }
+        void GenProgramFunctions()
+        {
+            GenFunction("main");
+            for (int i = 0; i < m_CalledFunctions.Count; i++)
+            {
+                if (m_UserDefinedFunctions.ContainsKey(m_CalledFunctions[i]))
+                {
+                    GenFunction(m_CalledFunctions[i]);
+                }
+            }
+            GenStdFunctions();
+        }
+        public StringBuilder GenProgram()
+        {
+            GenProgramPrologue();
+            GenProgramFunctions();
+            GenProgramDataSection();
+            GenProgramEpilogue();
             return m_outputcode;
         }
         //List<Var> GenGlobalVariables()
@@ -811,7 +783,7 @@ namespace Epsilon
             {
                 string reg = m_FirstTempReg;
                 string label = $"LABEL{m_labels_count++}_elifs";
-                GenExpr(elifs.elif.pred.cond, reg, 8);
+                GenExpr(elifs.elif.pred.cond, reg);
                 m_outputcode.AppendLine($"    BEQZ {reg}, {label}");
                 GenScope(elifs.elif.pred.scope);
                 m_outputcode.AppendLine($"    J {label_end}");
@@ -841,7 +813,7 @@ namespace Epsilon
             string label = $"LABEL{m_labels_count++}_elifs";
 
             m_outputcode.AppendLine($"{label_start}:");
-            GenExpr(iff.pred.cond, reg, 8);
+            GenExpr(iff.pred.cond, reg);
             m_outputcode.AppendLine($"    BEQZ {reg}, {label}");
             GenScope(iff.pred.scope);
             if (iff.elifs.HasValue)
@@ -881,7 +853,7 @@ namespace Epsilon
 
                 m_outputcode.AppendLine($"{label_start}:");
                 string reg = m_FirstTempReg;
-                GenExpr(forr.pred.cond.Value.cond, reg, 8);
+                GenExpr(forr.pred.cond.Value.cond, reg);
                 m_outputcode.AppendLine($"    BEQZ {reg}, {label_end}");
                 m_outputcode.AppendLine($"# end condition");
                 m_scopestart.Push(label_update);
@@ -951,7 +923,7 @@ namespace Epsilon
 
             m_outputcode.AppendLine($"{label_start}:");
             string reg = m_FirstTempReg;
-            GenExpr(whilee.cond, reg, 8);
+            GenExpr(whilee.cond, reg);
             m_outputcode.AppendLine($"    BEQZ {reg}, {label_end}");
             m_outputcode.AppendLine($"# end condition");
             m_scopestart.Push(label_start);
@@ -983,12 +955,12 @@ namespace Epsilon
         void GenStmtExit(NodeStmtExit exit)
         {
             string reg = "a0";
-            GenExpr(exit.expr, reg, 8);
+            GenExpr(exit.expr, reg);
             m_outputcode.AppendLine($"    call exit");
         }
         void GenStmtReturn(NodeStmtReturn returnn)
         {
-            GenExpr(returnn.expr, "s0", 8);
+            GenExpr(returnn.expr, "s0");
             GenReturnFromFunction();
         }
         void GenStmt(NodeStmt stmt)

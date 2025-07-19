@@ -1,7 +1,4 @@
-﻿
-
-using System.Reflection.Metadata;
-using System.Text;
+﻿using System.Text;
 namespace Epsilon
 {
     internal class Program
@@ -16,7 +13,7 @@ namespace Epsilon
             Parser Parser = new(TokenizedProgram, InputFilePath);
             NodeProg ParsedProgram = Parser.ParseProg();
             RISCVGenerator Generator = new(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
-            StringBuilder GeneratedProgram = Generator.GenProg();
+            StringBuilder GeneratedProgram = Generator.GenProgram();
             return GeneratedProgram;
         }
         static void Usage()

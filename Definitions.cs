@@ -318,4 +318,98 @@ namespace Epsilon
         public bool IsVariadic = IsVariadic;
         public List<uint> Dimensions = new(Dimensions);
     }
+    public struct Variables
+    {
+        public List<Var> m_vars = [];
+        public Variables()
+        {
+            m_vars = [];
+        }
+        public readonly uint GetAllocatedStackSize()
+        {
+            uint stacksize = 0;
+            for (int i = 0; i < m_vars.Count; i++)
+            {
+                if (m_vars[i].IsParameter && m_vars[i].IsArray)
+                    stacksize += 8;
+                else
+                    stacksize += m_vars[i].Size;
+            }
+            return stacksize;
+        }
+        public readonly Var this[int index]
+        {
+            get
+            {
+                Shartilities.Assert(0 <= index && index < m_vars.Count, $"index out of bound in variable indexing\n");
+                return m_vars[index];
+            }
+            set
+            {
+                Shartilities.Assert(0 <= index && index < m_vars.Count, $"index out of bound in variable indexing\n");
+                m_vars[index] = value;
+            }
+        }
+    }
+    public struct Token
+    {
+        public TokenType Type;
+        public string Value;
+        public int Line;
+    }
+    public enum TokenType
+    {
+        OpenParen,
+        CloseParen,
+        OpenSquare,
+        CloseSquare,
+        OpenCurly,
+        CloseCurly,
+
+        Comma,
+        Equal,
+        SemiColon,
+
+        ExclamationMark,
+        tilde,
+
+        Plus,
+        Minus,
+        Mul,
+        Rem,
+        Div,
+
+        And,
+        Or,
+        Xor,
+        Sll,
+        Srl,
+
+        EqualEqual,
+        NotEqual,
+        LessThan,
+
+        Ident,
+
+        IntLit,
+        StringLit,
+
+        Auto,
+        Char,
+
+        If,
+        Elif,
+        Else,
+        For,
+        While,
+
+        Func,
+        Variadic,
+
+        Continue,
+        Break,
+
+        Exit,
+        Return,
+    }
 }
