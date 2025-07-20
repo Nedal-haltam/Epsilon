@@ -1,4 +1,5 @@
-﻿using static Epsilon.NodeBinExpr;
+﻿using System.Collections.Generic;
+using static Epsilon.NodeBinExpr;
 
 namespace Epsilon
 {
@@ -308,7 +309,7 @@ namespace Epsilon
         public NodeExpr rhs;
     }
 
-    public struct Var(string value, uint size, uint TypeSize, List<uint> Dimensions, bool IsArray, bool IsParameter, bool IsVariadic)
+    public struct Var(string value, uint size, uint TypeSize, List<uint> Dimensions, bool IsArray, bool IsParameter, bool IsVariadic, bool IsGlobal = false)
     {
         public uint TypeSize { get; set; } = TypeSize;
         public string Value { get; set; } = value;
@@ -316,14 +317,66 @@ namespace Epsilon
         public bool IsParameter = IsParameter;
         public bool IsArray = IsArray;
         public bool IsVariadic = IsVariadic;
-        public List<uint> Dimensions = new(Dimensions);
+        public bool IsGlobal = IsGlobal;
+        public List<uint> Dimensions = [.. Dimensions];
     }
     public struct Variables
     {
-        public List<Var> m_vars = [];
+        List<Var> m_vars;
+        public List<Var> m_globals;
+        public readonly int VariablesCount() => m_vars.Count;
         public Variables()
         {
             m_vars = [];
+            m_globals = [];
+        }
+        public void Reset()
+        {
+            m_vars.Clear();
+            m_vars = [];
+        }
+        public readonly void AddVariable(Var var)
+        {
+            m_vars.Add(var);
+        }
+        public readonly void RemoveRange(int startindex, int count)
+        {
+            m_vars.RemoveRange(startindex, count);
+        }
+        public readonly bool IsVariableDeclared(string name)
+        {
+            return m_vars.Any(x => x.Value == name) || m_globals.Any(x => x.Value == name);
+        }
+        public readonly Var GetVariable(string name, string filepath, int line)
+        {
+            int index = m_vars.FindIndex(x => x.Value == name);
+            if (index != -1)
+                return m_vars[index];
+            index = m_globals.FindIndex(x => x.Value == name);
+            if (index != -1)
+                return m_globals[index];
+            Shartilities.Log(Shartilities.LogType.ERROR, $"{filepath}:{line}:1:  variable `{name}` is undeclared\n", 1);
+            return new();
+        }
+        public readonly Var GetVariadic()
+        {
+            int index = m_vars.FindIndex(x => x.IsVariadic);
+            if (index == -1)
+                Shartilities.Log(Shartilities.LogType.ERROR, $"no variadic are declared\n", 1);
+            return m_vars[index];
+        }
+        public readonly uint GetVariableLocation(string name)
+        {
+            uint size = 0;
+            int index = m_vars.FindIndex(x => x.Value == name);
+            for (int i = 0; i < index; i++)
+            {
+                if (m_vars[i].IsArray && m_vars[i].IsParameter)
+                    size += 8;
+                else
+                    size += m_vars[i].Size;
+            }
+            return size;
         }
         public readonly uint GetAllocatedStackSize()
         {
