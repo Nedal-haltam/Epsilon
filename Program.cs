@@ -30,6 +30,7 @@ namespace Epsilon
                 Environment.Exit(1);
             }
             string? OutputFilePath = null;
+            //	- refactor array address generation
 		    //	- if the input is `.e`: you do compile -> assemble -> link for qemu and output (MC/DM) for CAS
 		    //		- but if the -S flag is specified (it should be `.e` file) you just compile (i.e. generate assembly `.S` file)
 		    //	- add the -run flag/feature in Epsilon so you can 

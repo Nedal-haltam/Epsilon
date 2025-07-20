@@ -659,16 +659,16 @@ namespace Epsilon
                             dims.Add(DimValue);
                         }
                     }
-                    uint TypeSize = 0;
+                    uint ElementSize = 0;
                     if (vartype.Type == TokenType.Auto)
-                        TypeSize = 8;
+                        ElementSize = 8;
                     else if (vartype.Type == TokenType.Char)
-                        TypeSize = 1;
+                        ElementSize = 1;
                     else
                         Shartilities.Logln(Shartilities.LogType.ERROR, $"invalid variable type `{vartype.Type}`", 1);
 
-                    TotalSize *= TypeSize;
-                    parameters.Add(new(ident.Value, TotalSize, TypeSize, dims, IsArray, true, false));
+                    TotalSize *= ElementSize;
+                    parameters.Add(new(ident.Value, TotalSize, ElementSize, dims, IsArray, true, false));
                 }
                 else break;
             } while (PeekAndConsume(TokenType.Comma).HasValue);

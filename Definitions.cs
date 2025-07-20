@@ -309,9 +309,21 @@ namespace Epsilon
         public NodeExpr rhs;
     }
 
-    public struct Var(string value, uint size, uint TypeSize, List<uint> Dimensions, bool IsArray, bool IsParameter, bool IsVariadic, bool IsGlobal = false)
+    public struct Var(string value, uint size, uint ElementSize, List<uint> Dimensions, bool IsArray, bool IsParameter, bool IsVariadic, bool IsGlobal = false)
     {
-        public uint TypeSize { get; set; } = TypeSize;
+        public uint ElementSize = ElementSize;
+        public uint TypeSize
+        {
+            readonly get
+            {
+                return (IsArray && IsParameter) || IsVariadic ? 8 : ElementSize;
+            }
+            set
+            {
+                ElementSize = value;
+            } 
+        }
+        public readonly uint Count => Size / ElementSize;
         public string Value { get; set; } = value;
         public uint Size { get; set; } = size;
         public bool IsParameter = IsParameter;
@@ -365,10 +377,11 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"no variadic are declared\n", 1);
             return m_vars[index];
         }
-        public readonly uint GetVariableLocation(string name)
+        public readonly uint GetVariableRelativeLocation(string name, uint m_StackSize)
         {
             uint size = 0;
             int index = m_vars.FindIndex(x => x.Value == name);
+            Var var = m_vars[index];
             for (int i = 0; i < index; i++)
             {
                 if (m_vars[i].IsArray && m_vars[i].IsParameter)
@@ -376,8 +389,9 @@ namespace Epsilon
                 else
                     size += m_vars[i].Size;
             }
-            return size;
+            return m_StackSize - size - var.TypeSize;
         }
+        public readonly uint GetVariableRelativeLocation(Var var, uint m_StackSize) => GetVariableRelativeLocation(var.Value, m_StackSize);
         public readonly uint GetAllocatedStackSize()
         {
             uint stacksize = 0;
