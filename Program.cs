@@ -13,13 +13,7 @@ namespace Epsilon
             StringBuilder GeneratedProgram = RISCVGenerator.GenProgram(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
             return GeneratedProgram;
         }
-        static StringBuilder Compile(string SourceFilePath)
-        {
-            if (!File.Exists(SourceFilePath))
-                Shartilities.Log(Shartilities.LogType.ERROR, $"file {SourceFilePath} doesn't exists\n", 1);
-            string InputCode = File.ReadAllText(SourceFilePath);
-            return Compile(InputCode, SourceFilePath);
-        }
+        static StringBuilder Compile(string SourceFilePath) => Compile(Shartilities.ReadFile(SourceFilePath), SourceFilePath);
         static void Main(string[] args)
         {
             //Compile("../../../main.e");
@@ -73,9 +67,7 @@ namespace Epsilon
             else if (CompileOnly)
             {
                 OutputFilePath ??= "./a.S";
-                if (!File.Exists(SourceFilePath))
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"file {SourceFilePath} doesn't exists\n", 1);
-                string InputCode = File.ReadAllText(SourceFilePath);
+                string InputCode = Shartilities.ReadFile(SourceFilePath);
                 StringBuilder Assembly = Compile(InputCode, SourceFilePath);
                 File.WriteAllText(OutputFilePath, Assembly.ToString());
             }
@@ -83,13 +75,10 @@ namespace Epsilon
             {
                 string TempAssembly = "./temp.S";
                 OutputFilePath ??= "./a";
-                if (!File.Exists(SourceFilePath))
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"file {SourceFilePath} doesn't exists\n", 1);
-                string InputCode = File.ReadAllText(SourceFilePath);
+                string InputCode = Shartilities.ReadFile(SourceFilePath);
                 StringBuilder Assembly = Compile(InputCode, SourceFilePath);
                 File.WriteAllText(TempAssembly, Assembly.ToString());
 
-                //riscv64-linux-gnu-gcc -o ./main ./main.S -static
                 var AssemblingAndLink = CliWrap.Cli
                   .Wrap("riscv64-linux-gnu-gcc")
                   .WithArguments($" -o {OutputFilePath} {TempAssembly} -static")
