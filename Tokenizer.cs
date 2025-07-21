@@ -1,14 +1,14 @@
 ﻿using System.Text;
 namespace Epsilon
 {
-    public static class Tokenizer
+    public class Tokenizer(string SoureCode, string InputFilePath)
     {
-        static string m_thecode;
-        static string m_inputFilePath;
-        static int m_curr_index = 0;
-        static List<Token> m_tokens = [];
-        static Dictionary<string, Macro> macro = [];
-        static Dictionary<string, TokenType> KeyWords = new()
+        string m_thecode = SoureCode;
+        string m_inputFilePath = InputFilePath;
+        int m_curr_index = 0;
+        List<Token> m_tokens = [];
+        Dictionary<string, Macro> macro = [];
+        Dictionary<string, TokenType> KeyWords = new()
         {
             { "auto", TokenType.Auto},
             { "char", TokenType.Char},
@@ -24,7 +24,7 @@ namespace Epsilon
             { "return", TokenType.Return},
             { "exit", TokenType.Exit},
         };
-        static char? Peek(int offset = 0)
+        char? Peek(int offset = 0)
         {
             if (0 <= m_curr_index + offset && m_curr_index + offset < m_thecode.Length)
             {
@@ -32,7 +32,7 @@ namespace Epsilon
             }
             return null;
         }
-        static char? Peek(char type, int offset = 0)
+        char? Peek(char type, int offset = 0)
         {
             char? token = Peek(offset);
             if (token.HasValue && token.Value == type)
@@ -41,7 +41,7 @@ namespace Epsilon
             }
             return null;
         }
-        static bool Peek(string type, int offset = 0)
+        bool Peek(string type, int offset = 0)
         {
             for (int i = 0; i < type.Length; i++)
             {
@@ -50,7 +50,7 @@ namespace Epsilon
             }
             return true;
         }
-        static char Consume()
+        char Consume()
         {
             if (Peek().HasValue)
                 return m_thecode.ElementAt(m_curr_index++);
@@ -58,17 +58,17 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"reached the end of the file\n", 1);
             return ' ';
         }
-        static string ConsumeMany(int ConsumeLength)
+        string ConsumeMany(int ConsumeLength)
         {
             string consumed = m_thecode.Substring(m_curr_index, ConsumeLength);
             m_curr_index += ConsumeLength;
             return consumed;
         }
-        static bool IsComment()
+        bool IsComment()
         {
             return Peek("//") || Peek("/*");
         }
-        static void ConsumeComment(ref int line)
+        void ConsumeComment(ref int line)
         {
             if (Peek("//"))
             {
@@ -103,7 +103,7 @@ namespace Epsilon
                 Shartilities.UNREACHABLE("ConsumeComment");
             }
         }
-        static bool IsPartOfName()
+        bool IsPartOfName()
         {
             char? peeked = Peek();
             if (peeked.HasValue)
@@ -112,7 +112,7 @@ namespace Epsilon
             }
             return false;
         }
-        static int SkipUntilNot(char c)
+        int SkipUntilNot(char c)
         {
             int count = 0;
             while (Peek(c).HasValue)
@@ -122,7 +122,7 @@ namespace Epsilon
             }
             return count;
         }
-        static StringBuilder ConsumeUntil(char c)
+        StringBuilder ConsumeUntil(char c)
         {
             StringBuilder sb = new();
             while (!Peek(c).HasValue)
@@ -131,10 +131,8 @@ namespace Epsilon
             }
             return sb;
         }
-        public static List<Token> TokenizeProg(string SoureCode, string InputFilePath)
+        public List<Token> TokenizeProg()
         {
-            m_thecode = SoureCode;
-            m_inputFilePath = InputFilePath;
             m_tokens = [];
             StringBuilder buffer = new(); // this buffer is for multiple letter tokens
             int line = 1;
@@ -197,10 +195,10 @@ namespace Epsilon
                     if (!File.Exists(IncludeFilePath))
                         Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: file `{IncludeFilePath}` doesn't exists\n", 1);
                     string FileContent = File.ReadAllText(IncludeFilePath);
-                    List<Token> FileContentTokenized = Tokenizer.TokenizeProg(FileContent, IncludeFilePath);
+                    List<Token> FileContentTokenized = new Tokenizer(FileContent, IncludeFilePath).TokenizeProg();
                     {
                         // for error checking
-                        Parser.ParseProg(FileContentTokenized, IncludeFilePath);
+                        new Parser(FileContentTokenized, IncludeFilePath).ParseProg();
                     }
                     m_tokens.AddRange(FileContentTokenized);
                 }
@@ -220,7 +218,7 @@ namespace Epsilon
                     Consume();
                     string MacroSrc = buffer.ToString();
                     
-                    List<Token> macrovalue = Tokenizer.TokenizeProg(MacroSrc, m_inputFilePath);
+                    List<Token> macrovalue = new Tokenizer(MacroSrc, m_inputFilePath).TokenizeProg();
                     macro.Add(macroname, new() { src = MacroSrc, tokens = macrovalue });
                 }
                 else if (IsComment())

@@ -5,14 +5,18 @@ namespace Epsilon
     {
         static StringBuilder Compile(string InputCode, string InputFilePath)
         {
-            List<Token> TokenizedProgram = Tokenizer.TokenizeProg(InputCode, InputFilePath);
-            NodeProg ParsedProgram = Parser.ParseProg(TokenizedProgram, InputFilePath);
+            List<Token> TokenizedProgram = new Tokenizer(InputCode, InputFilePath).TokenizeProg();
+            Parser Parser = new(TokenizedProgram, InputFilePath);
+            NodeProg ParsedProgram = Parser.ParseProg();
             StringBuilder GeneratedProgram = RISCVGenerator.GenProgram(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
             return GeneratedProgram;
         }
-        static void Usage()
+        static StringBuilder Compile(string SourceFilePath)
         {
-            Console.WriteLine($"Usage: {Environment.ProcessPath} <input file> [-o output file]");
+            if (!File.Exists(SourceFilePath))
+                Shartilities.Log(Shartilities.LogType.ERROR, $"file {SourceFilePath} doesn't exists\n", 1);
+            string InputCode = File.ReadAllText(SourceFilePath);
+            return Compile(InputCode, SourceFilePath);
         }
         static void Main(string[] args)
         {
@@ -20,6 +24,8 @@ namespace Epsilon
             //		- needs to integrate/include from risc-v-utils
             //			- risc-v-assembler
             //			- risc-v-CAS
+            // TODO: add usage
+            // TODO: add -h arguemnt to display usage
             string? OutputFilePath = null;
             List<string> InputFilePaths = [];
             bool CompileOnly = false;
@@ -64,11 +70,11 @@ namespace Epsilon
             }
             else if (CompileOnly)
             {
+                OutputFilePath ??= "./a.S";
                 if (!File.Exists(SourceFilePath))
                     Shartilities.Log(Shartilities.LogType.ERROR, $"file {SourceFilePath} doesn't exists\n", 1);
                 string InputCode = File.ReadAllText(SourceFilePath);
                 StringBuilder Assembly = Compile(InputCode, SourceFilePath);
-                OutputFilePath ??= "./a.S";
                 File.WriteAllText(OutputFilePath, Assembly.ToString());
             }
             else

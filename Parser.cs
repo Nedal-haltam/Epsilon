@@ -5,19 +5,17 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 namespace Epsilon
 {
-    public static class Parser
+    public class Parser(List<Token> tokens, string InputFilePath)
     {
-        static NodeProg prog = new();
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        static List<Token> m_tokens;
-        static string m_inputFilePath;
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        static int m_curr_index = 0;
-        static string? CurrentFunctionName = null;
-        static public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
-        static public List<string> STD_FUNCTIONS = ["strlen", "stoa", "unstoa", "write"];
+        NodeProg prog;
+        List<Token> m_tokens = [.. tokens];
+        string m_inputFilePath = InputFilePath;
+        public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
+        int m_curr_index;
+        string? CurrentFunctionName;
+        public List<string> STD_FUNCTIONS = ["strlen", "stoa", "unstoa", "write"];
 
-        public static string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
+        public string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
         {
             Int64 a = Convert.ToInt64(imm1);
             Int64 b = Convert.ToInt64(imm2);
@@ -53,8 +51,8 @@ namespace Epsilon
             Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Generator: invalid operation `{op}`\n", 1);
             return "";
         }
-        static Token? Peek(int offset = 0) => 0 <= m_curr_index + offset && m_curr_index + offset < m_tokens.Count ? m_tokens[m_curr_index + offset] : null;
-        static Token? Peek(TokenType type, int offset = 0)
+        Token? Peek(int offset = 0) => 0 <= m_curr_index + offset && m_curr_index + offset < m_tokens.Count ? m_tokens[m_curr_index + offset] : null;
+        Token? Peek(TokenType type, int offset = 0)
         {
             Token? token = Peek(offset);
             if (token.HasValue && token.Value.Type == type)
@@ -63,7 +61,7 @@ namespace Epsilon
             }
             return null;
         }
-        static void Expect(TokenType type, int offset = 0)
+        void Expect(TokenType type, int offset = 0)
         {
             if (!Peek(type, offset).HasValue)
             {
@@ -72,7 +70,7 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: expected {type}\n", 1);
             }
         }
-        static void ExpectAndConsume(TokenType type, int offset = 0)
+        void ExpectAndConsume(TokenType type, int offset = 0)
         {
             if (!PeekAndConsume(type, offset).HasValue)
             {
@@ -81,17 +79,17 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: expected {type}\n", 1);
             }
         }
-        static Token? PeekAndConsume(TokenType type, int offset = 0) => Peek(type, offset).HasValue ? Consume() : null;
-        static Token Consume() => m_tokens.ElementAt(m_curr_index++);
-        static Token GetToken(int offset = 0) => m_tokens[m_curr_index + offset];
-        static void ConsumeMany(int n) => m_curr_index += n;
-        static bool IsStmtDeclare()  => (
+        Token? PeekAndConsume(TokenType type, int offset = 0) => Peek(type, offset).HasValue ? Consume() : null;
+        Token Consume() => m_tokens.ElementAt(m_curr_index++);
+        Token GetToken(int offset = 0) => m_tokens[m_curr_index + offset];
+        void ConsumeMany(int n) => m_curr_index += n;
+        bool IsStmtDeclare()  => (
             Peek(TokenType.Auto).HasValue || 
             Peek(TokenType.Char).HasValue
             ) && 
             Peek(TokenType.Ident, 1).HasValue;
-        static bool IsStmtAssign()   => Peek(TokenType.Ident).HasValue && (Peek(TokenType.OpenSquare, 1).HasValue || Peek(TokenType.Equal, 1).HasValue);
-        static bool IsBinExpr()      => Peek(TokenType.Plus).HasValue       ||
+        bool IsStmtAssign()   => Peek(TokenType.Ident).HasValue && (Peek(TokenType.OpenSquare, 1).HasValue || Peek(TokenType.Equal, 1).HasValue);
+        bool IsBinExpr()      => Peek(TokenType.Plus).HasValue       ||
                                  Peek(TokenType.Mul).HasValue        ||
                                  Peek(TokenType.Rem).HasValue        ||
                                  Peek(TokenType.Div).HasValue        ||
@@ -104,7 +102,7 @@ namespace Epsilon
                                  Peek(TokenType.EqualEqual).HasValue ||
                                  Peek(TokenType.NotEqual).HasValue   ||
                                  Peek(TokenType.LessThan).HasValue;
-        static NodeExpr ExpectedExpression(NodeExpr? expr)
+        NodeExpr ExpectedExpression(NodeExpr? expr)
         {
             if (!expr.HasValue)
             {
@@ -115,14 +113,14 @@ namespace Epsilon
             }
             return expr.Value;
         }
-        static NodeExpr Parseindex()
+        NodeExpr Parseindex()
         {
             Consume();
             NodeExpr index = ExpectedExpression(ParseExpr());
             ExpectAndConsume(TokenType.CloseSquare);
             return index;
         }
-        static NodeTerm? ParseTerm()
+        NodeTerm? ParseTerm()
         {
             NodeTerm term = new();
             if (Peek(TokenType.Minus).HasValue)
@@ -260,7 +258,7 @@ namespace Epsilon
             }
             return null;
         }
-        static int? GetPrec(TokenType type)
+        int? GetPrec(TokenType type)
         {
             int? prec = type switch
             {
@@ -277,7 +275,7 @@ namespace Epsilon
             if (!prec.HasValue) return null;
             return 10 - prec.Value;
         }
-        static NodeBinExpr.NodeBinExprType GetOpType(TokenType op)
+        NodeBinExpr.NodeBinExprType GetOpType(TokenType op)
         {
             if (op == TokenType.Plus)
                 return NodeBinExpr.NodeBinExprType.Add;
@@ -310,8 +308,8 @@ namespace Epsilon
             Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: inavalid operation `{op}`\n", 1);
             return 0;
         }
-        static bool IsExprIntLit(NodeExpr expr) => expr.type == NodeExpr.NodeExprType.Term && expr.term.type == NodeTerm.NodeTermType.IntLit;
-        static NodeExpr? ParseExpr(int min_prec = 0)
+        bool IsExprIntLit(NodeExpr expr) => expr.type == NodeExpr.NodeExprType.Term && expr.term.type == NodeTerm.NodeTermType.IntLit;
+        NodeExpr? ParseExpr(int min_prec = 0)
         {
             NodeTerm? _Termlhs = ParseTerm();
             if (!_Termlhs.HasValue)
@@ -368,7 +366,7 @@ namespace Epsilon
                 return exprlhs;
             }
         }
-        static NodeStmtScope ParseScope()
+        NodeStmtScope ParseScope()
         {
             NodeStmtScope scope = new();
             if (PeekAndConsume(TokenType.OpenCurly).HasValue)
@@ -378,7 +376,7 @@ namespace Epsilon
                 scope.stmts.AddRange(ParseStmt());
             return scope;
         }
-        static NodeIfElifs? ParseElifs()
+        NodeIfElifs? ParseElifs()
         {
             NodeIfElifs elifs = new();
             if (Peek(TokenType.Elif).HasValue)
@@ -406,7 +404,7 @@ namespace Epsilon
             }
             return null;
         }
-        static NodeIfPredicate ParseIfPredicate()
+        NodeIfPredicate ParseIfPredicate()
         {
             if (!Peek(TokenType.OpenParen).HasValue)
             {
@@ -423,7 +421,7 @@ namespace Epsilon
             pred.scope = scope;
             return pred;
         }
-        static NodeForInit? ParseForInit()
+        NodeForInit? ParseForInit()
         {
             NodeForInit forinit = new();
             if (IsStmtDeclare())
@@ -454,7 +452,7 @@ namespace Epsilon
             ExpectAndConsume(TokenType.SemiColon);
             return null;
         }
-        static NodeForCond? ParseForCond()
+        NodeForCond? ParseForCond()
         {
             NodeForCond? forcond = null;
             NodeExpr? cond = ParseExpr();
@@ -468,7 +466,7 @@ namespace Epsilon
             ExpectAndConsume(TokenType.SemiColon);
             return forcond;
         }
-        static NodeStmtAssign? ParseForUpdateStmt()
+        NodeStmtAssign? ParseForUpdateStmt()
         {
             if (!IsStmtAssign())
                 return null;
@@ -477,7 +475,7 @@ namespace Epsilon
                 return null;
             return stmt.assign;
         }
-        static NodeForUpdate ParseForUpdate()
+        NodeForUpdate ParseForUpdate()
         {
             NodeForUpdate forupdate = new();
             do
@@ -490,7 +488,7 @@ namespace Epsilon
             ExpectAndConsume(TokenType.CloseParen);
             return forupdate;
         }
-        static NodeForPredicate ParseForPredicate()
+        NodeForPredicate ParseForPredicate()
         {
             NodeForPredicate pred = new();
             ExpectAndConsume(TokenType.OpenParen);
@@ -501,14 +499,14 @@ namespace Epsilon
             pred.scope = scope;
             return pred;
         }
-        static NodeExpr ParseWhileCond()
+        NodeExpr ParseWhileCond()
         {
             ExpectAndConsume(TokenType.OpenParen);
             NodeExpr cond = ExpectedExpression(ParseExpr());
             ExpectAndConsume(TokenType.CloseParen);
             return cond;
         }
-        static Token Parsedimension()
+        Token Parsedimension()
         {
             Consume();
             Token size_token = Consume();
@@ -521,7 +519,7 @@ namespace Epsilon
             ExpectAndConsume(TokenType.CloseSquare);
             return size_token;
         }
-        static List<NodeStmt> ParseDeclare()
+        List<NodeStmt> ParseDeclare()
         {
             Token vartype = Consume();
             List<NodeStmt> stmts = [];
@@ -578,7 +576,7 @@ namespace Epsilon
             }
             return stmts;
         }
-        static NodeStmt ParseAssign()
+        NodeStmt ParseAssign()
         {
             Token Ident = Consume();
             NodeStmt stmt = new()
@@ -618,7 +616,7 @@ namespace Epsilon
             stmt.assign.type = IdentifierType;
             return stmt;
         }
-        static List<Var> ParseFunctionParameters()
+        List<Var> ParseFunctionParameters()
         {
             ExpectAndConsume(TokenType.OpenParen);
             List<Var> parameters = [];
@@ -677,7 +675,7 @@ namespace Epsilon
             ExpectAndConsume(TokenType.CloseParen);
             return parameters;
         }
-        static void ParseFunctionPrologue(Token FunctionName)
+        void ParseFunctionPrologue(Token FunctionName)
         {
             CurrentFunctionName = FunctionName.Value;
             if (STD_FUNCTIONS.Contains(FunctionName.Value) || UserDefinedFunctions.ContainsKey(FunctionName.Value))
@@ -687,16 +685,16 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: function with the name `{FunctionName.Value}` is already defined\n", 1);
             }
         }
-        static void ParseFunctionEpilogue()
+        void ParseFunctionEpilogue()
         {
             CurrentFunctionName = null;
         }
-        static NodeStmtScope ParseFunctionBody()
+        NodeStmtScope ParseFunctionBody()
         {
             Expect(TokenType.OpenCurly);
             return ParseScope();
         }
-        static void ParseFunction()
+        void ParseFunction()
         {
             Token FunctionName = Consume();
             ParseFunctionPrologue(FunctionName);
@@ -712,7 +710,7 @@ namespace Epsilon
             };
             UserDefinedFunctions.Add(FunctionName.Value, Function);
         }
-        static List<NodeExpr> ParseFunctionCallParameters()
+        List<NodeExpr> ParseFunctionCallParameters()
         {
             List<NodeExpr> parameters = [];
             ExpectAndConsume(TokenType.OpenParen);
@@ -725,7 +723,7 @@ namespace Epsilon
             ExpectAndConsume(TokenType.CloseParen);
             return parameters;
         }
-        static List<NodeStmt> ParseFunctionCall(Token CalledFunctionName)
+        List<NodeStmt> ParseFunctionCall(Token CalledFunctionName)
         {
             if (STD_FUNCTIONS.Contains(CalledFunctionName.Value))
             {
@@ -788,7 +786,7 @@ namespace Epsilon
                 return [stmt];
             }
         }
-        static List<NodeStmt> ParseStmt()
+        List<NodeStmt> ParseStmt()
         {
             if (IsStmtDeclare())
             {
@@ -936,11 +934,13 @@ namespace Epsilon
                 return [];
             }
         }
-        public static NodeProg ParseProg(List<Token> tokens, string InputFilePath)
+        public NodeProg ParseProg()
         {
-            m_tokens = tokens;
-            m_inputFilePath = InputFilePath;
+            m_curr_index = 0;
+            CurrentFunctionName = null;
+            UserDefinedFunctions = [];
             prog = new();
+
             while (Peek().HasValue)
             {
                 List<NodeStmt> stmts = ParseStmt();

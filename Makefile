@@ -20,7 +20,7 @@ all: tests examples
 	@echo "✅ Built successfully."
 
 main:
-	dotnet ./bin/Debug/net8.0/Epsilon.dll ./main.e -o ./main.S
+	dotnet ./bin/Debug/net8.0/Epsilon.dll -S ./main.e -o ./main.S
 	riscv64-linux-gnu-gcc -o ./main ./main.S -static
 	qemu-riscv64 ./main
 	@echo "✅ Built main successfully."
@@ -28,7 +28,7 @@ main:
 compile-examples: clean-examples
 	@for ex in $(EXAMPLES); do \
 		echo "Compiling $$ex.e..."; \
-		dotnet ./bin/Debug/net8.0/Epsilon.dll $(EXAMPLES_SRC_PATH)/$$ex.e -o $(EXAMPLES_RISCV_ASSEMBLY)/$$ex.S || exit 1; \
+		dotnet ./bin/Debug/net8.0/Epsilon.dll -S $(EXAMPLES_SRC_PATH)/$$ex.e -o $(EXAMPLES_RISCV_ASSEMBLY)/$$ex.S || exit 1; \
 	done
 
 assemble-examples:
@@ -54,7 +54,7 @@ examples: compile-examples assemble-examples run-examples
 compile-tests: clean-tests
 	@for ex in $(TESTS); do \
 		echo "Compiling $$ex.e..."; \
-		dotnet ./bin/Debug/net8.0/Epsilon.dll $(TESTS_SRC_PATH)/$$ex.e -o $(TESTS_RISCV_ASSEMBLY)/$$ex.S || exit 1; \
+		dotnet ./bin/Debug/net8.0/Epsilon.dll -S $(TESTS_SRC_PATH)/$$ex.e -o $(TESTS_RISCV_ASSEMBLY)/$$ex.S || exit 1; \
 	done
 
 assemble-tests:
