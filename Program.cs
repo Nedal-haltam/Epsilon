@@ -3,17 +3,11 @@ namespace Epsilon
 {
     internal class Program
     {
-        static StringBuilder Compile(string InputFilePath)
+        static StringBuilder Compile(string InputCode, string InputFilePath)
         {
-            if (!File.Exists(InputFilePath))
-                Shartilities.Log(Shartilities.LogType.ERROR, $"file `{InputFilePath}` doesn't exists\n", 1);
-            string InputCode = File.ReadAllText(InputFilePath);
-            Tokenizer Tokenizer = new(InputCode, InputFilePath);
-            List<Token> TokenizedProgram = Tokenizer.TokenizeProg();
-            Parser Parser = new(TokenizedProgram, InputFilePath);
-            NodeProg ParsedProgram = Parser.ParseProg();
-            RISCVGenerator Generator = new(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
-            StringBuilder GeneratedProgram = Generator.GenProgram();
+            List<Token> TokenizedProgram = Tokenizer.TokenizeProg(InputCode, InputFilePath);
+            NodeProg ParsedProgram = Parser.ParseProg(TokenizedProgram, InputFilePath);
+            StringBuilder GeneratedProgram = RISCVGenerator.GenProgram(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
             return GeneratedProgram;
         }
         static void Usage()
@@ -23,44 +17,64 @@ namespace Epsilon
         static void Main(string[] args)
         {
             //Compile("../../../main.e");
-            if (!Shartilities.ShiftArgs(ref args, out string InputFilePath))
-            {
-                Shartilities.Log(Shartilities.LogType.ERROR, "no input file provided\n");
-                Usage();
-                Environment.Exit(1);
-            }
+            //		- needs to integrate/include from risc-v-utils
+            //			- risc-v-assembler
+            //			- risc-v-CAS
             string? OutputFilePath = null;
-		    //	- if the input is `.e`: you do compile -> assemble -> link for qemu and output (MC/DM) for CAS
-		    //		- but if the -S flag is specified (it should be `.e` file) you just compile (i.e. generate assembly `.S` file)
-		    //	- add the -run flag/feature in Epsilon so you can 
-		    //	compile (epsilon) -> assemble (risc-v-assembler) -> run (risc-v-CAS) all at once
-		    //		- NOTE: running it internally in the code is easier (i.e. calling assembler/CAS APIs), 
-		    //		you have to run it using both qemu (external command) and risc-v-assembler/CAS (internal code) to ensure consistent results
-		    //		- needs to integrate/include
-		    //			- risc-v-assembler
-		    //			- risc-v-CAS
+            List<string> InputFilePaths = [];
+            bool CompileOnly = false;
+            bool Run = false; // Run using qemu
+            bool Sim = false; // simulate using our cycle accurate simulator
             while (Shartilities.ShiftArgs(ref args, out string arg))
             {
                 if (arg == "-o")
                 {
                     if (!Shartilities.ShiftArgs(ref args, out string OutputFilePathuser))
-                    {
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"Expected output file path\n", 1);
-                    }
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Expected output file path after -o\n", 1);
                     OutputFilePath = OutputFilePathuser;
+                }
+                else if (arg == "-run")
+                {
+                    Run = true;
+                }
+                else if (arg == "-sim")
+                {
+                    Sim = true;
+                }
+                else if (arg == "-S")
+                {
+                    CompileOnly = true;
                 }
                 else
                 {
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"Invalid flag `{arg}` was provided\n");
-                    Usage();
-                    Environment.Exit(1);
+                    InputFilePaths.Add(arg);
                 }
             }
-            StringBuilder Assembly = Compile(InputFilePath);
-            if (OutputFilePath == null)
-                File.WriteAllText("./a.S", Assembly.ToString());
-            else
+            if (InputFilePaths.Count == 0)
+                Shartilities.Logln(Shartilities.LogType.ERROR, $"no input files was provided", 1);
+            string SourceFilePath = InputFilePaths[0];
+
+            if (Run)
+            {
+                Shartilities.TODO("run using qemu");
+            }
+            else if (Sim)
+            {
+                Shartilities.TODO("simulate using CAS");
+            }
+            else if (CompileOnly)
+            {
+                if (!File.Exists(SourceFilePath))
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"file {SourceFilePath} doesn't exists\n", 1);
+                string InputCode = File.ReadAllText(SourceFilePath);
+                StringBuilder Assembly = Compile(InputCode, SourceFilePath);
+                OutputFilePath ??= "./a.S";
                 File.WriteAllText(OutputFilePath, Assembly.ToString());
+            }
+            else
+            {
+                Shartilities.TODO("compile -> assemble -> link -> <output ELF executable for qemu> and <output MC/DM file for CAS>");
+            }
         }
     }
 }

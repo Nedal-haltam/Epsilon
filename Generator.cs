@@ -6,30 +6,34 @@ using System.Text;
 using System.Xml.Linq;
 namespace Epsilon
 {
-    public class RISCVGenerator(NodeProg prog, Dictionary<string, NodeStmtFunction> UserDefinedFunctions, string InputFilePath, List<string> std_functions)
+    public static class RISCVGenerator
     {
         ////////////////////////////////////////////////////////
-        public NodeProg m_program = prog;
-        public Dictionary<string, NodeStmtFunction> m_UserDefinedFunctions = UserDefinedFunctions;
-        public readonly string m_inputFilePath = InputFilePath;
-        public readonly List<string> m_STD_FUNCTIONS = std_functions;
+        static NodeProg m_program;
         ////////////////////////////////////////////////////////
-        readonly string m_FirstTempReg_ = "t0";
-        readonly string m_SecondTempReg_ = "t1";
-        readonly StringBuilder m_output = new();
-        readonly List<string> m_CalledFunctions = [];
-        readonly List<string> m_StringLits = [];
+        static Variables m_Variables;
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        static Dictionary<string, NodeStmtFunction> m_UserDefinedFunctions;
+        static string m_inputFilePath;
+        static List<string> m_STD_FUNCTIONS;
+        static List<Var> Globals;
+        static Stack<int> m_scopes;
+        static uint m_StackSize;
+        static Stack<string?> m_scopestart;
+        static Stack<string?> m_scopeend;
+        static List<string> m_CalledFunctions;
+        static List<string> m_StringLits;
+        static ulong m_LabelsCount;
+        static string m_CurrentFunctionName;
+
+        static StringBuilder m_output;
+
+        static string m_FirstTempReg;
+        static string m_SecondTempReg;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         ////////////////////////////////////////////////////////
-        ulong m_LabelsCount = 1;
-        Variables m_vars = new();
-        Stack<int> m_scopes = [];
-        uint m_StackSize;
-        Stack<string?> m_scopestart = new();
-        Stack<string?> m_scopeend = new();
-        string m_CurrentFunctionName = "NO_FUNCTION_NAME";
-        ////////////////////////////////////////////////////////
-        string GetLabel() => $"LABEL{m_LabelsCount++}";
-        void LoadStoreBasedOnSize(string inst, string DestinationRegister, string SourceRegister, string Offset, uint ElementSize)
+        static string GetLabel() => $"LABEL{m_LabelsCount++}";
+        static void LoadStoreBasedOnSize(string inst, string DestinationRegister, string SourceRegister, string Offset, uint ElementSize)
         {
             string Mnem = "";
             if (inst == "store") Mnem = "S";
@@ -43,31 +47,31 @@ namespace Epsilon
             else
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"invalid ElementSize {ElementSize}", 1);
         }
-        void GenPush(string reg, uint size = 8)
+        static void GenPush(string reg, uint size = 8)
         {
             m_output.AppendLine($"    ADDI sp, sp, -{size}");
             LoadStoreBasedOnSize("store", reg, "sp", "0", size);
             m_StackSize += size;
         }
-        void GenPush(uint size)
+        static void GenPush(uint size)
         {
             if (size == 0) return;
             m_output.AppendLine($"    ADDI sp, sp, -{size}");
             m_StackSize += size;
         }
-        void GenPop(string reg, uint size = 8)
+        static void GenPop(string reg, uint size = 8)
         {
             LoadStoreBasedOnSize("load", reg, "sp", "0", size);
             m_output.AppendLine($"    ADDI sp, sp, {size}");
             m_StackSize -= size;
         }
-        void GenPop(uint size, bool Change_m_stacksize)
+        static void GenPop(uint size, bool Change_m_stacksize)
         {
             if (size == 0) return;
             m_output.AppendLine($"    ADDI sp, sp, {size}");
             if (Change_m_stacksize) m_StackSize -= size;
         }
-        void GenPushMany(List<string> regs, uint RegisterSize)
+        static void GenPushMany(List<string> regs, uint RegisterSize)
         {
             if (regs.Count == 0) return;
             m_output.AppendLine($"    ADDI sp, sp, -{regs.Count * RegisterSize}");
@@ -77,7 +81,7 @@ namespace Epsilon
             }
             m_StackSize += (uint)(RegisterSize * regs.Count);
         }
-        void GenPopMany(List<string> regs, uint RegisterSize)
+        static void GenPopMany(List<string> regs, uint RegisterSize)
         {
             if (regs.Count == 0) return;
             for (int i = 0; i < regs.Count; i++)
@@ -87,31 +91,31 @@ namespace Epsilon
             m_output.AppendLine($"    ADDI sp, sp, {regs.Count * RegisterSize}");
             m_StackSize -= (uint)(RegisterSize * regs.Count);
         }
-        void StackPopEndScope(uint popcount)
+        static void StackPopEndScope(uint popcount)
         {
             if (popcount == 0) return;
             m_output.AppendLine($"    LI t0, {popcount}");
             m_output.AppendLine($"    ADD sp, sp, t0");
             m_StackSize -= popcount;
         }
-        void BeginScope()
+        static void BeginScope()
         {
-            m_scopes.Push(m_vars.VariablesCount());
+            m_scopes.Push(m_Variables.VariablesCount());
         }
-        void EndScope()
+        static void EndScope()
         {
-            int Vars_topop = m_vars.VariablesCount() - m_scopes.Pop();
-            int i = m_vars.VariablesCount() - 1;
+            int Vars_topop = m_Variables.VariablesCount() - m_scopes.Pop();
+            int i = m_Variables.VariablesCount() - 1;
             int iterations = Vars_topop;
             uint popcount = 0;
             while (iterations-- > 0)
             {
-                popcount += m_vars[i--].Size;
+                popcount += m_Variables[i--].Size;
             }
             StackPopEndScope(popcount);
-            m_vars.RemoveRange(m_vars.VariablesCount() - Vars_topop, Vars_topop);
+            m_Variables.RemoveRange(m_Variables.VariablesCount() - Vars_topop, Vars_topop);
         }
-        void GenScope(NodeStmtScope scope)
+        static void GenScope(NodeStmtScope scope)
         {
             BeginScope();
             foreach (NodeStmt stmt in scope.stmts)
@@ -155,7 +159,7 @@ namespace Epsilon
             NodeExpr rhs = GenIndexExpr(ref indexes, ref dims, i + 1);
             return NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Add, lhs, rhs);
         }
-        void GenExpr(NodeExpr expr, string? DestReg, uint size = 8)
+        static void GenExpr(NodeExpr expr, string? DestReg, uint size = 8)
         {
             if (expr.type == NodeExpr.NodeExprType.Term)
             {
@@ -172,7 +176,7 @@ namespace Epsilon
             else
                 Shartilities.UNREACHABLE("no valid expression");
         }
-        Var GenVariableDeclare(NodeStmtDeclare declare, bool PushExpressions, bool IsGlobal = false)
+        static Var GenVariableDeclare(NodeStmtDeclare declare, bool PushExpressions, bool IsGlobal = false)
         {
             if (declare.type == NodeStmtIdentifierType.SingleVar)
             {
@@ -209,14 +213,14 @@ namespace Epsilon
             Shartilities.UNREACHABLE($"invalid identifier type");
             return new();
         }
-        Var GenStmtDeclare(NodeStmtDeclare declare, bool PushExpressions)
+        static Var GenStmtDeclare(NodeStmtDeclare declare, bool PushExpressions)
         {
             Token ident = declare.ident;
-            if (m_vars.IsVariableDeclared(ident.Value))
+            if (m_Variables.IsVariableDeclared(ident.Value))
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: Generator: variable `{ident.Value}` is alread declared", 1);
             return GenVariableDeclare(declare, PushExpressions);
         }
-        void GenArrayIndex(List<NodeExpr> indexes, List<uint> dims, Var var, string reg)
+        static void GenArrayIndex(List<NodeExpr> indexes, List<uint> dims, Var var, string reg)
         {
             if (!var.IsArray)
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"Generator: variable `{var.Value}` is not declared as an array", 1);
@@ -230,30 +234,30 @@ namespace Epsilon
                 reg, 8
             );
         }
-        void GenArrayAddr(List<NodeExpr> indexes, Var var, uint? RelativeLocationOfBaseAddress= null)
+        static void GenArrayAddr(List<NodeExpr> indexes, Var var, uint? RelativeLocationOfBaseAddress= null)
         {
-            string Address = m_FirstTempReg_;
+            string Address = m_FirstTempReg;
             GenArrayIndex(indexes, var.Dimensions, var, Address);
             if (RelativeLocationOfBaseAddress.HasValue)
             {
-                string BaseReg = m_SecondTempReg_;
+                string BaseReg = m_SecondTempReg;
                 m_output.AppendLine($"    LD {BaseReg}, {RelativeLocationOfBaseAddress}(sp)");
                 m_output.AppendLine($"    ADD {Address}, {BaseReg}, {Address}");
                 // Base address + index
             }
             else
             {
-                uint RelativeLocation = m_vars.GetVariableRelativeLocation(var, m_StackSize) - (var.Size - var.ElementSize);
+                uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize) - (var.Size - var.ElementSize);
                 m_output.AppendLine($"    ADDI {Address}, {Address}, {RelativeLocation}");
                 m_output.AppendLine($"    ADD {Address}, sp, {Address}");
                 // sp + index + (base address realtive address on the stack)
             }
             GenPush(Address);
         }
-        string GetOthertempRegisgter(string Register) => Register == m_FirstTempReg_ ? m_SecondTempReg_ : m_FirstTempReg_;
-        void GenTerm(NodeTerm term, string? DestReg, uint size)
+        static string GetOthertempRegisgter(string Register) => Register == m_FirstTempReg ? m_SecondTempReg : m_FirstTempReg;
+        static void GenTerm(NodeTerm term, string? DestReg, uint size)
         {
-            string RegData = DestReg ?? m_FirstTempReg_;
+            string RegData = DestReg ?? m_FirstTempReg;
             if (term.type == NodeTerm.NodeTermType.Unary)
             {
                 if (term.unary.type == NodeTermUnaryExpr.NodeTermUnaryExprType.complement)
@@ -282,14 +286,14 @@ namespace Epsilon
                     NodeTermIdent ident = term.unary.term.ident;
                     if (ident.indexes.Count == 0)
                     {
-                        Var var = m_vars.GetVariable(ident.ident.Value, m_inputFilePath, ident.ident.Line);
+                        Var var = m_Variables.GetVariable(ident.ident.Value, m_inputFilePath, ident.ident.Line);
                         if (var.IsGlobal)
                         {
                             m_output.AppendLine($"    LA {RegData}, {var.Value}");
                         }
                         else
                         {
-                            uint RelativeLocation = m_vars.GetVariableRelativeLocation(var, m_StackSize);
+                            uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
                             if (var.IsParameter)
                                 m_output.AppendLine($"    ADDI {RegData}, sp, {RelativeLocation}");
                             else
@@ -327,7 +331,7 @@ namespace Epsilon
             else if (term.type == NodeTerm.NodeTermType.Ident)
             {
                 NodeTermIdent ident = term.ident;
-                Var var = m_vars.GetVariable(ident.ident.Value, m_inputFilePath, ident.ident.Line);
+                Var var = m_Variables.GetVariable(ident.ident.Value, m_inputFilePath, ident.ident.Line);
                 if (ident.indexes.Count == 0)
                 {
                     if (var.IsArray)
@@ -336,7 +340,7 @@ namespace Epsilon
                         {
                             if (var.IsGlobal)
                                 Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot put global variable as a parameter", 1);
-                            uint RelativeLocation = m_vars.GetVariableRelativeLocation(var, m_StackSize);
+                            uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
                             m_output.AppendLine($"    LD {RegData}, {RelativeLocation}(sp)");
                         }
                         else
@@ -345,7 +349,7 @@ namespace Epsilon
                                 m_output.AppendLine($"    LA {RegData}, {var.Value}");
                             else
                             {
-                                uint RelativeLocation = m_vars.GetVariableRelativeLocation(var, m_StackSize);
+                                uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
                                 m_output.AppendLine($"    ADDI {RegData}, sp, {RelativeLocation - (var.TypeSize * (var.Count - 1))}");
                             }
                         }
@@ -357,7 +361,7 @@ namespace Epsilon
                         if (var.IsGlobal)
                             m_output.AppendLine($"    LA {BaseReg}, {var.Value}");
                         else
-                            RelativeLocation = m_vars.GetVariableRelativeLocation(var, m_StackSize);
+                            RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
                         LoadStoreBasedOnSize("load", RegData, BaseReg, RelativeLocation.ToString(), var.ElementSize);
                     }
                 }
@@ -368,7 +372,7 @@ namespace Epsilon
                     {
                         if (var.IsGlobal)
                             Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot put global variable as a parameter", 1);
-                        uint RelativeLocationOfBaseAddress= m_vars.GetVariableRelativeLocation(var, m_StackSize);
+                        uint RelativeLocationOfBaseAddress= m_Variables.GetVariableRelativeLocation(var, m_StackSize);
                         GenArrayAddr(ident.indexes, var, RelativeLocationOfBaseAddress);
                     }
                     else
@@ -393,10 +397,10 @@ namespace Epsilon
             }
             else if (term.type == NodeTerm.NodeTermType.Variadic)
             {
-                Var var = m_vars.GetVariadic();
+                Var var = m_Variables.GetVariadic();
                 string RegAddr = GetOthertempRegisgter(RegData);
 
-                uint RelativeLocation = m_vars.GetVariableRelativeLocation(var, m_StackSize);
+                uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
                 GenExpr(NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Mul, NodeExpr.Number("8", -1), term.variadic.VariadicIndex), RegAddr);
                 m_output.AppendLine($"    SUB {RegAddr}, sp, {RegAddr}");
                 m_output.AppendLine($"    LD {RegData}, {RelativeLocation}({RegAddr})");
@@ -414,13 +418,13 @@ namespace Epsilon
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"Generator: invalid term `{term.type}`", 1);
             }
         }
-        void GenStmtAssign(NodeStmtAssign assign)
+        static void GenStmtAssign(NodeStmtAssign assign)
         {
-            string RegData = m_FirstTempReg_;
+            string RegData = m_FirstTempReg;
             if (assign.type == NodeStmtIdentifierType.SingleVar)
             {
                 Token ident = assign.singlevar.ident;
-                Var var = m_vars.GetVariable(ident.Value, m_inputFilePath, ident.Line); 
+                Var var = m_Variables.GetVariable(ident.Value, m_inputFilePath, ident.Line); 
                 GenExpr(assign.singlevar.expr, RegData, var.ElementSize);
 
                 uint RelativeLocation = 0;
@@ -428,20 +432,20 @@ namespace Epsilon
                 if (var.IsGlobal)
                     m_output.AppendLine($"    LA {BaseReg}, {var.Value}");
                 else
-                    RelativeLocation = m_vars.GetVariableRelativeLocation(var, m_StackSize);
+                    RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
                 LoadStoreBasedOnSize("store", RegData, BaseReg, RelativeLocation.ToString(), var.ElementSize);
                 return;
             }
             else if (assign.type == NodeStmtIdentifierType.Array)
             {
                 Token ident = assign.array.ident;
-                Var var = m_vars.GetVariable(ident.Value, m_inputFilePath, ident.Line); 
-                string RegAddr = m_SecondTempReg_;
+                Var var = m_Variables.GetVariable(ident.Value, m_inputFilePath, ident.Line); 
+                string RegAddr = m_SecondTempReg;
                 if (var.IsParameter)
                 {
                     if (var.IsGlobal)
                         Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot put global variable as a parameter", 1);
-                    uint RelativeLocationOfBaseAddress= m_vars.GetVariableRelativeLocation(var, m_StackSize);
+                    uint RelativeLocationOfBaseAddress= m_Variables.GetVariableRelativeLocation(var, m_StackSize);
                     GenArrayAddr(assign.array.indexes, var, RelativeLocationOfBaseAddress);
                 }
                 else
@@ -465,7 +469,7 @@ namespace Epsilon
             }
             Shartilities.UNREACHABLE("not valid identifier type");
         }
-        NodeStmtFunction CheckFunctionCallCorrectness(NodeStmtFunctionCall CalledFunction)
+        static NodeStmtFunction CheckFunctionCallCorrectness(NodeStmtFunctionCall CalledFunction)
         {
             if (m_UserDefinedFunctions.TryGetValue(CalledFunction.FunctionName.Value, out NodeStmtFunction CalledFunctionDefinition))
             {
@@ -491,7 +495,7 @@ namespace Epsilon
             }
             return new();
         }
-        void FunctionCallFillParameters(NodeStmtFunctionCall CalledFunction, NodeStmtFunction CalledFunctionDefinition)
+        static void FunctionCallFillParameters(NodeStmtFunctionCall CalledFunction, NodeStmtFunction CalledFunctionDefinition)
         {
             if (m_UserDefinedFunctions.ContainsKey(CalledFunction.FunctionName.Value)) // user defined
             {
@@ -525,7 +529,7 @@ namespace Epsilon
                 }
             }
         }
-        void FunctionCallPrologue(NodeStmtFunctionCall CalledFunction, ref List<string> ParametersRegisters, bool WillPushParams)
+        static void FunctionCallPrologue(NodeStmtFunctionCall CalledFunction, ref List<string> ParametersRegisters, bool WillPushParams)
         {
             if (WillPushParams)
             {
@@ -535,14 +539,15 @@ namespace Epsilon
                 GenPushMany(ParametersRegisters, 8);
             }
         }
-        void FunctionCallEpilogue(NodeStmtFunctionCall CalledFunction, List<string> ParametersRegisters, bool WillPushParams)
+        static void FunctionCallEpilogue(NodeStmtFunctionCall CalledFunction, List<string> ParametersRegisters, bool WillPushParams)
         {
+            Shartilities.UNUSED(CalledFunction);
             if (WillPushParams)
             {
                 GenPopMany(ParametersRegisters, 8);
             }
         }
-        void GenStmtFunctionCall(NodeStmtFunctionCall CalledFunction, bool WillPushParams)
+        static void GenStmtFunctionCall(NodeStmtFunctionCall CalledFunction, bool WillPushParams)
         {
             NodeStmtFunction CalledFunctionDefinition = CheckFunctionCallCorrectness(CalledFunction);
             if (!m_CalledFunctions.Contains(CalledFunction.FunctionName.Value))
@@ -554,7 +559,7 @@ namespace Epsilon
             m_output.AppendLine($"    call {CalledFunction.FunctionName.Value}");
             FunctionCallEpilogue(CalledFunction, ParametersRegisters, WillPushParams);
         }
-        void GenPushFunctionParametersInDefinition(List<Var> parameters)
+        static void GenPushFunctionParametersInDefinition(List<Var> parameters)
         {
             for (int i = 0; i < parameters.Count; i++)
             {
@@ -565,7 +570,7 @@ namespace Epsilon
                     for (int j = i; j <= 7; j++)
                     {
                         GenPush($"a{j}");
-                        m_vars.AddVariable(new($"variadic({j - i})", 8, 8, [], false, true, true));
+                        m_Variables.AddVariable(new($"variadic({j - i})", 8, 8, [], false, true, true));
                     }
                     break;
                 }
@@ -578,12 +583,11 @@ namespace Epsilon
                         GenPush($"a{i}");
                     else
                         GenPush($"a{i}", TypeSize);
-                    m_vars.AddVariable(new(parameters[i].Value, Size, TypeSize, parameters[i].Dimensions, IsArray, true, false));
+                    m_Variables.AddVariable(new(parameters[i].Value, Size, TypeSize, parameters[i].Dimensions, IsArray, true, false));
                 }
             }
         }
-        List<Var> Globals = [];
-        void GetGlobalVariables(bool GenExpressions)
+        static void GetGlobalVariables(bool GenExpressions)
         {
             Globals = [];
             for (int i = 0; i < m_program.GlobalScope.stmts.Count; i++)
@@ -594,9 +598,9 @@ namespace Epsilon
                 Globals.Add(GenVariableDeclare(stmt.declare, GenExpressions, true));
             }
         }
-        void GenFunctionPrologue(string FunctionName)
+        static void GenFunctionPrologue(string FunctionName)
         {
-            m_vars.Reset();
+            m_Variables.Reset();
             m_StackSize = new();
             m_scopes = new();
             m_scopestart = new();
@@ -605,16 +609,16 @@ namespace Epsilon
             m_output.AppendLine($"{FunctionName}:");
 
             GenPush("ra");
-            m_vars.AddVariable(new("", 8, 8, [], false, false, false));
+            m_Variables.AddVariable(new("", 8, 8, [], false, false, false));
             GenPushFunctionParametersInDefinition(m_UserDefinedFunctions[FunctionName].parameters);
         }
-        void GenFunctionBody()
+        static void GenFunctionBody()
         {
             NodeStmtScope FunctionBody = m_UserDefinedFunctions[m_CurrentFunctionName].FunctionBody;
             foreach (NodeStmt stmt in FunctionBody.stmts)
                 GenStmt(stmt);
         }
-        void GenFunctionEpilogue()
+        static void GenFunctionEpilogue()
         {
             NodeStmtScope FunctionBody = m_UserDefinedFunctions[m_CurrentFunctionName].FunctionBody;
             if (FunctionBody.stmts.Count == 0 || FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
@@ -623,9 +627,9 @@ namespace Epsilon
                 GenReturnFromFunction();
             }
         }
-        void GenReturnFromFunction()
+        static void GenReturnFromFunction()
         {
-            uint AllocatedStackSize = m_vars.GetAllocatedStackSize();
+            uint AllocatedStackSize = m_Variables.GetAllocatedStackSize();
             Shartilities.Assert(AllocatedStackSize == m_StackSize, $"stack sizes are not equal");
             if (m_CurrentFunctionName == "main")
             {
@@ -638,15 +642,15 @@ namespace Epsilon
             m_output.AppendLine($"    LD ra, -8(sp)");
             m_output.AppendLine($"    ret");
         }
-        void GenFunction(string FunctionName)
+        static void GenFunction(string FunctionName)
         {
             GenFunctionPrologue(FunctionName);
             GenFunctionBody();
             GenFunctionEpilogue();
         }
-        void GenBinExpr(NodeBinExpr binExpr, string? DestReg, uint size)
+        static void GenBinExpr(NodeBinExpr binExpr, string? DestReg, uint size)
         {
-            string RegData = DestReg ?? m_FirstTempReg_;
+            string RegData = DestReg ?? m_FirstTempReg;
             string RegData2 = GetOthertempRegisgter(RegData);
             GenExpr(binExpr.rhs, null, size);
             GenExpr(binExpr.lhs, RegData, size);
@@ -702,11 +706,11 @@ namespace Epsilon
             if (DestReg == null)
                 GenPush(RegData, size);
         }
-        void GenElifs(NodeIfElifs elifs, string label_end)
+        static void GenElifs(NodeIfElifs elifs, string label_end)
         {
             if (elifs.type == NodeIfElifs.NodeIfElifsType.Elif)
             {
-                string RegData = m_FirstTempReg_;
+                string RegData = m_FirstTempReg;
                 string label = GetLabel() + "_elifs";
                 GenExpr(elifs.elif.pred.cond, RegData);
                 m_output.AppendLine($"    BEQZ {RegData}, {label}");
@@ -730,9 +734,9 @@ namespace Epsilon
             else
                 Shartilities.UNREACHABLE("GenElifs");
         }
-        string GenStmtIF(NodeStmtIF iff)
+        static string GenStmtIF(NodeStmtIF iff)
         {
-            string RegData = m_FirstTempReg_;
+            string RegData = m_FirstTempReg;
             string label_start = GetLabel() + "_START";
             string label_end = GetLabel() + "_END";
             string label = GetLabel() + "_elifs";
@@ -754,13 +758,13 @@ namespace Epsilon
             m_output.AppendLine($"{label_end}:");
             return label_start;
         }
-        void GenStmtFor(NodeStmtFor forr)
+        static void GenStmtFor(NodeStmtFor forr)
         {
             BeginScope();
             if (forr.pred.init.HasValue)
             {
                 if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.Declare)
-                    m_vars.AddVariable(GenStmtDeclare(forr.pred.init.Value.declare, true));
+                    m_Variables.AddVariable(GenStmtDeclare(forr.pred.init.Value.declare, true));
                 else if (forr.pred.init.Value.type == NodeForInit.NodeForInitType.Assign)
                     GenStmtAssign(forr.pred.init.Value.assign);
                 else
@@ -773,7 +777,7 @@ namespace Epsilon
                 string label_update = GetLabel() + "_START";
 
                 m_output.AppendLine($"{label_start}:");
-                string RegData = m_FirstTempReg_;
+                string RegData = m_FirstTempReg;
                 GenExpr(forr.pred.cond.Value.cond, RegData);
                 m_output.AppendLine($"    BEQZ {RegData}, {label_end}");
                 m_scopestart.Push(label_update);
@@ -828,14 +832,14 @@ namespace Epsilon
             }
             EndScope();
         }
-        void GenStmtWhile(NodeStmtWhile whilee)
+        static void GenStmtWhile(NodeStmtWhile whilee)
         {
             BeginScope();
             string label_start = GetLabel() + "_START";
             string label_end = GetLabel() + "_END";
 
             m_output.AppendLine($"{label_start}:");
-            string RegData = m_FirstTempReg_;
+            string RegData = m_FirstTempReg;
             GenExpr(whilee.cond, RegData);
             m_output.AppendLine($"    BEQZ {RegData}, {label_end}");
             m_scopestart.Push(label_start);
@@ -847,7 +851,7 @@ namespace Epsilon
             m_output.AppendLine($"{label_end}:");
             EndScope();
         }
-        void GenStmtBreak(NodeStmtBreak breakk)
+        static void GenStmtBreak(NodeStmtBreak breakk)
         {
             if (m_scopeend.Count == 0)
             {
@@ -855,7 +859,7 @@ namespace Epsilon
             }
             m_output.AppendLine($"    J {m_scopeend.Peek()}");
         }
-        void GenStmtContinue(NodeStmtContinuee continuee)
+        static void GenStmtContinue(NodeStmtContinuee continuee)
         {
             if (m_scopestart.Count == 0)
             {
@@ -863,22 +867,22 @@ namespace Epsilon
             }
             m_output.AppendLine($"    J {m_scopestart.Peek()}");
         }
-        void GenStmtExit(NodeStmtExit exit)
+        static void GenStmtExit(NodeStmtExit exit)
         {
             string reg = "a0";
             GenExpr(exit.expr, reg);
             m_output.AppendLine($"    call exit");
         }
-        void GenStmtReturn(NodeStmtReturn returnn)
+        static void GenStmtReturn(NodeStmtReturn returnn)
         {
             GenExpr(returnn.expr, "s0");
             GenReturnFromFunction();
         }
-        void GenStmt(NodeStmt stmt)
+        static void GenStmt(NodeStmt stmt)
         {
             if (stmt.type == NodeStmt.NodeStmtType.Declare)
             {
-                m_vars.AddVariable(GenStmtDeclare(stmt.declare, true));
+                m_Variables.AddVariable(GenStmtDeclare(stmt.declare, true));
             }
             else if (stmt.type == NodeStmt.NodeStmtType.Assign)
             {
@@ -921,7 +925,7 @@ namespace Epsilon
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"Generator: invalid statement `{stmt.type}`", 1);
             }
         }
-        void GenStdFunctions()
+        static void GenStdFunctions()
         {
             m_output.AppendLine($"exit:");
             m_output.AppendLine($"    li a7, 93");
@@ -991,7 +995,7 @@ namespace Epsilon
                 m_output.AppendLine($"    ret");
             }
         }
-        void GenProgramPrologue()
+        static void GenProgramPrologue()
         {
             m_output.AppendLine($".section .text");
             m_output.AppendLine($".globl main");
@@ -1000,13 +1004,13 @@ namespace Epsilon
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined", 1);
             }
             GetGlobalVariables(false);
-            m_vars.m_globals = [.. Globals];
+            m_Variables.m_globals = [.. Globals];
         }
-        void GenProgramEpilogue()
+        static void GenProgramEpilogue()
         {
-
+            // nothing to do, for now...
         }
-        void GenProgramDataSection()
+        static void GenProgramDataSection()
         {
             m_output.AppendLine($".section .data");
             for (int i = 0; i < Globals.Count; i++)
@@ -1028,7 +1032,7 @@ namespace Epsilon
                 m_output.AppendLine($"    .space 32");
             }
         }
-        void GenProgramFunctions()
+        static void GenProgramFunctions()
         {
             GenFunction("main");
             for (int i = 0; i < m_CalledFunctions.Count; i++)
@@ -1040,12 +1044,39 @@ namespace Epsilon
             }
             GenStdFunctions();
         }
-        public StringBuilder GenProgram()
+        static void CodeGeneratorPrologue(NodeProg prog, Dictionary<string, NodeStmtFunction> UserDefinedFunctions, string InputFilePath, List<string> std_functions)
         {
+            m_program = prog;
+            m_UserDefinedFunctions = new(UserDefinedFunctions);
+            m_inputFilePath = new(InputFilePath);
+            m_STD_FUNCTIONS = [.. std_functions];
+
+
+            m_Variables = new();
+            Globals = [];
+            m_scopes = [];
+            m_StackSize = 0;
+            m_scopestart = new();
+            m_scopeend = new();
+            m_CalledFunctions = [];
+            m_StringLits = [];
+            m_LabelsCount = 1;
+            m_CurrentFunctionName = "NO_FUNCTION_NAME";
+
+            m_output = new();
+
+            m_FirstTempReg = "t0";
+            m_SecondTempReg = "t1";
+        }
+        public static StringBuilder GenProgram(NodeProg prog, Dictionary<string, NodeStmtFunction> UserDefinedFunctions, string InputFilePath, List<string> std_functions)
+        {
+            CodeGeneratorPrologue(prog, UserDefinedFunctions, InputFilePath, std_functions);
+
             GenProgramPrologue();
             GenProgramFunctions();
             GenProgramDataSection();
             GenProgramEpilogue();
+
             return m_output;
         }
     }

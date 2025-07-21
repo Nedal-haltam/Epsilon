@@ -78,15 +78,15 @@ tests: compile-tests assemble-tests run-tests
 
 clean-examples:
 	@echo "🧹 Cleaning up examples"
-	rm -rf $(EXAMPLES_RISCV_ASSEMBLY)
-	mkdir $(EXAMPLES_RISCV_ASSEMBLY)
-	mkdir $(EXAMPLES_RISCV_BIN)
+	@rm -rf $(EXAMPLES_RISCV_ASSEMBLY)
+	@mkdir $(EXAMPLES_RISCV_ASSEMBLY)
+	@mkdir $(EXAMPLES_RISCV_BIN)
 
 clean-tests:
 	@echo "🧹 Cleaning up tests"
-	rm -rf $(TESTS_RISCV_ASSEMBLY)
-	mkdir $(TESTS_RISCV_ASSEMBLY)
-	mkdir $(TESTS_RISCV_BIN)
+	@rm -rf $(TESTS_RISCV_ASSEMBLY)
+	@mkdir $(TESTS_RISCV_ASSEMBLY)
+	@mkdir $(TESTS_RISCV_BIN)
 
 clean: clean-examples clean-tests
 	@echo "🧹 Cleaning up all"
@@ -97,11 +97,11 @@ record-log:
 	$(MAKE) LOG=1 SAVED_OUTPUT_PATH=$(SAVED_OUTPUT_PATH)
 
 diff-diff:
-	rm -rf logs
-	mkdir logs
-	rm -rf ./SavedOutput2.txt
-	touch ./SavedOutput2.txt
-	make LOG=1 SAVED_OUTPUT_PATH=./SavedOutput2.txt
-	col -b < $(SAVED_OUTPUT_PATH) > logs/SavedOutput.txt
-	col -b < SavedOutput2.txt > logs/SavedOutput2.txt
-	diff -as --suppress-common-lines --color=always logs/SavedOutput.txt logs/SavedOutput2.txt
+	@rm -rf logs
+	@mkdir logs
+	@rm -rf ./SavedOutput2.txt
+	@touch ./SavedOutput2.txt
+	@make LOG=1 SAVED_OUTPUT_PATH=./SavedOutput2.txt
+	@col -b < $(SAVED_OUTPUT_PATH) > logs/SavedOutput.txt
+	@col -b < SavedOutput2.txt > logs/SavedOutput2.txt
+	@diff -as --suppress-common-lines --color=always logs/SavedOutput.txt logs/SavedOutput2.txt
