@@ -51,20 +51,9 @@ namespace Epsilon
         }
         void GenPush(uint size)
         {
-            if (size > 0)
-            {
-                m_output.AppendLine($"    ADDI sp, sp, -{size}");
-                m_StackSize += size;
-            }
-        }
-        void GenPushMany(List<string> regs)
-        {
-            m_output.AppendLine($"    ADDI sp, sp, -{regs.Count * 8}");
-            for (int i = 0; i < regs.Count; i++)
-            {
-                m_output.AppendLine($"    SD {regs[i]}, {8 * i}(sp)");
-            }
-            m_StackSize += (uint)(8 * regs.Count);
+            if (size == 0) return;
+            m_output.AppendLine($"    ADDI sp, sp, -{size}");
+            m_StackSize += size;
         }
         void GenPop(string reg, uint size = 8)
         {
@@ -74,35 +63,36 @@ namespace Epsilon
         }
         void GenPop(uint size, bool Change_m_stacksize)
         {
-            if (size > 0)
-            {
-                m_output.AppendLine($"    ADDI sp, sp, {size}");
-                if (Change_m_stacksize) m_StackSize -= size;
-            }
+            if (size == 0) return;
+            m_output.AppendLine($"    ADDI sp, sp, {size}");
+            if (Change_m_stacksize) m_StackSize -= size;
         }
-        void GenPopMany(List<string> regs)
+        void GenPushMany(List<string> regs, uint RegisterSize)
         {
+            if (regs.Count == 0) return;
+            m_output.AppendLine($"    ADDI sp, sp, -{regs.Count * RegisterSize}");
             for (int i = 0; i < regs.Count; i++)
             {
-                m_output.AppendLine($"    LD {regs[regs.Count - i - 1]}, {8 * (regs.Count - i - 1)}(sp)");
+                m_output.AppendLine($"    SD {regs[i]}, {RegisterSize * i}(sp)");
             }
-            m_output.AppendLine($"    ADDI sp, sp, {regs.Count * 8}");
-            m_StackSize -= (uint)(8 * regs.Count);
+            m_StackSize += (uint)(RegisterSize * regs.Count);
+        }
+        void GenPopMany(List<string> regs, uint RegisterSize)
+        {
+            if (regs.Count == 0) return;
+            for (int i = 0; i < regs.Count; i++)
+            {
+                m_output.AppendLine($"    LD {regs[regs.Count - i - 1]}, {RegisterSize * (regs.Count - i - 1)}(sp)");
+            }
+            m_output.AppendLine($"    ADDI sp, sp, {regs.Count * RegisterSize}");
+            m_StackSize -= (uint)(RegisterSize * regs.Count);
         }
         void StackPopEndScope(uint popcount)
         {
-            if (popcount != 0)
-            {
-                if (popcount >= 2048)
-                {
-                    m_output.AppendLine($"    LI t0, {popcount}");
-                    m_output.AppendLine($"    ADD sp, sp, t0");
-                }
-                else
-                {
-                    m_output.AppendLine($"    ADDI sp, sp, {popcount}");
-                }
-            }
+            if (popcount == 0) return;
+            m_output.AppendLine($"    LI t0, {popcount}");
+            m_output.AppendLine($"    ADD sp, sp, t0");
+            m_StackSize -= popcount;
         }
         void BeginScope()
         {
@@ -119,7 +109,6 @@ namespace Epsilon
                 popcount += m_vars[i--].Size;
             }
             StackPopEndScope(popcount);
-            m_StackSize -= popcount;
             m_vars.RemoveRange(m_vars.VariablesCount() - Vars_topop, Vars_topop);
         }
         void GenScope(NodeStmtScope scope)
@@ -502,7 +491,7 @@ namespace Epsilon
             }
             return new();
         }
-        void FillParametersOfFunction(NodeStmtFunctionCall CalledFunction, NodeStmtFunction CalledFunctionDefinition)
+        void FunctionCallFillParameters(NodeStmtFunctionCall CalledFunction, NodeStmtFunction CalledFunctionDefinition)
         {
             if (m_UserDefinedFunctions.ContainsKey(CalledFunction.FunctionName.Value)) // user defined
             {
@@ -536,30 +525,34 @@ namespace Epsilon
                 }
             }
         }
+        void FunctionCallPrologue(NodeStmtFunctionCall CalledFunction, ref List<string> ParametersRegisters, bool WillPushParams)
+        {
+            if (WillPushParams)
+            {
+                ParametersRegisters.Clear();
+                for (int i = 0; i < CalledFunction.parameters.Count; i++)
+                    ParametersRegisters.Add($"a{i}");
+                GenPushMany(ParametersRegisters, 8);
+            }
+        }
+        void FunctionCallEpilogue(NodeStmtFunctionCall CalledFunction, List<string> ParametersRegisters, bool WillPushParams)
+        {
+            if (WillPushParams)
+            {
+                GenPopMany(ParametersRegisters, 8);
+            }
+        }
         void GenStmtFunctionCall(NodeStmtFunctionCall CalledFunction, bool WillPushParams)
         {
             NodeStmtFunction CalledFunctionDefinition = CheckFunctionCallCorrectness(CalledFunction);
             if (!m_CalledFunctions.Contains(CalledFunction.FunctionName.Value))
                 m_CalledFunctions.Add(CalledFunction.FunctionName.Value);
-            List<string> regs = [];
-            {
-                if (WillPushParams)
-                {
-                    for (int i = 0; i < CalledFunction.parameters.Count; i++)
-                    {
-                        regs.Add($"a{i}");
-                    }
-                    GenPushMany(regs);
-                }
-            }
-            FillParametersOfFunction(CalledFunction, CalledFunctionDefinition);
+
+            List<string> ParametersRegisters = [];
+            FunctionCallPrologue(CalledFunction, ref ParametersRegisters, WillPushParams);
+            FunctionCallFillParameters(CalledFunction, CalledFunctionDefinition);
             m_output.AppendLine($"    call {CalledFunction.FunctionName.Value}");
-            {
-                if (WillPushParams)
-                {
-                    GenPopMany(regs);
-                }
-            }
+            FunctionCallEpilogue(CalledFunction, ParametersRegisters, WillPushParams);
         }
         void GenPushFunctionParametersInDefinition(List<Var> parameters)
         {

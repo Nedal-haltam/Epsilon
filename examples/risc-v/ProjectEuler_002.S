@@ -219,7 +219,8 @@ LABEL14_START:
     SD t0, 8(sp)
 LABEL16_elifs:
 LABEL15_END:
-    ADDI sp, sp, 8
+    LI t0, 8
+    ADD sp, sp, t0
     J LABEL12_END
 LABEL13_elifs:
     ADDI sp, sp, -40
@@ -251,7 +252,8 @@ LABEL13_elifs:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 24(sp)
-    ADDI sp, sp, 8
+    LI t0, 8
+    ADD sp, sp, t0
 LABEL12_END:
     J LABEL9_START
 LABEL10_END:
@@ -683,7 +685,8 @@ LABEL26_START:
     ADDI sp, sp, 56
     LD ra, -8(sp)
     ret
-    ADDI sp, sp, 8
+    LI t0, 8
+    ADD sp, sp, t0
 LABEL28_elifs:
 LABEL27_END:
     LI a0, 1
@@ -780,7 +783,8 @@ LABEL39_END:
     LD a1, 8(sp)
     LD a2, 0(sp)
     call write
-    ADDI sp, sp, 16
+    LI t0, 16
+    ADD sp, sp, t0
     J LABEL33_END
 LABEL34_elifs:
     ADDI sp, sp, -8
@@ -805,7 +809,8 @@ LABEL34_elifs:
     LD a1, 8(sp)
     LD a2, 0(sp)
     call write
-    ADDI sp, sp, 16
+    LI t0, 16
+    ADD sp, sp, t0
 LABEL33_END:
 LABEL30_END:
     mv s0, zero
