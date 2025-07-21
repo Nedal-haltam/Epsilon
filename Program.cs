@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using CliWrap.Buffered;
+using System.Text;
+
 namespace Epsilon
 {
     internal class Program
@@ -79,7 +81,24 @@ namespace Epsilon
             }
             else
             {
-                Shartilities.TODO("compile -> assemble -> link -> <output ELF executable for qemu> and <output MC/DM file for CAS>");
+                string TempAssembly = "./temp.S";
+                OutputFilePath ??= "./a";
+                if (!File.Exists(SourceFilePath))
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"file {SourceFilePath} doesn't exists\n", 1);
+                string InputCode = File.ReadAllText(SourceFilePath);
+                StringBuilder Assembly = Compile(InputCode, SourceFilePath);
+                File.WriteAllText(TempAssembly, Assembly.ToString());
+
+                //riscv64-linux-gnu-gcc -o ./main ./main.S -static
+                var AssemblingAndLink = CliWrap.Cli
+                  .Wrap("riscv64-linux-gnu-gcc")
+                  .WithArguments($" -o {OutputFilePath} {TempAssembly} -static")
+                  .ExecuteBufferedAsync();
+
+                if (File.Exists(TempAssembly)) 
+                    File.Delete(TempAssembly);
+                
+                File.WriteAllText(OutputFilePath, Assembly.ToString());
             }
         }
     }
