@@ -86,8 +86,6 @@ namespace Epsilon
 
                 if (File.Exists(TempAssembly)) 
                     File.Delete(TempAssembly);
-                
-                File.WriteAllText(OutputFilePath, Assembly.ToString());
             }
         }
     }
