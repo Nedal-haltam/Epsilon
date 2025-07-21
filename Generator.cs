@@ -17,10 +17,10 @@ namespace Epsilon
         readonly string m_FirstTempReg_ = "t0";
         readonly string m_SecondTempReg_ = "t1";
         readonly StringBuilder m_output = new();
-        int m_labels_count = 0;
         readonly List<string> m_CalledFunctions = [];
         readonly List<string> m_StringLits = [];
         ////////////////////////////////////////////////////////
+        ulong m_LabelsCount = 1;
         Variables m_vars = new();
         Stack<int> m_scopes = [];
         uint m_StackSize;
@@ -28,6 +28,7 @@ namespace Epsilon
         Stack<string?> m_scopeend = new();
         string m_CurrentFunctionName = "NO_FUNCTION_NAME";
         ////////////////////////////////////////////////////////
+        string GetLabel() => $"LABEL{m_LabelsCount++}";
         void LoadStoreBasedOnSize(string inst, string DestinationRegister, string SourceRegister, string Offset, uint ElementSize)
         {
             string Mnem = "";
@@ -713,7 +714,7 @@ namespace Epsilon
             if (elifs.type == NodeIfElifs.NodeIfElifsType.Elif)
             {
                 string RegData = m_FirstTempReg_;
-                string label = $"LABEL{m_labels_count++}_elifs";
+                string label = GetLabel() + "_elifs";
                 GenExpr(elifs.elif.pred.cond, RegData);
                 m_output.AppendLine($"    BEQZ {RegData}, {label}");
                 GenScope(elifs.elif.pred.scope);
@@ -739,9 +740,9 @@ namespace Epsilon
         string GenStmtIF(NodeStmtIF iff)
         {
             string RegData = m_FirstTempReg_;
-            string label_start = $"LABEL{m_labels_count++}_START";
-            string label_end = $"LABEL{m_labels_count++}_END";
-            string label = $"LABEL{m_labels_count++}_elifs";
+            string label_start = GetLabel() + "_START";
+            string label_end = GetLabel() + "_END";
+            string label = GetLabel() + "_elifs";
 
             m_output.AppendLine($"{label_start}:");
             GenExpr(iff.pred.cond, RegData);
@@ -774,9 +775,9 @@ namespace Epsilon
             }
             if (forr.pred.cond.HasValue)
             {
-                string label_start = $"TEMP_LABEL{m_labels_count++}_START";
-                string label_end = $"TEMP_LABEL{m_labels_count++}_END";
-                string label_update = $"TEMP_LABEL{m_labels_count++}_START";
+                string label_start = GetLabel() + "_START";
+                string label_end = GetLabel() + "_END";
+                string label_update = GetLabel() + "_START";
 
                 m_output.AppendLine($"{label_start}:");
                 string RegData = m_FirstTempReg_;
@@ -800,9 +801,9 @@ namespace Epsilon
             }
             else if (forr.pred.udpate.updates.Count != 0)
             {
-                string label_start = $"TEMP_LABEL{m_labels_count++}_START";
-                string label_end = $"TEMP_LABEL{m_labels_count++}_END";
-                string label_update = $"TEMP_LABEL{m_labels_count++}_START";
+                string label_start = GetLabel() + "_START";
+                string label_end = GetLabel() + "_END";
+                string label_update = GetLabel() + "_START";
 
                 m_output.AppendLine($"{label_start}:");
                 m_scopestart.Push(label_update);
@@ -820,8 +821,8 @@ namespace Epsilon
             }
             else
             {
-                string label_start = $"TEMP_LABEL{m_labels_count++}_START";
-                string label_end = $"TEMP_LABEL{m_labels_count++}_END";
+                string label_start = GetLabel() + "_START";
+                string label_end = GetLabel() + "_END";
 
                 m_output.AppendLine($"{label_start}:");
                 m_scopestart.Push(label_start);
@@ -837,8 +838,8 @@ namespace Epsilon
         void GenStmtWhile(NodeStmtWhile whilee)
         {
             BeginScope();
-            string label_start = $"TEMP_LABEL{m_labels_count++}_START";
-            string label_end = $"TEMP_LABEL{m_labels_count++}_END";
+            string label_start = GetLabel() + "_START";
+            string label_end = GetLabel() + "_END";
 
             m_output.AppendLine($"{label_start}:");
             string RegData = m_FirstTempReg_;

@@ -20,7 +20,7 @@ FibRecursive:
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
-TEMP_LABEL0_START:
+LABEL1_START:
     LI t0, 30
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -28,7 +28,7 @@ TEMP_LABEL0_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL1_END
+    BEQZ t0, LABEL2_END
     LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -45,7 +45,7 @@ TEMP_LABEL0_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SD t0, 0(t1)
-TEMP_LABEL2_START:
+LABEL3_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -54,13 +54,13 @@ TEMP_LABEL2_START:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 0(sp)
-    J TEMP_LABEL0_START
-TEMP_LABEL1_END:
+    J LABEL1_START
+LABEL2_END:
     ADDI sp, sp, 8
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
-TEMP_LABEL3_START:
+LABEL4_START:
     LI t0, 30
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -68,7 +68,7 @@ TEMP_LABEL3_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL4_END
+    BEQZ t0, LABEL5_END
     LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -110,7 +110,7 @@ TEMP_LABEL3_START:
     ADDI sp, sp, 8
     LD a2, 0(t0)
     call print
-TEMP_LABEL5_START:
+LABEL6_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -119,8 +119,8 @@ TEMP_LABEL5_START:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 0(sp)
-    J TEMP_LABEL3_START
-TEMP_LABEL4_END:
+    J LABEL4_START
+LABEL5_END:
     ADDI sp, sp, 8
     LA a0, StringLits1
     LI a1, 0
@@ -144,7 +144,7 @@ FibIterative:
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
-TEMP_LABEL6_START:
+LABEL7_START:
     LD t0, 32(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -152,7 +152,7 @@ TEMP_LABEL6_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL7_END
+    BEQZ t0, LABEL8_END
     LA a0, StringLits0
     LI a1, 1
     LD a2, 24(sp)
@@ -169,7 +169,7 @@ TEMP_LABEL6_START:
     SD t0, 24(sp)
     LD t0, 8(sp)
     SD t0, 16(sp)
-TEMP_LABEL8_START:
+LABEL9_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -178,8 +178,8 @@ TEMP_LABEL8_START:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 0(sp)
-    J TEMP_LABEL6_START
-TEMP_LABEL7_END:
+    J LABEL7_START
+LABEL8_END:
     ADDI sp, sp, 8
     LA a0, StringLits1
     LI a1, 0
@@ -195,7 +195,7 @@ _FibRecursive:
     SD a0, 0(sp)
     ADDI sp, sp, -8
     SD a1, 0(sp)
-LABEL9_START:
+LABEL10_START:
     LI t0, 1
     NEG t0, t0
     ADDI sp, sp, -8
@@ -218,7 +218,7 @@ LABEL9_START:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SNEZ t0, t0
-    BEQZ t0, LABEL11_elifs
+    BEQZ t0, LABEL12_elifs
     LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -236,9 +236,9 @@ LABEL9_START:
     ADDI sp, sp, 24
     LD ra, -8(sp)
     ret
-LABEL11_elifs:
-LABEL10_END:
-LABEL12_START:
+LABEL12_elifs:
+LABEL11_END:
+LABEL13_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -260,13 +260,13 @@ LABEL12_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     OR t0, t0, t1
-    BEQZ t0, LABEL14_elifs
+    BEQZ t0, LABEL15_elifs
     LD s0, 0(sp)
     ADDI sp, sp, 24
     LD ra, -8(sp)
     ret
-LABEL14_elifs:
-LABEL13_END:
+LABEL15_elifs:
+LABEL14_END:
     ADDI sp, sp, -16
     SD a0, 0(sp)
     SD a1, 8(sp)
@@ -352,7 +352,7 @@ print:
     LD t0, 72(t1)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-TEMP_LABEL15_START:
+LABEL16_START:
     LD t0, 24(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -360,8 +360,8 @@ TEMP_LABEL15_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, TEMP_LABEL16_END
-LABEL17_START:
+    BEQZ t0, LABEL17_END
+LABEL18_START:
     LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -381,7 +381,7 @@ LABEL17_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
-    BEQZ t0, LABEL19_elifs
+    BEQZ t0, LABEL20_elifs
     ADDI sp, sp, -40
     SD a0, 0(sp)
     SD a1, 8(sp)
@@ -419,7 +419,7 @@ LABEL17_START:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 24(sp)
-LABEL20_START:
+LABEL21_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -428,7 +428,7 @@ LABEL20_START:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SNEZ t0, t0
-    BEQZ t0, LABEL22_elifs
+    BEQZ t0, LABEL23_elifs
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -445,11 +445,11 @@ LABEL20_START:
     ADDI sp, sp, 8
     SUB t0, t0, t1
     SD t0, 8(sp)
-LABEL22_elifs:
-LABEL21_END:
+LABEL23_elifs:
+LABEL22_END:
     ADDI sp, sp, 8
-    J LABEL18_END
-LABEL19_elifs:
+    J LABEL19_END
+LABEL20_elifs:
     ADDI sp, sp, -40
     SD a0, 0(sp)
     SD a1, 8(sp)
@@ -480,9 +480,9 @@ LABEL19_elifs:
     ADD t0, t0, t1
     SD t0, 24(sp)
     ADDI sp, sp, 8
-LABEL18_END:
-    J TEMP_LABEL15_START
-TEMP_LABEL16_END:
+LABEL19_END:
+    J LABEL16_START
+LABEL17_END:
     mv s0, zero
     ADDI sp, sp, 104
     LD ra, -8(sp)
@@ -500,7 +500,7 @@ printhelper:
     SD a3, 0(sp)
     ADDI sp, sp, -8
     SD a4, 0(sp)
-LABEL23_START:
+LABEL24_START:
     LI t0, 100
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -578,7 +578,7 @@ LABEL23_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
-    BEQZ t0, LABEL25_elifs
+    BEQZ t0, LABEL26_elifs
     LD a0, 8(sp)
     LI a1, 1
     call printnumber
@@ -586,9 +586,9 @@ LABEL23_START:
     ADDI sp, sp, 48
     LD ra, -8(sp)
     ret
-LABEL25_elifs:
-LABEL24_END:
-LABEL26_START:
+LABEL26_elifs:
+LABEL25_END:
+LABEL27_START:
     LI t0, 117
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -716,7 +716,7 @@ LABEL26_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
-    BEQZ t0, LABEL28_elifs
+    BEQZ t0, LABEL29_elifs
     LD a0, 8(sp)
     LI a1, 0
     call printnumber
@@ -724,9 +724,9 @@ LABEL26_START:
     ADDI sp, sp, 48
     LD ra, -8(sp)
     ret
-LABEL28_elifs:
-LABEL27_END:
-LABEL29_START:
+LABEL29_elifs:
+LABEL28_END:
+LABEL30_START:
     LI t0, 99
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -804,7 +804,7 @@ LABEL29_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
-    BEQZ t0, LABEL31_elifs
+    BEQZ t0, LABEL32_elifs
     LI a0, 1
     ADDI a1, sp, 8
     LI a2, 1
@@ -813,9 +813,9 @@ LABEL29_START:
     ADDI sp, sp, 48
     LD ra, -8(sp)
     ret
-LABEL31_elifs:
-LABEL30_END:
-LABEL32_START:
+LABEL32_elifs:
+LABEL31_END:
+LABEL33_START:
     LI t0, 115
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -893,7 +893,7 @@ LABEL32_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
-    BEQZ t0, LABEL34_elifs
+    BEQZ t0, LABEL35_elifs
     ADDI sp, sp, -8
     SD a0, 0(sp)
     LD a0, 16(sp)
@@ -912,8 +912,8 @@ LABEL32_START:
     LD ra, -8(sp)
     ret
     ADDI sp, sp, 8
-LABEL34_elifs:
-LABEL33_END:
+LABEL35_elifs:
+LABEL34_END:
     LI a0, 1
     LD t0, 16(sp)
     ADDI sp, sp, -8
@@ -935,20 +935,20 @@ printnumber:
     SD a0, 0(sp)
     ADDI sp, sp, -1
     SB a1, 0(sp)
-LABEL35_START:
+LABEL36_START:
     LD t0, 1(sp)
     SEQZ t0, t0
-    BEQZ t0, LABEL37_elifs
+    BEQZ t0, LABEL38_elifs
     LI a0, 1
     LA a1, StringLits2
     LI a2, 1
     call write
-    J LABEL36_END
-LABEL37_elifs:
-LABEL38_START:
+    J LABEL37_END
+LABEL38_elifs:
+LABEL39_START:
     LB t0, 0(sp)
-    BEQZ t0, LABEL40_elifs
-LABEL41_START:
+    BEQZ t0, LABEL41_elifs
+LABEL42_START:
     LI t0, -9223372036854775808
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -957,7 +957,7 @@ LABEL41_START:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SEQZ t0, t0
-    BEQZ t0, LABEL43_elifs
+    BEQZ t0, LABEL44_elifs
     LI a0, 1
     LA a1, StringLits3
     LI a2, 20
@@ -966,9 +966,9 @@ LABEL41_START:
     ADDI sp, sp, 17
     LD ra, -8(sp)
     ret
-LABEL43_elifs:
-LABEL42_END:
-LABEL44_START:
+LABEL44_elifs:
+LABEL43_END:
+LABEL45_START:
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -976,7 +976,7 @@ LABEL44_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, LABEL46_elifs
+    BEQZ t0, LABEL47_elifs
     LD t0, 1(sp)
     NEG t0, t0
     SD t0, 1(sp)
@@ -984,8 +984,8 @@ LABEL44_START:
     LA a1, StringLits4
     LI a2, 1
     call write
-LABEL46_elifs:
-LABEL45_END:
+LABEL47_elifs:
+LABEL46_END:
     ADDI sp, sp, -8
     SD a0, 0(sp)
     LD a0, 9(sp)
@@ -1009,8 +1009,8 @@ LABEL45_END:
     LD a2, 0(sp)
     call write
     ADDI sp, sp, 16
-    J LABEL39_END
-LABEL40_elifs:
+    J LABEL40_END
+LABEL41_elifs:
     ADDI sp, sp, -8
     SD a0, 0(sp)
     LD a0, 9(sp)
@@ -1034,8 +1034,8 @@ LABEL40_elifs:
     LD a2, 0(sp)
     call write
     ADDI sp, sp, 16
-LABEL39_END:
-LABEL36_END:
+LABEL40_END:
+LABEL37_END:
     mv s0, zero
     ADDI sp, sp, 17
     LD ra, -8(sp)
