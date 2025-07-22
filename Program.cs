@@ -1,6 +1,6 @@
-﻿using CliWrap.Buffered;
-using LibCPU;
-using System.Reflection;
+﻿using CliWrap;
+using CliWrap.Buffered;
+using CliWrap.EventStream;
 using System.Text;
 
 namespace Epsilon
@@ -37,16 +37,33 @@ namespace Epsilon
         }
         static void RunOnQemu(string FilePath)
         {
-            var RunResult = CliWrap.Cli
-              .Wrap("qemu-riscv64")
-              .WithArguments($"{FilePath}")
-              .WithValidation(CliWrap.CommandResultValidation.None)
-              .ExecuteBufferedAsync()
-              .GetAwaiter()
-              .GetResult();
-
-            Console.Write(RunResult.StandardOutput);
+            var RunResult = RunCommandSync(["qemu-riscv64", FilePath]).Result;
             Environment.Exit(RunResult.ExitCode);
+        }
+        static async Task<BufferedCommandResult> RunCommandSync(string[] args)
+        {
+            Shartilities.Assert(args.Length > 0, $"no enough arguments to execute command");
+            var Command = Cli
+                .Wrap(args[0])
+                .WithArguments(args[1..])
+                .WithValidation(CommandResultValidation.None);
+
+            var CommandTask = Command.ExecuteBufferedAsync();
+
+            await foreach (var CommandEvent in Command.ListenAsync())
+            {
+                switch (CommandEvent)
+                {
+                    case StandardOutputCommandEvent stdOut:
+                        Console.WriteLine(stdOut.Text);
+                        break;
+                    case StandardErrorCommandEvent stdErr:
+                        Console.Error.WriteLine(stdErr.Text);
+                        break;
+                }
+            }
+            var result = CommandTask.GetAwaiter().GetResult();
+            return result;
         }
         static LibUtils.Program AssembleAndLinkForCAS(string SourceFilePath, string OutputFilePath, bool Generate)
         {

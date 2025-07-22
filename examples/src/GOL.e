@@ -7,9 +7,9 @@
 
 func SlowDown()
 {
-    for (auto i = 0; i < 1000; i = i + 1)
+    for (auto i = 0; i < 500; i = i + 1)
     {
-        for (auto j = 0; j < 1000; j = j + 1)
+        for (auto j = 0; j < 500; j = j + 1)
         {
             for (auto k = 0; k < 25; k = k + 1)
             {
