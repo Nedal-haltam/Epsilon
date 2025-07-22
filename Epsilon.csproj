@@ -9,6 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="Assembler">
+      <HintPath>..\risc-v-utils\Assembler\bin\Debug\net8.0\Assembler.dll</HintPath>
+    </Reference>
+    <Reference Include="LibCPU">
+      <HintPath>..\risc-v-utils\LibCPU\bin\Debug\net8.0\LibCPU.dll</HintPath>
+    </Reference>
+    <Reference Include="LibUtils">
+      <HintPath>..\risc-v-utils\LibUtil\bin\Debug\net8.0\LibUtils.dll</HintPath>
+    </Reference>
     <Reference Include="Shartilities">
       <HintPath>..\Shartilities\bin\Debug\net8.0\Shartilities.dll</HintPath>
     </Reference>

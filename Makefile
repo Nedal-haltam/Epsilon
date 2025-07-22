@@ -20,9 +20,9 @@ all: tests examples
 	@echo "✅ Built successfully."
 
 main:
-	dotnet ./bin/Debug/net8.0/Epsilon.dll -S ./main.e -o ./main.S
-	riscv64-linux-gnu-gcc -o ./main ./main.S -static
-	qemu-riscv64 ./main
+	dotnet ./bin/Debug/net8.0/Epsilon.dll -S ./main/main.e -o ./main/main.S
+	riscv64-linux-gnu-gcc -o ./main/main ./main/main.S -static
+	qemu-riscv64 ./main/main
 	@echo "✅ Built main successfully."
 
 compile-examples: clean-examples

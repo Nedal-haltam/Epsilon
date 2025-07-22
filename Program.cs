@@ -1,4 +1,5 @@
 ﻿using CliWrap.Buffered;
+using System.Reflection;
 using System.Text;
 
 namespace Epsilon
@@ -14,19 +15,34 @@ namespace Epsilon
             return GeneratedProgram;
         }
         static StringBuilder Compile(string SourceFilePath) => Compile(Shartilities.ReadFile(SourceFilePath), SourceFilePath);
+        static void AssembleAndLinkForQemu(string SourceFilePath, string OutputFilePath)
+        {
+            var AssemblingAndLinkResult = CliWrap.Cli
+              .Wrap("riscv64-linux-gnu-gcc")
+              .WithArguments($" -o {OutputFilePath} {SourceFilePath} -static")
+              .ExecuteBufferedAsync().GetAwaiter().GetResult();
+        }
+        static void AssembleAndLinkForCAS(string SourceFilePath, string OutputFilePath)
+        {
+            LibUtils.Program p = Assembler.Assembler.AssembleProgram(SourceFilePath, false);
+            List<string> IM = LibUtils.GetIM(p.MachineCodes);
+            List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
+            File.WriteAllLines(OutputFilePath + "_IM", IM);
+            File.WriteAllLines(OutputFilePath + "_DM", DM);
+        }
         static void Main(string[] args)
         {
             //Compile("../../../main.e");
-            //		- needs to integrate/include from risc-v-utils
-            //			- risc-v-assembler
-            //			- risc-v-CAS
+            //      - deal with multiple files
+            //          - if you start with .e file you interpret the rest as epsilon files and you start from the compile step
+            //          - if you start with .S file you interpret the rest as assembly files and you start from the assemble step
             // TODO: add usage
             // TODO: add -h arguemnt to display usage
             string? OutputFilePath = null;
             List<string> InputFilePaths = [];
             bool CompileOnly = false;
             bool Run = false; // Run using qemu
-            bool Sim = false; // simulate using our cycle accurate simulator
+            bool Sim = false; // simulate using my cycle accurate simulator
             while (Shartilities.ShiftArgs(ref args, out string arg))
             {
                 if (arg == "-o")
@@ -73,18 +89,21 @@ namespace Epsilon
             }
             else
             {
-                string TempAssembly = "./temp.S";
+                string TempAssembly = SourceFilePath;
                 OutputFilePath ??= "./a";
                 string InputCode = Shartilities.ReadFile(SourceFilePath);
-                StringBuilder Assembly = Compile(InputCode, SourceFilePath);
-                File.WriteAllText(TempAssembly, Assembly.ToString());
+                bool IsAssemblyFile = SourceFilePath.EndsWith(".S");
+                if (!IsAssemblyFile)
+                {
+                    TempAssembly = "./temp.S";
+                    StringBuilder Assembly = Compile(InputCode, SourceFilePath);
+                    File.WriteAllText(TempAssembly, Assembly.ToString());
+                }
 
-                var AssemblingAndLink = CliWrap.Cli
-                  .Wrap("riscv64-linux-gnu-gcc")
-                  .WithArguments($" -o {OutputFilePath} {TempAssembly} -static")
-                  .ExecuteBufferedAsync();
+                AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
+                AssembleAndLinkForCAS(TempAssembly, OutputFilePath);
 
-                if (File.Exists(TempAssembly)) 
+                if (!IsAssemblyFile && File.Exists(TempAssembly))
                     File.Delete(TempAssembly);
             }
         }

@@ -2,9 +2,7 @@
 /.vs
 /bin
 /obj
-main
-main.S
-main.e
+/main
 /examples/risc-v/bin
 /tests/risc-v/bin
 /logs
