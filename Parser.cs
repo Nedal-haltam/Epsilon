@@ -258,7 +258,7 @@ namespace Epsilon
             }
             return null;
         }
-        int? GetPrec(TokenType type)
+        static int? GetPrec(TokenType type)
         {
             int? prec = type switch
             {
@@ -308,7 +308,7 @@ namespace Epsilon
             Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: inavalid operation `{op}`\n", 1);
             return 0;
         }
-        bool IsExprIntLit(NodeExpr expr) => expr.type == NodeExpr.NodeExprType.Term && expr.term.type == NodeTerm.NodeTermType.IntLit;
+        static bool IsExprIntLit(NodeExpr expr) => expr.type == NodeExpr.NodeExprType.Term && expr.term.type == NodeTerm.NodeTermType.IntLit;
         NodeExpr? ParseExpr(int min_prec = 0)
         {
             NodeTerm? _Termlhs = ParseTerm();

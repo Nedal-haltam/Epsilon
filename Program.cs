@@ -20,16 +20,32 @@ namespace Epsilon
             var AssemblingAndLinkResult = CliWrap.Cli
               .Wrap("riscv64-linux-gnu-gcc")
               .WithArguments($" -o {OutputFilePath} {SourceFilePath} -static")
-              .ExecuteBufferedAsync().GetAwaiter().GetResult();
+              .WithValidation(CliWrap.CommandResultValidation.None)
+              .ExecuteBufferedAsync()
+              .GetAwaiter()
+              .GetResult();
+            if (!AssemblingAndLinkResult.IsSuccess)
+            {
+                Console.Write($"standard output:\n");
+                Console.Write(AssemblingAndLinkResult.StandardOutput);
+                Console.Write($"standard error:\n");
+                Console.Write(AssemblingAndLinkResult.StandardError);
+                Environment.Exit(AssemblingAndLinkResult.ExitCode);
+            }
+            Shartilities.UNUSED(AssemblingAndLinkResult);
         }
         static void RunOnQemu(string FilePath)
         {
             var RunResult = CliWrap.Cli
               .Wrap("qemu-riscv64")
               .WithArguments($"{FilePath}")
-              .ExecuteBufferedAsync().GetAwaiter().GetResult();
+              .WithValidation(CliWrap.CommandResultValidation.None)
+              .ExecuteBufferedAsync()
+              .GetAwaiter()
+              .GetResult();
 
             Console.Write(RunResult.StandardOutput);
+            Environment.Exit(RunResult.ExitCode);
         }
         static void AssembleAndLinkForCAS(string SourceFilePath, string OutputFilePath)
         {
