@@ -22,6 +22,15 @@ namespace Epsilon
               .WithArguments($" -o {OutputFilePath} {SourceFilePath} -static")
               .ExecuteBufferedAsync().GetAwaiter().GetResult();
         }
+        static void RunOnQemu(string FilePath)
+        {
+            var RunResult = CliWrap.Cli
+              .Wrap("qemu-riscv64")
+              .WithArguments($"{FilePath}")
+              .ExecuteBufferedAsync().GetAwaiter().GetResult();
+
+            Console.Write(RunResult.StandardOutput);
+        }
         static void AssembleAndLinkForCAS(string SourceFilePath, string OutputFilePath)
         {
             LibUtils.Program p = Assembler.Assembler.AssembleProgram(SourceFilePath, false);
@@ -74,7 +83,23 @@ namespace Epsilon
 
             if (Run)
             {
-                Shartilities.TODO("run using qemu");
+                string TempAssembly = SourceFilePath;
+                OutputFilePath ??= "./a";
+                string InputCode = Shartilities.ReadFile(SourceFilePath);
+                bool IsAssemblyFile = SourceFilePath.EndsWith(".S");
+                if (!IsAssemblyFile)
+                {
+                    TempAssembly = "./temp.S";
+                    StringBuilder Assembly = Compile(InputCode, SourceFilePath);
+                    File.WriteAllText(TempAssembly, Assembly.ToString());
+                }
+
+                AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
+
+                if (!IsAssemblyFile && File.Exists(TempAssembly))
+                    File.Delete(TempAssembly);
+
+                RunOnQemu(OutputFilePath);
             }
             else if (Sim)
             {
