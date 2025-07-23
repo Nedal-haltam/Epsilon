@@ -98,14 +98,27 @@ namespace Epsilon
                 File.Delete(TempAssembly);
             return p;
         }
+        static void Usage()
+        {
+            Console.WriteLine($"Usage:");
+            Console.WriteLine($"  {Environment.ProcessPath} [options] <input_file>");
+            Console.WriteLine();
+            Console.WriteLine($"Options:");
+            Console.WriteLine($"  -o <file>     Specify output file path (default: ./a or ./a.S for -S)");
+            Console.WriteLine($"  -S            Compile only; generate assembly and exit");
+            Console.WriteLine($"  -run          Compile, assemble, link, and run using QEMU");
+            Console.WriteLine($"  -sim          Compile, assemble, and simulate using the custom simulator (CAS)");
+            Console.WriteLine($"  -h            Display this usage information");
+            Console.WriteLine();
+            Console.WriteLine($"Notes:");
+            Console.WriteLine($"  - Default behavior (no -S/-run/-sim) compiles, assembles, links, and generates the executable, and files needed by the CAS.");
+        }
         static void Main(string[] args)
         {
             //Compile("../../../main.e");
             //      - deal with multiple files
             //          - if you start with .e file you interpret the rest as epsilon files and you start from the compile step
             //          - if you start with .S file you interpret the rest as assembly files and you start from the assemble step
-            // TODO: add usage
-            // TODO: add -h arguemnt to display usage
 			// TODO: change epsilon syntax like for example
 			// for (auto i = 0; i < 10; i = i + 1) -->> for i in 0..10
 			// and other new different syntax for other things/statements
@@ -133,6 +146,11 @@ namespace Epsilon
                 else if (arg == "-S")
                 {
                     CompileOnly = true;
+                }
+                else if (arg == "-h")
+                {
+                    Usage();
+                    Environment.Exit(0);
                 }
                 else
                 {
