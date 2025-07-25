@@ -12,6 +12,11 @@ namespace Epsilon
             scope = new();
             GlobalScope = new();
         }
+        public NodeProg(NodeStmtScope scope, NodeStmtScope GlobalScope)
+        {
+            this.scope = scope;
+            this.GlobalScope = GlobalScope;
+        }
     }
     public struct NodeStmtScope
     {
@@ -19,6 +24,10 @@ namespace Epsilon
         public NodeStmtScope()
         {
             stmts = [];
+        }
+        public NodeStmtScope(List<NodeStmt> stmts)
+        {
+            this.stmts = [.. stmts];
         }
     }
     public struct NodeStmt
@@ -55,16 +64,72 @@ namespace Epsilon
         public Token ident;
         public NodeStmtDeclareSingleVar singlevar;
         public NodeStmtDeclareArray array;
+        public NodeStmtDeclare()
+        {
+            this.type = new();
+            this.datatype = new();
+            this.ident = new();
+            this.singlevar = new();
+            this.array = new();
+        }
+        public NodeStmtDeclare(NodeStmtIdentifierType type, NodeStmtDataType datatype, Token ident, dynamic thing)
+        {
+            this.type = type;
+            switch (type)
+            {
+                case NodeStmtIdentifierType.SingleVar:
+                    this.singlevar = thing;
+                    break;
+                case NodeStmtIdentifierType.Array:
+                    this.array = thing;
+                    break;
+                default:
+                    Shartilities.UNREACHABLE("NodeStmtDeclareConstructer");
+                    break;
+            }
+            this.datatype = datatype;
+            this.ident = ident;
+        }
     }
     public struct NodeStmtAssign
     {
         public NodeStmtIdentifierType type;
         public NodeStmtAssignSingleVar singlevar;
         public NodeStmtAssignArray array;
+        public NodeStmtAssign()
+        {
+            this.type = new();
+            this.singlevar = new();
+            this.array = new();
+        }
+        public NodeStmtAssign(NodeStmtIdentifierType type, dynamic thing)
+        {
+            this.type = type;
+            switch (type)
+            {
+                case NodeStmtIdentifierType.SingleVar:
+                    this.singlevar = thing;
+                    break;
+                case NodeStmtIdentifierType.Array:
+                    this.array = thing;
+                    break;
+                default:
+                    Shartilities.UNREACHABLE("NodeStmtAssignConstructer");
+                    break;
+            }
+        }
     }
     public struct NodeStmtDeclareSingleVar
     {
         public NodeExpr expr;
+        public NodeStmtDeclareSingleVar()
+        {
+            expr = new();
+        }
+        public NodeStmtDeclareSingleVar(NodeExpr expr)
+        {
+            this.expr = expr;
+        }
     }
     public struct NodeStmtDeclareArray
     {
@@ -75,11 +140,26 @@ namespace Epsilon
             values = [];
             Dimensions = [];
         }
+        public NodeStmtDeclareArray(List<NodeExpr> values, List<uint> Dimensions)
+        {
+            this.values = values;
+            this.Dimensions = Dimensions;
+        }
     }
     public struct NodeStmtAssignSingleVar
     {
         public Token ident;
         public NodeExpr expr;
+        public NodeStmtAssignSingleVar()
+        {
+            this.ident = new();
+            this.expr = new();
+        }
+        public NodeStmtAssignSingleVar(Token ident, NodeExpr expr)
+        {
+            this.ident = ident;
+            this.expr = expr;
+        }
     }
     public struct NodeStmtAssignArray
     {
@@ -90,6 +170,12 @@ namespace Epsilon
         {
             indexes = [];
         }
+        public NodeStmtAssignArray(Token ident, List<NodeExpr> indexes, NodeExpr expr)
+        {
+            this.ident = ident;
+            this.indexes = indexes;
+            this.expr = expr;
+        }
     }
     public class NodeStmtIF
     {
@@ -97,14 +183,29 @@ namespace Epsilon
         public NodeIfElifs? elifs;
         public NodeStmtIF()
         {
-            pred = new NodeIfPredicate();
+            pred = new();
             elifs = null;
+        }
+        public NodeStmtIF(NodeIfPredicate pred, NodeIfElifs elifs)
+        {
+            this.pred = pred;
+            this.elifs = elifs;
         }
     }
     public struct NodeIfPredicate
     {
         public NodeExpr cond;
         public NodeStmtScope scope;
+        public NodeIfPredicate()
+        {
+            this.cond = new();
+            this.scope = new();
+        }
+        public NodeIfPredicate(NodeExpr cond, NodeStmtScope scope)
+        {
+            this.cond = cond;
+            this.scope = scope;
+        }
     }
     public struct NodeIfElifs
     {
@@ -120,6 +221,12 @@ namespace Epsilon
             type = NodeIfElifsType.Else;
             elif = new NodeElif();
             elsee = new NodeElse();
+        }
+        public NodeIfElifs(NodeIfElifsType type, NodeElif elif, NodeElse elsee)
+        {
+            this.type = type;
+            this.elif = elif;
+            this.elsee = elsee;
         }
     }
     public class NodeElif
@@ -151,18 +258,52 @@ namespace Epsilon
         public NodeForInitType type;
         public NodeStmtDeclare declare;
         public NodeStmtAssign assign;
+        public NodeForInit()
+        {
+            this.type = new();
+            this.declare = new();
+            this.assign = new();
+        }
+        public NodeForInit(NodeForInitType type, dynamic thing)
+        {
+            this.type = type;
+            switch (type)
+            {
+                case NodeForInitType.Declare:
+                    this.declare = thing;
+                    break;
+                case NodeForInitType.Assign:
+                    this.assign = thing; 
+                    break;
+                default:
+                    Shartilities.UNREACHABLE("NodeForInitConstructer");
+                    break;
+            }
+        }
     }
     public struct NodeForCond
     {
         public NodeExpr cond;
+        public NodeForCond()
+        {
+            this.cond = new();
+        }
+        public NodeForCond(NodeExpr cond)
+        {
+            this.cond = cond;
+        }
     }
     public struct NodeForUpdate
     {
+        public List<NodeStmtAssign> updates;
         public NodeForUpdate()
         {
             updates = [];
         }
-        public List<NodeStmtAssign> updates;
+        public NodeForUpdate(List<NodeStmtAssign> updates)
+        {
+            this.updates = [.. updates];
+        }
     }
     public struct NodeStmtWhile
     {
@@ -210,19 +351,6 @@ namespace Epsilon
         public NodeExprType type;
         public NodeTerm term;
         public NodeBinExpr binexpr;
-        public static NodeExpr BinExpr(NodeBinExprType type, NodeExpr lhs, NodeExpr rhs)
-        {
-            return new()
-            {
-                type = NodeExprType.BinExpr,
-                binexpr = new()
-                {
-                    type = type,
-                    lhs = lhs,
-                    rhs = rhs,
-                },
-            };
-        }
         public static NodeExpr Number(string num, int line)
         {
             return new NodeExpr()
@@ -241,6 +369,31 @@ namespace Epsilon
                         }
                     }
                 }
+            };
+        }
+        public static NodeExpr Identifier(NodeTermIdent ident)
+        {
+            return new()
+            {
+                type = NodeExprType.Term,
+                term = new()
+                {
+                    type = NodeTerm.NodeTermType.Ident,
+                    ident = ident,
+                }
+            };
+        }
+        public static NodeExpr BinExpr(NodeBinExprType type, NodeExpr lhs, NodeExpr rhs)
+        {
+            return new()
+            {
+                type = NodeExprType.BinExpr,
+                binexpr = new()
+                {
+                    type = type,
+                    lhs = lhs,
+                    rhs = rhs,
+                },
             };
         }
     }
@@ -292,6 +445,11 @@ namespace Epsilon
         public NodeTermIdent()
         {
             indexes = [];
+        }
+        public NodeTermIdent(Token ident, List<NodeExpr> indexes)
+        {
+            this.ident = ident;
+            this.indexes = [.. indexes];
         }
     }
     public class NodeTermParen
@@ -474,6 +632,9 @@ namespace Epsilon
         Variadic,
         VariadicCount,
         VariadicArgs,
+
+        In,
+        Range,
 
         Continue,
         Break,
