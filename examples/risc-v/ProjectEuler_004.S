@@ -198,7 +198,7 @@ print:
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LI t0, 1
+    LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 0
@@ -229,18 +229,6 @@ LABEL14_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 7
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SLT t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    AND t0, t0, t1
     BEQZ t0, LABEL16_elifs
     ADDI sp, sp, -40
     SD a0, 0(sp)
@@ -251,7 +239,13 @@ LABEL14_START:
     LD a0, 128(sp)
     LD a1, 64(sp)
     LD a2, 56(sp)
-    LD t0, 48(sp)
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 56(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 8
