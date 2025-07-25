@@ -224,12 +224,21 @@ namespace Epsilon
                 }
                 return term;
             }
-            else if (Peek(TokenType.Variadic).HasValue)
+            else if (Peek(TokenType.VariadicArgs).HasValue)
             {
                 Consume();
                 ExpectAndConsume(TokenType.OpenParen);
                 NodeExpr VariadicIndex = ExpectedExpression(ParseExpr());
+                VariadicIndex = NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Add, VariadicIndex, NodeExpr.Number("1", -1));
                 ExpectAndConsume(TokenType.CloseParen);
+                term.type = NodeTerm.NodeTermType.Variadic;
+                term.variadic = new() { VariadicIndex = VariadicIndex };
+                return term;
+            }
+            else if (Peek(TokenType.VariadicCount).HasValue)
+            {
+                Token t = Consume();
+                NodeExpr VariadicIndex = NodeExpr.Number("0", t.Line);
                 term.type = NodeTerm.NodeTermType.Variadic;
                 term.variadic = new() { VariadicIndex = VariadicIndex };
                 return term;

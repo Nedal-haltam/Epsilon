@@ -472,6 +472,8 @@ namespace Epsilon
 
         Func,
         Variadic,
+        VariadicCount,
+        VariadicArgs,
 
         Continue,
         Break,

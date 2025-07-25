@@ -18,7 +18,9 @@ namespace Epsilon
             { "for", TokenType.For},
             { "while", TokenType.While},
             { "func", TokenType.Func},
-            { "variadic", TokenType.Variadic},
+            { "...", TokenType.Variadic},
+            { "__VARIADIC_COUNT__", TokenType.VariadicCount},
+            { "__VARIADIC_ARGS__", TokenType.VariadicArgs},
             { "continue", TokenType.Continue},
             { "break", TokenType.Break},
             { "return", TokenType.Return},
@@ -370,6 +372,11 @@ namespace Epsilon
                 {
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.SemiColon, Line = line });
+                }
+                else if (Peek("..."))
+                {
+                    buffer.Append(ConsumeMany(3));
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Variadic, Line = line });
                 }
                 else if (curr_token == '\n')
                 {

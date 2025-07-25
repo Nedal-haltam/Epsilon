@@ -119,9 +119,11 @@ namespace Epsilon
             //      - deal with multiple files
             //          - if you start with .e file you interpret the rest as epsilon files and you start from the compile step
             //          - if you start with .S file you interpret the rest as assembly files and you start from the assemble step
+
 			// TODO: change epsilon syntax like for example
-			// for (auto i = 0; i < 10; i = i + 1) -->> for i in 0..10
+			// for (auto i = 0; i < 10; i = i + 1) -->> for i in 0..10, or support both
 			// and other new different syntax for other things/statements
+
             string? OutputFilePath = null;
             List<string> InputFilePaths = [];
             bool CompileOnly = false;

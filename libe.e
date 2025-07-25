@@ -60,17 +60,17 @@ func printhelper(char msg[], auto msg_len, auto i, auto Number, auto IfPrintNumb
     return 1;
 }
 
-func print(char msg[], variadic)
+func print(char msg[], ...)
 {
     auto msg_len = strlen(msg);
     auto i = 0;
-    auto n = 1;
-    auto VariadicCount = variadic(0);
+    auto n = 0;
+    auto VariadicCount = __VARIADIC_COUNT__;
     while (i < msg_len)
     {
-        if (n < 7 & 0 < VariadicCount)
+        if (0 < VariadicCount)
         {
-            auto skip = printhelper(msg, msg_len, i, variadic(n), 1);
+            auto skip = printhelper(msg, msg_len, i, __VARIADIC_ARGS__(n), 1);
             i = i + skip;
             if (skip != 1)
             {
