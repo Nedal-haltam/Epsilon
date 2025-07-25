@@ -71,7 +71,7 @@ func main()
             }
             print("\n");
         }
-        SlowDown();
+        // SlowDown();
         Copy(grid, grid2);
         for (auto i = 0; i < SIZE; i = i + 1)
         {
