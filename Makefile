@@ -11,7 +11,7 @@ TESTS_RISCV_BIN := ./tests/risc-v/bin
 SAVED_OUTPUT_PATH := ./SavedOutput.txt
 
 EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 ProjectEuler_004 ProjectEuler_005
-TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc PrintNumbers
+TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc PrintNumbers Globals
 
 .PHONY:	all main compile-examples assemble-examples run-examples examples \
 		compile-tests assemble-tests run-tests tests clean-examples clean-tests clean record-log diff-diff
