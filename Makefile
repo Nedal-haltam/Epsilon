@@ -11,7 +11,7 @@ TESTS_RISCV_BIN := ./tests/risc-v/bin
 SAVED_OUTPUT_PATH := ./SavedOutput.txt
 
 EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 ProjectEuler_004 ProjectEuler_005
-TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc PrintNumbers Globals
+TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc PrintNumbers Globals ForLoops
 
 .PHONY:	all main compile-examples assemble-examples run-examples examples \
 		compile-tests assemble-tests run-tests tests clean-examples clean-tests clean record-log diff-diff
@@ -74,21 +74,6 @@ run-tests:
 
 tests: compile-tests assemble-tests run-tests
 
-clean-examples:
-	@echo "🧹 Cleaning up examples"
-	@rm -rf $(EXAMPLES_RISCV_ASSEMBLY)
-	@mkdir $(EXAMPLES_RISCV_ASSEMBLY)
-	@mkdir $(EXAMPLES_RISCV_BIN)
-
-clean-tests:
-	@echo "🧹 Cleaning up tests"
-	@rm -rf $(TESTS_RISCV_ASSEMBLY)
-	@mkdir $(TESTS_RISCV_ASSEMBLY)
-	@mkdir $(TESTS_RISCV_BIN)
-
-clean: clean-examples clean-tests
-	@echo "🧹 Cleaning up all"
-
 record-log:
 	@rm -rf $(SAVED_OUTPUT_PATH)
 	@touch $(SAVED_OUTPUT_PATH)
@@ -103,3 +88,18 @@ diff-diff:
 	@col -b < $(SAVED_OUTPUT_PATH) > logs/SavedOutput.txt
 	@col -b < SavedOutput2.txt > logs/SavedOutput2.txt
 	@diff -as --suppress-common-lines --color=always logs/SavedOutput.txt logs/SavedOutput2.txt
+
+clean-examples:
+	@echo "🧹 Cleaning up examples"
+	@rm -rf $(EXAMPLES_RISCV_ASSEMBLY)
+	@mkdir $(EXAMPLES_RISCV_ASSEMBLY)
+	@mkdir $(EXAMPLES_RISCV_BIN)
+
+clean-tests:
+	@echo "🧹 Cleaning up tests"
+	@rm -rf $(TESTS_RISCV_ASSEMBLY)
+	@mkdir $(TESTS_RISCV_ASSEMBLY)
+	@mkdir $(TESTS_RISCV_BIN)
+
+clean: clean-examples clean-tests
+	@echo "🧹 Cleaning up all"
