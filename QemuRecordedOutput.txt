@@ -553,5 +553,3 @@ i = 23
 sum of all the multiples of 3 or 5 below 1000 is: 233168
 the sum of the even-valued terms is: 4613732
 the largest prime factor of the number 600851475143 is 6857
-the largest palindrome made from the product of two 3-digit numbers is : 906609
-the smallest positive number that is evenly divisible by all of the numbers from 1 to 20 is : 232792560
