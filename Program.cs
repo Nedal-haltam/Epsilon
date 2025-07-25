@@ -33,7 +33,6 @@ namespace Epsilon
                 Console.Write(AssemblingAndLinkResult.StandardError);
                 Environment.Exit(AssemblingAndLinkResult.ExitCode);
             }
-            Shartilities.UNUSED(AssemblingAndLinkResult);
         }
         static void RunOnQemu(string FilePath)
         {
@@ -77,14 +76,13 @@ namespace Epsilon
             }
             return p;
         }
-        static LibUtils.Program CompileAssembleLink(string SourceFilePath, string OutputFilePath, bool DoQemu, bool DoCAS, bool CasGenerate)
+        static LibUtils.Program CompileAssembleLink(string SourceFilePath, string OutputFilePath, bool DoQemu, bool DoCAS, bool CasGenerate, bool Dump)
         {
-            string TempAssembly = SourceFilePath;
+            string TempAssembly = OutputFilePath + ".S";
             string InputCode = Shartilities.ReadFile(SourceFilePath);
             bool IsAssemblyFile = SourceFilePath.EndsWith(".S");
             if (!IsAssemblyFile)
             {
-                TempAssembly = "./temp.S";
                 StringBuilder Assembly = Compile(InputCode, SourceFilePath);
                 File.WriteAllText(TempAssembly, Assembly.ToString());
             }
@@ -92,9 +90,9 @@ namespace Epsilon
             if (DoQemu)
                 AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
             if (DoCAS)
-                p = AssembleAndLinkForCAS(TempAssembly, OutputFilePath, CasGenerate);
+                p = AssembleAndLinkForCAS(TempAssembly, OutputFilePath, CasGenerate || Dump);
 
-            if (!IsAssemblyFile && File.Exists(TempAssembly))
+            if (!Dump && !IsAssemblyFile && File.Exists(TempAssembly))
                 File.Delete(TempAssembly);
             return p;
         }
@@ -120,15 +118,12 @@ namespace Epsilon
             //          - if you start with .e file you interpret the rest as epsilon files and you start from the compile step
             //          - if you start with .S file you interpret the rest as assembly files and you start from the assemble step
 
-			// TODO: change epsilon syntax like for example
-			// for (auto i = 0; i < 10; i = i + 1) -->> for i in 0..10, or support both
-			// and other new different syntax for other things/statements
-
             string? OutputFilePath = null;
             List<string> InputFilePaths = [];
             bool CompileOnly = false;
             bool Run = false; // Run using qemu
             bool Sim = false; // simulate using my cycle accurate simulator
+            bool Dump = false;
             while (Shartilities.ShiftArgs(ref args, out string arg))
             {
                 if (arg == "-o")
@@ -149,6 +144,10 @@ namespace Epsilon
                 {
                     CompileOnly = true;
                 }
+                else if (arg == "-dump")
+                {
+                    Dump = true;
+                }
                 else if (arg == "-h")
                 {
                     Usage();
@@ -167,13 +166,13 @@ namespace Epsilon
             if (Run)
             {
                 OutputFilePath ??= "./a";
-                CompileAssembleLink(SourceFilePath, OutputFilePath, true, false, false);
+                CompileAssembleLink(SourceFilePath, OutputFilePath, true, false, false, Dump);
                 RunOnQemu(OutputFilePath);
             }
             else if (Sim)
             {
                 OutputFilePath ??= "./a";
-                LibUtils.Program p = CompileAssembleLink(SourceFilePath, OutputFilePath, false, true, false);
+                LibUtils.Program p = CompileAssembleLink(SourceFilePath, OutputFilePath, false, true, false, Dump);
                 List<string> MC = LibUtils.GetIM(p.MachineCodes);
                 List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
                 LibCPU.SingleCycle.Run(MC, DM, 4096, 4096, null);
@@ -188,7 +187,7 @@ namespace Epsilon
             else
             {
                 OutputFilePath ??= "./a";
-                CompileAssembleLink(SourceFilePath, OutputFilePath, true, true, true);
+                CompileAssembleLink(SourceFilePath, OutputFilePath, true, true, true, Dump);
             }
         }
     }
