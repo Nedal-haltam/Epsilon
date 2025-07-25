@@ -70,14 +70,18 @@ namespace Epsilon
                 Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: expected {type}\n", 1);
             }
         }
-        void ExpectAndConsume(TokenType type, int offset = 0)
+        Token ExpectAndConsume(TokenType type, int offset = 0)
         {
-            if (!PeekAndConsume(type, offset).HasValue)
+            Token? t = PeekAndConsume(type, offset);
+            if (!t.HasValue)
             {
                 Token? peeked = Peek(-1);
                 int line = peeked.HasValue ? peeked.Value.Line : 1;
                 Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: expected {type}\n", 1);
+                Shartilities.UNREACHABLE("ExpectAndConsume");
+                return new();
             }
+            return t.Value;
         }
         Token? PeekAndConsume(TokenType type, int offset = 0) => Peek(type, offset).HasValue ? Consume() : null;
         Token Consume() => m_tokens.ElementAt(m_curr_index++);
@@ -500,12 +504,35 @@ namespace Epsilon
         NodeForPredicate ParseForPredicate()
         {
             NodeForPredicate pred = new();
-            ExpectAndConsume(TokenType.OpenParen);
-            pred.init = ParseForInit();
-            pred.cond = ParseForCond();
-            pred.udpate = ParseForUpdate();
-            NodeStmtScope scope = ParseScope();
-            pred.scope = scope;
+            if (PeekAndConsume(TokenType.OpenParen).HasValue)
+            {
+                pred.init   = ParseForInit();
+                pred.cond   = ParseForCond();
+                pred.udpate = ParseForUpdate();
+                pred.scope  = ParseScope();
+            }
+            else
+            {
+                Token ident = ExpectAndConsume(TokenType.Ident);
+                ExpectAndConsume(TokenType.In);
+                NodeExpr start = ExpectedExpression(ParseExpr());
+                ExpectAndConsume(TokenType.Range);
+                NodeExpr end = ExpectedExpression(ParseExpr());
+                NodeStmtScope scope = ParseScope();
+
+                pred.init = new(
+                    NodeForInit.NodeForInitType.Declare, 
+                    new NodeStmtDeclare(NodeStmtIdentifierType.SingleVar, NodeStmtDataType.Auto, ident, new NodeStmtDeclareSingleVar(start)));
+
+                pred.cond = new(NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.LessThan, NodeExpr.Identifier(new(ident, [])), end));
+                pred.udpate = new([
+                    new(NodeStmtIdentifierType.SingleVar, 
+                    new NodeStmtAssignSingleVar(
+                        ident, 
+                        NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Add, NodeExpr.Identifier(new(ident, [])), NodeExpr.Number("1", ident.Line))
+                        ))]);
+                pred.scope = scope;
+            }
             return pred;
         }
         NodeExpr ParseWhileCond()

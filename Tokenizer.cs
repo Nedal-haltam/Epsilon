@@ -3,28 +3,29 @@ namespace Epsilon
 {
     public class Tokenizer(string SoureCode, string InputFilePath)
     {
-        string m_thecode = SoureCode;
-        string m_inputFilePath = InputFilePath;
+        readonly string m_thecode = SoureCode;
+        readonly string m_inputFilePath = InputFilePath;
         int m_curr_index = 0;
         List<Token> m_tokens = [];
-        Dictionary<string, Macro> macro = [];
-        Dictionary<string, TokenType> KeyWords = new()
+        readonly Dictionary<string, Macro> macro = [];
+        readonly Dictionary<string, TokenType> KeyWords = new()
         {
-            { "auto", TokenType.Auto},
-            { "char", TokenType.Char},
-            { "if", TokenType.If},
-            { "elif", TokenType.Elif},
-            { "else", TokenType.Else},
-            { "for", TokenType.For},
-            { "while", TokenType.While},
-            { "func", TokenType.Func},
-            { "...", TokenType.Variadic},
-            { "__VARIADIC_COUNT__", TokenType.VariadicCount},
-            { "__VARIADIC_ARGS__", TokenType.VariadicArgs},
-            { "continue", TokenType.Continue},
-            { "break", TokenType.Break},
-            { "return", TokenType.Return},
-            { "exit", TokenType.Exit},
+            { "auto"               , TokenType.Auto},
+            { "char"               , TokenType.Char},
+            { "if"                 , TokenType.If},
+            { "elif"               , TokenType.Elif},
+            { "else"               , TokenType.Else},
+            { "for"                , TokenType.For},
+            { "while"              , TokenType.While},
+            { "func"               , TokenType.Func},
+            { "..."                , TokenType.Variadic},
+            { "__VARIADIC_COUNT__" , TokenType.VariadicCount},
+            { "__VARIADIC_ARGS__"  , TokenType.VariadicArgs},
+            { "in"                 , TokenType.In},
+            { "continue"           , TokenType.Continue},
+            { "break"              , TokenType.Break},
+            { "return"             , TokenType.Return},
+            { "exit"               , TokenType.Exit},
         };
         char? Peek(int offset = 0)
         {
@@ -377,6 +378,11 @@ namespace Epsilon
                 {
                     buffer.Append(ConsumeMany(3));
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Variadic, Line = line });
+                }
+                else if (Peek(".."))
+                {
+                    buffer.Append(ConsumeMany(2));
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Range, Line = line });
                 }
                 else if (curr_token == '\n')
                 {
