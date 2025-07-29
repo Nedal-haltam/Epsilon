@@ -876,6 +876,19 @@ namespace Epsilon
                 };
                 return [stmt];
             }
+            else if (PeekAndConsume(TokenType.Asm).HasValue)
+            {
+                ExpectAndConsume(TokenType.OpenParen);
+                Token assembly = Consume();
+                ExpectAndConsume(TokenType.CloseParen);
+                ExpectAndConsume(TokenType.SemiColon);
+                NodeStmt stmt = new()
+                {
+                    type = NodeStmt.NodeStmtType.Asm,
+                    Asm = new NodeStmtAsm(assembly),
+                };
+                return [stmt];
+            }
             else if (Peek(TokenType.OpenCurly).HasValue)
             {
                 NodeStmtScope scope = ParseScope();

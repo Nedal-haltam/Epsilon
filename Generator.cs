@@ -851,6 +851,10 @@ namespace Epsilon
             m_output.AppendLine($"{label_end}:");
             EndScope();
         }
+        static void GenStmtAsm(NodeStmtAsm asm)
+        {
+            m_output.AppendLine(asm.assembly.Value);
+        }
         static void GenStmtBreak(NodeStmtBreak breakk)
         {
             if (m_scopeend.Count == 0)
@@ -899,6 +903,10 @@ namespace Epsilon
             else if (stmt.type == NodeStmt.NodeStmtType.While)
             {
                 GenStmtWhile(stmt.While);
+            }
+            else if (stmt.type == NodeStmt.NodeStmtType.Asm)
+            {
+                GenStmtAsm(stmt.Asm);
             }
             else if (stmt.type == NodeStmt.NodeStmtType.Break)
             {

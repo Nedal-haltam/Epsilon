@@ -17,6 +17,7 @@ namespace Epsilon
             { "else"               , TokenType.Else},
             { "for"                , TokenType.For},
             { "while"              , TokenType.While},
+            { "asm"                , TokenType.Asm},
             { "func"               , TokenType.Func},
             { "..."                , TokenType.Variadic},
             { "__VARIADIC_COUNT__" , TokenType.VariadicCount},

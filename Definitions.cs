@@ -34,7 +34,7 @@ namespace Epsilon
     {
         public enum NodeStmtType
         {
-            Declare, Assign, If, For, While, Scope, Break, Continue, Function, Return, Exit
+            Declare, Assign, If, For, While, Asm, Scope, Break, Continue, Function, Return, Exit
         }
         public NodeStmtType type;
         public NodeStmtDeclare declare;
@@ -42,6 +42,7 @@ namespace Epsilon
         public NodeStmtIF If;
         public NodeStmtFor For;
         public NodeStmtWhile While;
+        public NodeStmtAsm Asm;
         public NodeStmtScope Scope;
         public NodeStmtBreak Break;
         public NodeStmtContinuee Continue;
@@ -309,6 +310,18 @@ namespace Epsilon
     {
         public NodeExpr cond;
         public NodeStmtScope scope;
+    }
+    public struct NodeStmtAsm
+    {
+        public Token assembly;
+        public NodeStmtAsm()
+        {
+            assembly = new();
+        }
+        public NodeStmtAsm(Token assembly)
+        {
+            this.assembly = assembly;
+        }
     }
     public struct NodeStmtBreak
     {
@@ -627,6 +640,7 @@ namespace Epsilon
         Else,
         For,
         While,
+        Asm,
 
         Func,
         Variadic,
