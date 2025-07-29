@@ -200,6 +200,18 @@ i = 20
 i = 21
 i = 22
 i = 23
+return 256:
+char: 0
+auto: 0
+return 255:
+char: -1
+auto: -1
+return 128:
+char: -128
+auto: -128
+return 127:
+char: 127
+auto: 127
 ..........
 ..#.......
 ...#......
