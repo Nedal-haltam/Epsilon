@@ -78,22 +78,29 @@ namespace Epsilon
         }
         static LibUtils.Program CompileAssembleLink(string SourceFilePath, string OutputFilePath, bool DoQemu, bool DoCAS, bool CasGenerate, bool Dump)
         {
-            string TempAssembly = OutputFilePath + ".S";
-            string InputCode = Shartilities.ReadFile(SourceFilePath);
-            bool IsAssemblyFile = SourceFilePath.EndsWith(".S");
-            if (!IsAssemblyFile)
+            LibUtils.Program p = new();
+            if (!SourceFilePath.EndsWith(".S"))
             {
+                string TempAssembly = OutputFilePath + ".S";
+                string InputCode = Shartilities.ReadFile(SourceFilePath);
                 StringBuilder Assembly = Compile(InputCode, SourceFilePath);
                 File.WriteAllText(TempAssembly, Assembly.ToString());
+                if (DoQemu)
+                    AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
+                if (DoCAS)
+                    p = AssembleAndLinkForCAS(TempAssembly, OutputFilePath, CasGenerate || Dump);
+                if (!Dump && File.Exists(TempAssembly))
+                    File.Delete(TempAssembly);
             }
-            LibUtils.Program p = new();
-            if (DoQemu)
-                AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
-            if (DoCAS)
-                p = AssembleAndLinkForCAS(TempAssembly, OutputFilePath, CasGenerate || Dump);
-
-            if (!Dump && !IsAssemblyFile && File.Exists(TempAssembly))
-                File.Delete(TempAssembly);
+            else
+            {
+                string TempAssembly = SourceFilePath;
+                string InputCode = Shartilities.ReadFile(SourceFilePath);
+                if (DoQemu)
+                    AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
+                if (DoCAS)
+                    p = AssembleAndLinkForCAS(TempAssembly, OutputFilePath, CasGenerate || Dump);
+            }
             return p;
         }
         static void Usage()
@@ -165,12 +172,14 @@ namespace Epsilon
 
             if (Run)
             {
+                Console.WriteLine("running");
                 OutputFilePath ??= "./a";
                 CompileAssembleLink(SourceFilePath, OutputFilePath, true, false, false, Dump);
                 RunOnQemu(OutputFilePath);
             }
             else if (Sim)
             {
+                Console.WriteLine("simulating");
                 OutputFilePath ??= "./a";
                 LibUtils.Program p = CompileAssembleLink(SourceFilePath, OutputFilePath, false, true, false, Dump);
                 List<string> MC = LibUtils.GetIM(p.MachineCodes);
@@ -179,6 +188,7 @@ namespace Epsilon
             }
             else if (CompileOnly)
             {
+                Console.WriteLine("compile only");
                 OutputFilePath ??= "./a.S";
                 string InputCode = Shartilities.ReadFile(SourceFilePath);
                 StringBuilder Assembly = Compile(InputCode, SourceFilePath);
@@ -186,6 +196,7 @@ namespace Epsilon
             }
             else
             {
+                Console.WriteLine("compiling and assembling");
                 OutputFilePath ??= "./a";
                 CompileAssembleLink(SourceFilePath, OutputFilePath, true, true, true, Dump);
             }
