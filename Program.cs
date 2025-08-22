@@ -170,16 +170,19 @@ namespace Epsilon
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"no input files was provided", 1);
             string SourceFilePath = InputFilePaths[0];
 
+            bool log = false;
             if (Run)
             {
-                Console.WriteLine("running");
+                if (log)
+                    Console.WriteLine("running");
                 OutputFilePath ??= "./a";
                 CompileAssembleLink(SourceFilePath, OutputFilePath, true, false, false, Dump);
                 RunOnQemu(OutputFilePath);
             }
             else if (Sim)
             {
-                Console.WriteLine("simulating");
+                if (log)
+                    Console.WriteLine("simulating");
                 OutputFilePath ??= "./a";
                 LibUtils.Program p = CompileAssembleLink(SourceFilePath, OutputFilePath, false, true, false, Dump);
                 List<string> MC = LibUtils.GetIM(p.MachineCodes);
@@ -188,7 +191,8 @@ namespace Epsilon
             }
             else if (CompileOnly)
             {
-                Console.WriteLine("compile only");
+                if (log)
+                    Console.WriteLine("compile only");
                 OutputFilePath ??= "./a.S";
                 string InputCode = Shartilities.ReadFile(SourceFilePath);
                 StringBuilder Assembly = Compile(InputCode, SourceFilePath);
@@ -196,7 +200,8 @@ namespace Epsilon
             }
             else
             {
-                Console.WriteLine("compiling and assembling");
+                if (log)
+                    Console.WriteLine("compiling and assembling");
                 OutputFilePath ??= "./a";
                 CompileAssembleLink(SourceFilePath, OutputFilePath, true, true, true, Dump);
             }
