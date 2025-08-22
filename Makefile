@@ -15,7 +15,7 @@ TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays 
 
 .PHONY:	all run sim main run-examples run-tests sim-examples sim-tests record-log diff-diff clean-examples clean-tests clean
 
-all: run sim
+all: clean run sim
 	@echo "✅ All tasks completed successfully."
 
 run: run-tests run-examples
@@ -28,7 +28,7 @@ main:
 	dotnet ./bin/Debug/net8.0/Epsilon.dll -run ./main/main.e -o ./main/main
 	@echo "✅ Built main successfully."
 
-run-examples: clean-examples
+run-examples:
 	@for ex in $(EXAMPLES); do \
 		echo "-------------------------------------------------------------------"; \
 		echo "Running $$ex..."; \
@@ -39,7 +39,7 @@ run-examples: clean-examples
 		fi; \
 	done
 
-run-tests: clean-tests
+run-tests:
 	@for ex in $(TESTS); do \
 		echo "-------------------------------------------------------------------"; \
 		echo "Running $$ex..."; \
@@ -50,7 +50,7 @@ run-tests: clean-tests
 		fi; \
 	done
 
-sim-examples: clean-examples
+sim-examples:
 	@for ex in $(EXAMPLES); do \
 		echo "-------------------------------------------------------------------"; \
 		echo "Simulating $$ex..."; \
@@ -61,7 +61,7 @@ sim-examples: clean-examples
 		fi; \
 	done
 
-sim-tests: clean-tests
+sim-tests:
 	@for ex in $(TESTS); do \
 		echo "-------------------------------------------------------------------"; \
 		echo "Simulating $$ex..."; \
