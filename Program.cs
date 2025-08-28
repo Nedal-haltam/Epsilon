@@ -1,6 +1,7 @@
 ﻿using CliWrap;
 using CliWrap.Buffered;
 using CliWrap.EventStream;
+using System.Diagnostics;
 using System.Text;
 
 namespace Epsilon
@@ -18,51 +19,24 @@ namespace Epsilon
         static StringBuilder Compile(string SourceFilePath) => Compile(Shartilities.ReadFile(SourceFilePath), SourceFilePath);
         static void AssembleAndLinkForQemu(string SourceFilePath, string OutputFilePath)
         {
-            var AssemblingAndLinkResult = CliWrap.Cli
-              .Wrap("riscv64-linux-gnu-gcc")
-              .WithArguments($" -o {OutputFilePath} {SourceFilePath} -static")
-              .WithValidation(CliWrap.CommandResultValidation.None)
-              .ExecuteBufferedAsync()
-              .GetAwaiter()
-              .GetResult();
-            if (!AssemblingAndLinkResult.IsSuccess)
+            Shartilities.Command cmd = new(["riscv64-linux-gnu-gcc", "-o", OutputFilePath, SourceFilePath, "-static"]);
+            Process? p = new();
+            if (!cmd.RunSync(ref p))
             {
                 Console.Write($"standard output:\n");
-                Console.Write(AssemblingAndLinkResult.StandardOutput);
+                Console.Write(p!.StandardOutput.ReadToEnd());
                 Console.Write($"standard error:\n");
-                Console.Write(AssemblingAndLinkResult.StandardError);
-                Environment.Exit(AssemblingAndLinkResult.ExitCode);
+                Console.Write(p!.StandardError.ReadToEnd());
+                Environment.Exit(p!.ExitCode);
             }
+            Console.Write(p!.StandardOutput.ReadToEnd());
         }
         static void RunOnQemu(string FilePath)
         {
-            var RunResult = RunCommandSync(["qemu-riscv64", FilePath]).Result;
-            Environment.Exit(RunResult.ExitCode);
-        }
-        static async Task<BufferedCommandResult> RunCommandSync(string[] args)
-        {
-            Shartilities.Assert(args.Length > 0, $"no enough arguments to execute command");
-            var Command = Cli
-                .Wrap(args[0])
-                .WithArguments(args[1..])
-                .WithValidation(CommandResultValidation.None);
-
-            var CommandTask = Command.ExecuteBufferedAsync();
-
-            await foreach (var CommandEvent in Command.ListenAsync())
-            {
-                switch (CommandEvent)
-                {
-                    case StandardOutputCommandEvent stdOut:
-                        Console.WriteLine(stdOut.Text);
-                        break;
-                    case StandardErrorCommandEvent stdErr:
-                        Console.Error.WriteLine(stdErr.Text);
-                        break;
-                }
-            }
-            var result = CommandTask.GetAwaiter().GetResult();
-            return result;
+            Process? p = new();
+            new Shartilities.Command(["qemu-riscv64", FilePath]).RunSync(ref p);
+            Console.Write(p!.StandardOutput.ReadToEnd());
+            Environment.Exit(p!.ExitCode);
         }
         static LibUtils.Program AssembleAndLinkForCAS(string SourceFilePath, string OutputFilePath, bool Generate)
         {
@@ -95,7 +69,6 @@ namespace Epsilon
             else
             {
                 string TempAssembly = SourceFilePath;
-                string InputCode = Shartilities.ReadFile(SourceFilePath);
                 if (DoQemu)
                     AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
                 if (DoCAS)
