@@ -2,11 +2,11 @@
 
 func main()
 {
-    auto GlobalString = "Global String\n";
+    auto string = "string\n";
     asm("
     li a0, 1
     LD a1, 0(sp)
-    li a2, 14
+    li a2, 7
     li a7, 64
     ecall
     la a0, 0
