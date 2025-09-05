@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Xml.Linq;
+﻿using System.Text;
 namespace Epsilon
 {
-    public static class RISCVGenerator
+    static class Generator
     {
         ////////////////////////////////////////////////////////
         static NodeProg m_program;

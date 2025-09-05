@@ -1,7 +1,4 @@
-﻿using CliWrap;
-using CliWrap.Buffered;
-using CliWrap.EventStream;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 
 namespace Epsilon
@@ -13,7 +10,8 @@ namespace Epsilon
             List<Token> TokenizedProgram = new Tokenizer(InputCode, InputFilePath).TokenizeProg();
             Parser Parser = new(TokenizedProgram, InputFilePath);
             NodeProg ParsedProgram = Parser.ParseProg();
-            StringBuilder GeneratedProgram = RISCVGenerator.GenProgram(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
+
+            StringBuilder GeneratedProgram = Generator.GenProgram(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
             return GeneratedProgram;
         }
         static StringBuilder Compile(string SourceFilePath) => Compile(Shartilities.ReadFile(SourceFilePath), SourceFilePath);
