@@ -1,11 +1,6 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-namespace Epsilon
+﻿namespace Epsilon
 {
-    public class Parser(List<Token> tokens, string InputFilePath)
+    class Parser(List<Token> tokens, string InputFilePath)
     {
         NodeProg prog;
         List<Token> m_tokens = [.. tokens];

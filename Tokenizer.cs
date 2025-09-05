@@ -1,7 +1,7 @@
 ﻿using System.Text;
 namespace Epsilon
 {
-    public class Tokenizer(string SoureCode, string InputFilePath)
+    class Tokenizer(string SoureCode, string InputFilePath)
     {
         readonly string m_thecode = SoureCode;
         readonly string m_inputFilePath = InputFilePath;
@@ -137,6 +137,8 @@ namespace Epsilon
         }
         public List<Token> TokenizeProg()
         {
+            m_curr_index = 0;
+            macro.Clear();
             m_tokens = [];
             StringBuilder buffer = new(); // this buffer is for multiple letter tokens
             int line = 1;
