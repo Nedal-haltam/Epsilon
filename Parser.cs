@@ -377,11 +377,15 @@
         NodeStmtScope ParseScope()
         {
             NodeStmtScope scope = new();
+            if (PeekAndConsume(TokenType.SemiColon).HasValue)
+                return scope;
+
             if (PeekAndConsume(TokenType.OpenCurly).HasValue)
                 while (!PeekAndConsume(TokenType.CloseCurly).HasValue)
                     scope.stmts.AddRange(ParseStmt());
             else
                 scope.stmts.AddRange(ParseStmt());
+
             return scope;
         }
         NodeIfElifs? ParseElifs()
