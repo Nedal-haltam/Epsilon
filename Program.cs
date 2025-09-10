@@ -5,8 +5,9 @@ namespace Epsilon
 {
     internal class Program
     {
-        static StringBuilder Compile(string InputCode, string InputFilePath)
+        static StringBuilder Compile(string InputFilePath)
         {
+            string InputCode = Shartilities.ReadFile(InputFilePath);
             List<Token> TokenizedProgram = new Tokenizer(InputCode, InputFilePath).TokenizeProg();
             Parser Parser = new(TokenizedProgram, InputFilePath);
             NodeProg ParsedProgram = Parser.ParseProg();
@@ -14,7 +15,6 @@ namespace Epsilon
             StringBuilder GeneratedProgram = Generator.GenProgram(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
             return GeneratedProgram;
         }
-        static StringBuilder Compile(string SourceFilePath) => Compile(Shartilities.ReadFile(SourceFilePath), SourceFilePath);
         static void AssembleAndLinkForQemu(string SourceFilePath, string OutputFilePath)
         {
             Shartilities.Command cmd = new(["riscv64-linux-gnu-gcc", "-o", OutputFilePath, SourceFilePath, "-static"]);
@@ -55,9 +55,8 @@ namespace Epsilon
             {
                 string TempAssembly = OutputFilePath + ".S";
                 {
-                    string InputCode = Shartilities.ReadFile(SourceFilePath);
-                    StringBuilder Assembly = Compile(InputCode, SourceFilePath);
-                    File.WriteAllText(TempAssembly, Assembly.ToString());
+                    StringBuilder Assembly = Compile(SourceFilePath);
+                    Shartilities.WriteFile(TempAssembly, Assembly.ToString());
                 }
                 if (DoQemu)
                     AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
@@ -165,9 +164,8 @@ namespace Epsilon
             {
                 if (log) Console.WriteLine("compile only");
                 OutputFilePath ??= "./a.S";
-                string InputCode = Shartilities.ReadFile(SourceFilePath);
-                StringBuilder Assembly = Compile(InputCode, SourceFilePath);
-                File.WriteAllText(OutputFilePath, Assembly.ToString());
+                StringBuilder Assembly = Compile(SourceFilePath);
+                Shartilities.WriteFile(OutputFilePath, Assembly.ToString());
             }
             else
             {
