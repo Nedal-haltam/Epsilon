@@ -150,6 +150,7 @@ namespace Epsilon
                 OutputFilePath ??= "./a";
                 CompileAssembleLink(SourceFilePath, OutputFilePath, true, false, false, Dump);
                 RunOnQemu(OutputFilePath);
+                File.Delete(OutputFilePath);
             }
             else if (Sim)
             {
