@@ -128,7 +128,7 @@ namespace Epsilon
                 {
                     Dump = true;
                 }
-                else if (arg == "-h")
+                else if (arg == "-h" || arg == "--h" || arg == "-help" || arg == "--help")
                 {
                     Usage();
                     Environment.Exit(0);
