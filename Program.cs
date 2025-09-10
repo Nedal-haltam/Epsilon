@@ -54,9 +54,11 @@ namespace Epsilon
             if (!SourceFilePath.EndsWith(".S"))
             {
                 string TempAssembly = OutputFilePath + ".S";
-                string InputCode = Shartilities.ReadFile(SourceFilePath);
-                StringBuilder Assembly = Compile(InputCode, SourceFilePath);
-                File.WriteAllText(TempAssembly, Assembly.ToString());
+                {
+                    string InputCode = Shartilities.ReadFile(SourceFilePath);
+                    StringBuilder Assembly = Compile(InputCode, SourceFilePath);
+                    File.WriteAllText(TempAssembly, Assembly.ToString());
+                }
                 if (DoQemu)
                     AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
                 if (DoCAS)
@@ -144,16 +146,14 @@ namespace Epsilon
             bool log = false;
             if (Run)
             {
-                if (log)
-                    Console.WriteLine("running");
+                if (log) Console.WriteLine("running");
                 OutputFilePath ??= "./a";
                 CompileAssembleLink(SourceFilePath, OutputFilePath, true, false, false, Dump);
                 RunOnQemu(OutputFilePath);
             }
             else if (Sim)
             {
-                if (log)
-                    Console.WriteLine("simulating");
+                if (log) Console.WriteLine("simulating");
                 OutputFilePath ??= "./a";
                 LibUtils.Program p = CompileAssembleLink(SourceFilePath, OutputFilePath, false, true, false, Dump);
                 List<string> MC = LibUtils.GetIM(p.MachineCodes);
@@ -162,8 +162,7 @@ namespace Epsilon
             }
             else if (CompileOnly)
             {
-                if (log)
-                    Console.WriteLine("compile only");
+                if (log) Console.WriteLine("compile only");
                 OutputFilePath ??= "./a.S";
                 string InputCode = Shartilities.ReadFile(SourceFilePath);
                 StringBuilder Assembly = Compile(InputCode, SourceFilePath);
@@ -171,8 +170,7 @@ namespace Epsilon
             }
             else
             {
-                if (log)
-                    Console.WriteLine("compiling and assembling");
+                if (log) Console.WriteLine("compiling and assembling");
                 OutputFilePath ??= "./a";
                 CompileAssembleLink(SourceFilePath, OutputFilePath, true, true, true, Dump);
             }
