@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Roslyn.Analyzers" Version="1.0.3.4" PrivateAssets="All" />
     <Reference Include="Assembler">
       <HintPath>..\risc-v-utils\Assembler\bin\Debug\net8.0\Assembler.dll</HintPath>
     </Reference>
