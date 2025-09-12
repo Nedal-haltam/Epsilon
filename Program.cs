@@ -11,7 +11,7 @@ namespace Epsilon
             List<Token> TokenizedProgram = new Tokenizer(InputCode, InputFilePath).TokenizeProg();
             Parser Parser = new(TokenizedProgram, InputFilePath);
             NodeProg ParsedProgram = Parser.ParseProg();
-
+            // TODO: optimize
             StringBuilder GeneratedProgram = Generator.GenProgram(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
             return GeneratedProgram;
         }
