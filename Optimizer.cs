@@ -59,6 +59,16 @@ namespace Epsilon
             }
             return null;
         }
+        static bool IdentIsUsedInStmt(Token ident, List<NodeStmt> stmts)
+        {
+            Shartilities.TODO("IdentIsUsed");
+            Shartilities.UNUSED(ident);
+            for (int i = 0; i < stmts.Count; i++)
+            {
+                // TODO: switch upon all stmt types
+            }
+            return false;
+        }
 
     }
 }
