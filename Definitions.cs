@@ -5,16 +5,13 @@ namespace Epsilon
 {
     public struct NodeProg
     {
-        public NodeStmtScope scope;
         public NodeStmtScope GlobalScope;
         public NodeProg()
         {
-            scope = new();
             GlobalScope = new();
         }
         public NodeProg(NodeStmtScope scope, NodeStmtScope GlobalScope)
         {
-            this.scope = scope;
             this.GlobalScope = GlobalScope;
         }
     }

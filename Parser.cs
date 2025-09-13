@@ -992,7 +992,6 @@
             while (Peek().HasValue)
             {
                 List<NodeStmt> stmts = ParseStmt();
-                prog.scope.stmts.AddRange(stmts);
             }
             return prog;
         }
