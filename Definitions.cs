@@ -352,6 +352,10 @@ namespace Epsilon
     }
     public struct NodeExpr
     {
+        public NodeExprType type;
+        public NodeTerm term;
+        public NodeBinExpr binexpr;
+        // `NodeExprType.None` is when the variable is declared but not assigned to a thing
         public NodeExpr()
         {
             type = NodeExprType.None;
@@ -361,9 +365,6 @@ namespace Epsilon
         {
             Term, BinExpr, None
         }
-        public NodeExprType type;
-        public NodeTerm term;
-        public NodeBinExpr binexpr;
         public static NodeExpr Number(string num, int line)
         {
             return new NodeExpr()
@@ -431,12 +432,12 @@ namespace Epsilon
     }
     public class NodeTermUnaryExpr
     {
+        public NodeTermUnaryExprType type;
+        public NodeTerm term;
         public enum NodeTermUnaryExprType
         {
             negative, complement, not, addressof
         }
-        public NodeTermUnaryExprType type;
-        public NodeTerm term;
     }
     public struct NodeTermIntLit
     {
