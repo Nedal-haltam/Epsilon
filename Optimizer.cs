@@ -59,82 +59,187 @@ namespace Epsilon
             }
             return null;
         }
-        static bool IdentIsUsedInStmt(Token ident, List<NodeStmt> stmts)
+        static bool IsIdentUsedInTerm(Token ident, NodeTerm term)
         {
-            Shartilities.TODO("IdentIsUsed");
-            Shartilities.UNUSED(ident);
+            switch (term.type)
+            {
+                case NodeTerm.NodeTermType.IntLit:
+                case NodeTerm.NodeTermType.StringLit:
+                    return false;
+                case NodeTerm.NodeTermType.FunctionCall:
+                    Shartilities.TODO("IsIdentUsedInTerm::case NodeTerm.NodeTermType.FunctionCall");
+                    return false;
+                case NodeTerm.NodeTermType.Ident:
+                    return ident.Value == term.ident.ident.Value;
+                case NodeTerm.NodeTermType.Paren:
+                    return IsIdentUsedInExpr(ident, term.paren.expr);
+                case NodeTerm.NodeTermType.Unary:
+                    return IsIdentUsedInTerm(ident, term.unary.term);
+                case NodeTerm.NodeTermType.Variadic:
+                    return IsIdentUsedInExpr(ident, term.variadic.VariadicIndex);
+                default:
+                    Shartilities.UNREACHABLE("IsIdentUsedInTerm");
+                    return false;
+            }
+        }
+        static bool IsIdentUsedInExpr(Token ident, NodeExpr expr)
+        {
+            switch (expr.type)
+            {
+                case NodeExpr.NodeExprType.Term:
+                    return IsIdentUsedInTerm(ident, expr.term);
+                case NodeExpr.NodeExprType.BinExpr:
+                    return IsIdentUsedInExpr(ident, expr.binexpr.lhs) || IsIdentUsedInExpr(ident, expr.binexpr.rhs);
+                case NodeExpr.NodeExprType.None:
+                    return false;
+                default:
+                    Shartilities.UNREACHABLE("IsIdentUsedInExpr");
+                    return false;
+
+            }
+        }
+        static bool IsIdentUsedInStmts(Token ident, List<NodeStmt> stmts)
+        {
             for (int i = 0; i < stmts.Count; i++)
             {
-                // TODO: switch upon all stmt types
+                NodeStmt stmt = stmts[i];
+                switch (stmt.type)
+                {
+                    case NodeStmt.NodeStmtType.Declare:
+                        Shartilities.Logln(Shartilities.LogType.ERROR, "Declare");
+                        break;
+                    case NodeStmt.NodeStmtType.Assign:
+                        if (stmt.assign.type == NodeStmtIdentifierType.SingleVar)
+                        {
+                            if (IsIdentUsedInExpr(ident, stmt.assign.singlevar.expr)) return true;
+                        }
+                        else if (stmt.assign.type == NodeStmtIdentifierType.Array)
+                        {
+                            if (IsIdentUsedInExpr(ident, stmt.assign.array.expr)) return true;
+                        }
+                        else
+                            Shartilities.UNREACHABLE("IdentIsUsedInStmt::case NodeStmt.NodeStmtType.Assign");
+                        break;
+                    case NodeStmt.NodeStmtType.If:
+                        Shartilities.Logln(Shartilities.LogType.ERROR, "If");
+                        break;
+                    case NodeStmt.NodeStmtType.For:
+                        Shartilities.Logln(Shartilities.LogType.ERROR, "For");
+                        break;
+                    case NodeStmt.NodeStmtType.While:
+                        Shartilities.Logln(Shartilities.LogType.ERROR, "While");
+                        break;
+                    case NodeStmt.NodeStmtType.Asm:
+                        Shartilities.Logln(Shartilities.LogType.ERROR, "Asm");
+                        break;
+                    case NodeStmt.NodeStmtType.Scope:
+                        Shartilities.Logln(Shartilities.LogType.ERROR, "Scope");
+                        break;
+                    case NodeStmt.NodeStmtType.Break:
+                        Shartilities.Logln(Shartilities.LogType.ERROR, "Break");
+                        break;
+                    case NodeStmt.NodeStmtType.Continue:
+                        Shartilities.Logln(Shartilities.LogType.ERROR, "Continue");
+                        break;
+                    case NodeStmt.NodeStmtType.Function:
+                        Shartilities.Logln(Shartilities.LogType.ERROR, "Function");
+                        break;
+                    case NodeStmt.NodeStmtType.Return:
+                        Shartilities.Logln(Shartilities.LogType.ERROR, "Return");
+                        break;
+                    case NodeStmt.NodeStmtType.Exit:
+                        Shartilities.Logln(Shartilities.LogType.ERROR, "Exit");
+                        break;
+                    default:
+                        Shartilities.UNREACHABLE("invalid statement type");
+                        break;
+                }
             }
             return false;
         }
-        public static NodeProg OptimizeProgram(NodeProg prog)
+        public static void OptimizeProgram(ref NodeProg prog, ref Dictionary<string, NodeStmtFunction> funcs)
         {
-            NodeProg prevprog = prog;
-            NodeProg newprog = new();
-
             // TODO: nested scopes
             // TODO: other functions, not only `main()`
-            int Runs = 1;
+            NodeStmtScope PrevMainScope = new(funcs["main"].FunctionBody.stmts);
+            NodeStmtScope NewMainScope = new();
+            int Runs = 2;
             for (int i = 0; i < Runs; i++)
             {
-                for (int j = 0; j < prevprog.scope.stmts.Count; j++)
+                for (int j = 0; j < PrevMainScope.stmts.Count; j++)
                 {
-                    NodeStmt stmt = prevprog.scope.stmts[j];
+                    NodeStmt stmt = PrevMainScope.stmts[j];
+                    //newprog.scope.stmts.Add(stmt);
+                    //continue;
                     switch(stmt.type)
                     {
                         case NodeStmt.NodeStmtType.Declare:
                             Shartilities.Logln(Shartilities.LogType.ERROR, "Declare");
+                            NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Assign:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "Assign");
                             Token? ident = GetIdentFromStmt(stmt);
                             if (!ident.HasValue)
-                                Shartilities.UNREACHABLE("");
-                            else if (IdentIsUsedInStmt(ident.Value, prevprog.scope.stmts[(j + 1)..]))
-                                newprog.scope.stmts.Add(stmt);
+                                Shartilities.UNREACHABLE("OptimizeProgram::case NodeStmt.NodeStmtType.Assign");
+                            else if (IsIdentUsedInStmts(ident.Value, PrevMainScope.stmts[(j + 1)..]))
+                            {
+                                NewMainScope.stmts.Add(stmt);
+                                Console.WriteLine("it is used");
+                            }
+                            else
+                                Console.WriteLine("it is not used");
                             break;
                         case NodeStmt.NodeStmtType.If:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "If");
+                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: If");
+                            NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.For:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "For");
+                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: For");
+                            NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.While:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "While");
+                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: While");
+                            NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Asm:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "Asm");
+                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Asm");
+                            NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Scope:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "Scope");
+                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Scope");
+                            NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Break:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "Break");
+                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Break");
+                            NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Continue:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "Continue");
+                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Continue");
+                            NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Function:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "Function");
+                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Function");
+                            NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Return:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "Return");
+                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Return");
+                            NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Exit:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "Exit");
+                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Exit");
+                            NewMainScope.stmts.Add(stmt);
                             break;
                         default:
                             Shartilities.UNREACHABLE("invalid statement type");
                             break;
                     }
                 }
-                prevprog = newprog;
-                newprog = new();
+                PrevMainScope = new(NewMainScope.stmts);
+                NewMainScope = new();
             }
-
-            return prevprog;
+            var temp = funcs["main"];
+            temp.FunctionBody.stmts = [.. PrevMainScope.stmts];
+            funcs["main"] = temp;
         }
     }
 }
