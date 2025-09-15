@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Epsilon
 {
-    internal class Program
+    internal sealed class Program
     {
         static StringBuilder Compile(string InputFilePath)
         {

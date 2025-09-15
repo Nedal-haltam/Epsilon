@@ -175,7 +175,7 @@ namespace Epsilon
             this.expr = expr;
         }
     }
-    public class NodeStmtIF
+    public sealed class NodeStmtIF
     {
         public NodeIfPredicate pred;
         public NodeIfElifs? elifs;
@@ -227,7 +227,7 @@ namespace Epsilon
             this.elsee = elsee;
         }
     }
-    public class NodeElif
+    public sealed class NodeElif
     {
         public NodeIfPredicate pred;
         public NodeIfElifs? elifs;
@@ -423,11 +423,11 @@ namespace Epsilon
         public NodeTermUnaryExpr unary;
         public NodeTermVariadic variadic;
     }
-    public class NodeTermVariadic
+    public sealed class NodeTermVariadic
     {
         public NodeExpr VariadicIndex;
     }
-    public class NodeTermUnaryExpr
+    public sealed class NodeTermUnaryExpr
     {
         public NodeTermUnaryExprType type;
         public NodeTerm term;
@@ -449,7 +449,7 @@ namespace Epsilon
         public Token FunctionName;
         public List<NodeExpr> parameters;
     }
-    public class NodeTermIdent
+    public sealed class NodeTermIdent
     {
         public Token ident;
         public List<NodeExpr> indexes;
@@ -463,11 +463,11 @@ namespace Epsilon
             this.indexes = [.. indexes];
         }
     }
-    public class NodeTermParen
+    public sealed class NodeTermParen
     {
         public NodeExpr expr;
     }
-    public class NodeBinExpr 
+    public sealed class NodeBinExpr
     {
         public enum NodeBinExprType
         {
