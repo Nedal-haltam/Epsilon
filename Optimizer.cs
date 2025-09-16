@@ -199,7 +199,8 @@ namespace Epsilon
                     case NodeStmt.NodeStmtType.Continue:
                         return false;
                     case NodeStmt.NodeStmtType.Function:
-                        Shartilities.Logln(Shartilities.LogType.ERROR, "Function");
+                        foreach (var expr in stmt.CalledFunction.parameters)
+                            if (IsIdentUsedInExpr(ident, expr)) return true;
                         break;
                     case NodeStmt.NodeStmtType.Return:
                         if (IsIdentUsedInExpr(ident, stmt.Return.expr)) return true;
