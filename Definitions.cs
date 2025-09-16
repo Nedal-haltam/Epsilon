@@ -131,16 +131,13 @@ namespace Epsilon
     }
     public struct NodeStmtDeclareArray
     {
-        public List<NodeExpr> values;
         public List<uint> Dimensions;
         public NodeStmtDeclareArray()
         {
-            values = [];
             Dimensions = [];
         }
         public NodeStmtDeclareArray(List<NodeExpr> values, List<uint> Dimensions)
         {
-            this.values = values;
             this.Dimensions = Dimensions;
         }
     }
