@@ -1,5 +1,6 @@
 ﻿#pragma warning disable RETURN0001
 using System.Runtime.InteropServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Epsilon
 {
@@ -115,6 +116,31 @@ namespace Epsilon
             }
             return false;
         }
+        static bool IsIdentUsedInFor(Token ident, NodeStmtFor For)
+        {
+            if (For.pred.init.HasValue)
+            {
+                switch (For.pred.init.Value.type)
+                {
+                    case NodeForInit.NodeForInitType.Declare:
+                        if (IsIdentUsedInStmts(ident, [new() { type = NodeStmt.NodeStmtType.Declare, declare = For.pred.init.Value.declare }])) return true;
+                        break;
+                    case NodeForInit.NodeForInitType.Assign:
+                        if (IsIdentUsedInStmts(ident, [new() { type = NodeStmt.NodeStmtType.Assign, assign = For.pred.init.Value.assign }])) return true;
+                        break;
+                    default:
+                        Shartilities.UNREACHABLE("IsIdentUsedInFor");
+                        break;
+                }
+            }
+            if (For.pred.cond.HasValue && IsIdentUsedInExpr(ident, For.pred.cond.Value.cond)) return true;
+            List<NodeStmt> AssignStmts = [];
+            foreach (var s in For.pred.udpate.updates)
+                AssignStmts.Add(new() { type = NodeStmt.NodeStmtType.Assign, assign = s });
+            if (IsIdentUsedInStmts(ident, AssignStmts)) return true;
+            if (IsIdentUsedInStmts(ident, For.pred.scope.stmts)) return true;
+            return false;
+        }
         static bool IsIdentUsedInStmts(Token ident, List<NodeStmt> stmts)
         {
             for (int i = 0; i < stmts.Count; i++)
@@ -156,7 +182,7 @@ namespace Epsilon
                         if (stmt.If.elifs.HasValue && IsIdentUsedInElifs(ident, stmt.If.elifs.Value)) return true;
                         break;
                     case NodeStmt.NodeStmtType.For:
-                        Shartilities.Logln(Shartilities.LogType.ERROR, "For");
+                        if (IsIdentUsedInFor(ident, stmt.For)) return true;
                         break;
                     case NodeStmt.NodeStmtType.While:
                         Shartilities.Logln(Shartilities.LogType.ERROR, "While");
