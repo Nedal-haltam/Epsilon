@@ -11,9 +11,7 @@ namespace Epsilon
             switch (stmt.type)
             {
                 case NodeStmt.NodeStmtType.Declare:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "Declare");
-                    //return stmt.declare.ident;
-                    break;
+                    return stmt.declare.ident;
                 case NodeStmt.NodeStmtType.Assign:
                     Shartilities.Logln(Shartilities.LogType.ERROR, "Assign");
                     if (stmt.assign.type == NodeStmtIdentifierType.SingleVar)
@@ -231,16 +229,23 @@ namespace Epsilon
                     switch (stmt.type)
                     {
                         case NodeStmt.NodeStmtType.Declare:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "Declare");
-                            NewMainScope.stmts.Add(stmt);
-                            break;
+                            {
+                                Token? ident = GetIdentFromStmt(stmt);
+                                if (!ident.HasValue)
+                                    Shartilities.UNREACHABLE("DeadCodeElimination::case NodeStmt.NodeStmtType.Declare");
+                                else if (IsIdentUsedInStmts(ident.Value, PrevMainScope.stmts[(j + 1)..]))
+                                    NewMainScope.stmts.Add(stmt);
+                                break;
+                            }
                         case NodeStmt.NodeStmtType.Assign:
-                            Token? ident = GetIdentFromStmt(stmt);
-                            if (!ident.HasValue)
-                                Shartilities.UNREACHABLE("OptimizeProgram::case NodeStmt.NodeStmtType.Assign");
-                            else if (IsIdentUsedInStmts(ident.Value, PrevMainScope.stmts[(j + 1)..]))
-                                NewMainScope.stmts.Add(stmt);
-                            break;
+                            {
+                                Token? ident = GetIdentFromStmt(stmt);
+                                if (!ident.HasValue)
+                                    Shartilities.UNREACHABLE("DeadCodeElimination::case NodeStmt.NodeStmtType.Assign");
+                                else if (IsIdentUsedInStmts(ident.Value, PrevMainScope.stmts[(j + 1)..]))
+                                    NewMainScope.stmts.Add(stmt);
+                                break;
+                            }
                         case NodeStmt.NodeStmtType.If:
                             Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: If");
                             NewMainScope.stmts.Add(stmt);
