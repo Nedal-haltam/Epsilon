@@ -261,7 +261,7 @@ namespace Epsilon
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Asm:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Asm");
+                            // TODO: should we analyze the inined assembly to optimize it out??
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Scope:
