@@ -164,9 +164,11 @@ namespace Epsilon
                         switch (stmt.assign.type)
                         {
                             case NodeStmtIdentifierType.SingleVar:
+                                if (ident.Value == stmt.assign.singlevar.ident.Value) return true;
                                 if (IsIdentUsedInExpr(ident, stmt.assign.singlevar.expr)) return true;
                                 break;
                             case NodeStmtIdentifierType.Array:
+                                if (ident.Value == stmt.assign.array.ident.Value) return true;
                                 if (IsIdentUsedInExpr(ident, stmt.assign.array.expr)) return true;
                                 break;
                             default:
