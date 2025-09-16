@@ -269,11 +269,9 @@ namespace Epsilon
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Break:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Break");
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Continue:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Continue");
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Function:
@@ -281,11 +279,9 @@ namespace Epsilon
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Return:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Return");
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Exit:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Exit");
                             NewMainScope.stmts.Add(stmt);
                             break;
                         default:
