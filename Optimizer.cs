@@ -202,10 +202,10 @@ namespace Epsilon
                         Shartilities.Logln(Shartilities.LogType.ERROR, "Function");
                         break;
                     case NodeStmt.NodeStmtType.Return:
-                        Shartilities.Logln(Shartilities.LogType.ERROR, "Return");
+                        if (IsIdentUsedInExpr(ident, stmt.Return.expr)) return true;
                         break;
                     case NodeStmt.NodeStmtType.Exit:
-                        Shartilities.Logln(Shartilities.LogType.ERROR, "Exit");
+                        if (IsIdentUsedInExpr(ident, stmt.Exit.expr)) return true;
                         break;
                     default:
                         Shartilities.UNREACHABLE("invalid statement type");
