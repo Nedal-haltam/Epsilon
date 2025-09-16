@@ -1,4 +1,6 @@
 ﻿#pragma warning disable RETURN0001
+using System.Runtime.InteropServices;
+
 namespace Epsilon
 {
     static class Optimizer
@@ -95,6 +97,24 @@ namespace Epsilon
 
             }
         }
+        static bool IsIdentUsedInElifs(Token ident, NodeIfElifs elifs)
+        {
+            switch (elifs.type)
+            {
+                case NodeIfElifs.NodeIfElifsType.Elif:
+                    if (IsIdentUsedInExpr(ident, elifs.elif.pred.cond)) return true;
+                    if (IsIdentUsedInStmts(ident, elifs.elif.pred.scope.stmts)) return true;
+                    if (elifs.elif.elifs.HasValue && IsIdentUsedInElifs(ident, elifs.elif.elifs.Value)) return true;
+                    break;
+                case NodeIfElifs.NodeIfElifsType.Else:
+                    if (IsIdentUsedInStmts(ident, elifs.elsee.scope.stmts)) return true;
+                    break;
+                default:
+                    Shartilities.UNREACHABLE("IsIdentUsedInElifs");
+                    break;
+            }
+            return false;
+        }
         static bool IsIdentUsedInStmts(Token ident, List<NodeStmt> stmts)
         {
             for (int i = 0; i < stmts.Count; i++)
@@ -131,7 +151,9 @@ namespace Epsilon
                         }
                         break;
                     case NodeStmt.NodeStmtType.If:
-                        Shartilities.Logln(Shartilities.LogType.ERROR, "If");
+                        if (IsIdentUsedInExpr(ident, stmt.If.pred.cond)) return true;
+                        if (IsIdentUsedInStmts(ident, stmt.If.pred.scope.stmts)) return true;
+                        if (stmt.If.elifs.HasValue && IsIdentUsedInElifs(ident, stmt.If.elifs.Value)) return true;
                         break;
                     case NodeStmt.NodeStmtType.For:
                         Shartilities.Logln(Shartilities.LogType.ERROR, "For");
