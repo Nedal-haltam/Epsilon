@@ -189,8 +189,9 @@ namespace Epsilon
                         if (IsIdentUsedInStmts(ident, stmt.While.scope.stmts)) return true;
                         break;
                     case NodeStmt.NodeStmtType.Asm:
-                        Shartilities.Logln(Shartilities.LogType.ERROR, "Asm");
-                        break;
+                        // TODO: have to analyze it but for now we will not optimize it out if there is inline assembly
+                        return true;
+                        //break;
                     case NodeStmt.NodeStmtType.Scope:
                         Shartilities.Logln(Shartilities.LogType.ERROR, "Scope");
                         break;
