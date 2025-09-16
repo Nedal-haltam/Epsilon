@@ -215,20 +215,20 @@ namespace Epsilon
             }
             return false;
         }
-        public static void OptimizeProgram(ref NodeProg prog, ref Dictionary<string, NodeStmtFunction> funcs)
+        static void DeadCodeElimination(ref NodeProg prog, ref Dictionary<string, NodeStmtFunction> funcs)
         {
             Shartilities.UNUSED(prog);
             // TODO: nested scopes
             // TODO: other functions, not only `main()`
             NodeStmtScope PrevMainScope = new(funcs["main"].FunctionBody.stmts);
             NodeStmtScope NewMainScope = new();
-            int Runs = 2;
+            int Runs = 1;
             for (int i = 0; i < Runs; i++)
             {
                 for (int j = 0; j < PrevMainScope.stmts.Count; j++)
                 {
                     NodeStmt stmt = PrevMainScope.stmts[j];
-                    switch(stmt.type)
+                    switch (stmt.type)
                     {
                         case NodeStmt.NodeStmtType.Declare:
                             Shartilities.Logln(Shartilities.LogType.ERROR, "Declare");
@@ -292,6 +292,10 @@ namespace Epsilon
             var temp = funcs["main"];
             temp.FunctionBody.stmts = [.. PrevMainScope.stmts];
             funcs["main"] = temp;
+        }
+        public static void OptimizeProgram(ref NodeProg prog, ref Dictionary<string, NodeStmtFunction> funcs)
+        {
+            DeadCodeElimination(ref prog, ref funcs);
         }
     }
 }
