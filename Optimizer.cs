@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using static System.Formats.Asn1.AsnWriter;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿#pragma warning disable RETURN0001
 namespace Epsilon
 {
     static class Optimizer
@@ -106,19 +103,32 @@ namespace Epsilon
                 switch (stmt.type)
                 {
                     case NodeStmt.NodeStmtType.Declare:
-                        Shartilities.Logln(Shartilities.LogType.ERROR, "Declare");
+                        switch (stmt.declare.type)
+                        {
+                            case NodeStmtIdentifierType.SingleVar:
+                                if (IsIdentUsedInExpr(ident, stmt.declare.singlevar.expr)) return true;
+                                break;
+                            case NodeStmtIdentifierType.Array:
+                                // TODO: implement when array initialization upon declaration is supported
+                                break;
+                            default:
+                                Shartilities.UNREACHABLE("IdentIsUsedInStmt::case NodeStmt.NodeStmtType.Declare");
+                                break;
+                        }
                         break;
                     case NodeStmt.NodeStmtType.Assign:
-                        if (stmt.assign.type == NodeStmtIdentifierType.SingleVar)
+                        switch (stmt.assign.type)
                         {
-                            if (IsIdentUsedInExpr(ident, stmt.assign.singlevar.expr)) return true;
+                            case NodeStmtIdentifierType.SingleVar:
+                                if (IsIdentUsedInExpr(ident, stmt.assign.singlevar.expr)) return true;
+                                break;
+                            case NodeStmtIdentifierType.Array:
+                                if (IsIdentUsedInExpr(ident, stmt.assign.array.expr)) return true;
+                                break;
+                            default:
+                                Shartilities.UNREACHABLE("IdentIsUsedInStmt::case NodeStmt.NodeStmtType.Assign");
+                                break;
                         }
-                        else if (stmt.assign.type == NodeStmtIdentifierType.Array)
-                        {
-                            if (IsIdentUsedInExpr(ident, stmt.assign.array.expr)) return true;
-                        }
-                        else
-                            Shartilities.UNREACHABLE("IdentIsUsedInStmt::case NodeStmt.NodeStmtType.Assign");
                         break;
                     case NodeStmt.NodeStmtType.If:
                         Shartilities.Logln(Shartilities.LogType.ERROR, "If");
@@ -159,6 +169,7 @@ namespace Epsilon
         }
         public static void OptimizeProgram(ref NodeProg prog, ref Dictionary<string, NodeStmtFunction> funcs)
         {
+            Shartilities.UNUSED(prog);
             // TODO: nested scopes
             // TODO: other functions, not only `main()`
             NodeStmtScope PrevMainScope = new(funcs["main"].FunctionBody.stmts);
@@ -169,8 +180,6 @@ namespace Epsilon
                 for (int j = 0; j < PrevMainScope.stmts.Count; j++)
                 {
                     NodeStmt stmt = PrevMainScope.stmts[j];
-                    //newprog.scope.stmts.Add(stmt);
-                    //continue;
                     switch(stmt.type)
                     {
                         case NodeStmt.NodeStmtType.Declare:
@@ -182,12 +191,7 @@ namespace Epsilon
                             if (!ident.HasValue)
                                 Shartilities.UNREACHABLE("OptimizeProgram::case NodeStmt.NodeStmtType.Assign");
                             else if (IsIdentUsedInStmts(ident.Value, PrevMainScope.stmts[(j + 1)..]))
-                            {
                                 NewMainScope.stmts.Add(stmt);
-                                Console.WriteLine("it is used");
-                            }
-                            else
-                                Console.WriteLine("it is not used");
                             break;
                         case NodeStmt.NodeStmtType.If:
                             Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: If");
