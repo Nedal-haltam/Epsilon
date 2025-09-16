@@ -185,7 +185,8 @@ namespace Epsilon
                         if (IsIdentUsedInFor(ident, stmt.For)) return true;
                         break;
                     case NodeStmt.NodeStmtType.While:
-                        Shartilities.Logln(Shartilities.LogType.ERROR, "While");
+                        if (IsIdentUsedInExpr(ident, stmt.While.cond)) return true;
+                        if (IsIdentUsedInStmts(ident, stmt.While.scope.stmts)) return true;
                         break;
                     case NodeStmt.NodeStmtType.Asm:
                         Shartilities.Logln(Shartilities.LogType.ERROR, "Asm");
