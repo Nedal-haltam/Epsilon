@@ -193,7 +193,7 @@ namespace Epsilon
                         return true;
                         //break;
                     case NodeStmt.NodeStmtType.Scope:
-                        Shartilities.Logln(Shartilities.LogType.ERROR, "Scope");
+                        if (IsIdentUsedInStmts(ident, stmt.Scope.stmts)) return true;
                         break;
                     case NodeStmt.NodeStmtType.Break:
                         Shartilities.Logln(Shartilities.LogType.ERROR, "Break");
