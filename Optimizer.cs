@@ -382,9 +382,93 @@ namespace Epsilon
                     return expr;
             }
         }
+        static List<NodeStmt> FoldStmts(List<NodeStmt> stmts)
+        {
+            List<NodeStmt> FoldedStmts = [];
+            for (int j = 0; j < stmts.Count; j++)
+            {
+                NodeStmt stmt = stmts[j];
+                switch (stmt.type)
+                {
+                    case NodeStmt.NodeStmtType.Declare:
+                        switch (stmt.declare.type)
+                        {
+                            case NodeStmtIdentifierType.SingleVar:
+                                stmt.declare.singlevar.expr = FoldExpr(stmt.declare.singlevar.expr);
+                                break;
+                            case NodeStmtIdentifierType.Array:
+                                // TODO: implement when array initialization upon declaration is supported
+                                break;
+                            default:
+                                Shartilities.UNREACHABLE("IdentIsUsedInStmt::case NodeStmt.NodeStmtType.Declare");
+                                break;
+                        }
+                        break;
+                    case NodeStmt.NodeStmtType.Assign:
+                        switch (stmt.assign.type)
+                        {
+                            case NodeStmtIdentifierType.SingleVar:
+                                stmt.assign.singlevar.expr = FoldExpr(stmt.assign.singlevar.expr);
+                                break;
+                            case NodeStmtIdentifierType.Array:
+                                stmt.assign.array.expr = FoldExpr(stmt.assign.array.expr);
+                                break;
+                            default:
+                                Shartilities.UNREACHABLE("IdentIsUsedInStmt::case NodeStmt.NodeStmtType.Assign");
+                                break;
+                        }
+                        break;
+                    case NodeStmt.NodeStmtType.If:
+                        stmt.If.pred.cond = FoldExpr(stmt.If.pred.cond);
+                        stmt.If.pred.scope.stmts = [.. FoldStmts(stmt.If.pred.scope.stmts)];
+                        // TODO: fold constant in the elifs
+                        //if (stmt.If.elifs.HasValue) -> fold this: stmt.If.elifs.Value
+                        break;
+                    case NodeStmt.NodeStmtType.For:
+                        // TODO: fold constant in `stmt.For`
+                        break;
+                    case NodeStmt.NodeStmtType.While:
+                        stmt.While.cond = FoldExpr(stmt.While.cond);
+                        stmt.While.scope.stmts = [.. FoldStmts(stmt.While.scope.stmts)];
+                        break;
+                    case NodeStmt.NodeStmtType.Scope:
+                        stmt.Scope.stmts = [.. FoldStmts(stmt.Scope.stmts)];
+                        break;
+                    case NodeStmt.NodeStmtType.Asm:
+                    case NodeStmt.NodeStmtType.Break:
+                    case NodeStmt.NodeStmtType.Continue:
+                        break;
+                    case NodeStmt.NodeStmtType.Function:
+                        for (int i = 0; i < stmt.CalledFunction.parameters.Count; i++)
+                            stmt.CalledFunction.parameters[i] = FoldExpr(stmt.CalledFunction.parameters[i]);
+                        break;
+                    case NodeStmt.NodeStmtType.Return:
+                        stmt.Return.expr = FoldExpr(stmt.Return.expr);
+                        break;
+                    case NodeStmt.NodeStmtType.Exit:
+                        stmt.Exit.expr = FoldExpr(stmt.Exit.expr);
+                        break;
+                    default:
+                        Shartilities.UNREACHABLE("invalid statement type");
+                        break;
+                }
+                FoldedStmts.Add(stmt);
+            }
+            return FoldedStmts;
+        }
+        static void ConstantFolding(ref NodeProg prog, ref Dictionary<string, NodeStmtFunction> funcs)
+        {
+            Shartilities.UNUSED(prog);
+            // TODO: other functions, not only `main()`
+            NodeStmtScope FoldedMainScope = new(FoldStmts(funcs["main"].FunctionBody.stmts));
+            var temp = funcs["main"];
+            temp.FunctionBody.stmts = [.. FoldedMainScope.stmts];
+            funcs["main"] = temp;
+        }
         public static void OptimizeProgram(ref NodeProg prog, ref Dictionary<string, NodeStmtFunction> funcs)
         {
             DeadCodeElimination(ref prog, ref funcs);
+            ConstantFolding(ref prog, ref funcs);
         }
     }
 }
