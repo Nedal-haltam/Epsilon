@@ -357,6 +357,31 @@ namespace Epsilon
                     return new();
             }
         }
+        static NodeExpr FoldExpr(NodeExpr expr)
+        {
+            switch (expr.type)
+            {
+                case NodeExpr.NodeExprType.Term:
+                    expr.term = FoldTerm(expr.term);
+                    return expr;
+                case NodeExpr.NodeExprType.BinExpr:
+                    expr.binexpr.lhs = FoldExpr(expr.binexpr.lhs);
+                    expr.binexpr.rhs = FoldExpr(expr.binexpr.rhs);
+                    if (IsExprIntLit(expr.binexpr.lhs) && IsExprIntLit(expr.binexpr.rhs))
+                    {
+                        string constant1 = expr.binexpr.lhs.term.intlit.intlit.Value;
+                        string constant2 = expr.binexpr.rhs.term.intlit.intlit.Value;
+                        string value = GetImmedOperation(constant1, constant2, expr.binexpr.type);
+                        return NodeExpr.Number(value, expr.binexpr.lhs.term.intlit.intlit.Line);
+                    }
+                    return expr;
+                case NodeExpr.NodeExprType.None:
+                    return expr;
+                default:
+                    Shartilities.UNREACHABLE("FoldExpr");
+                    return expr;
+            }
+        }
         public static void OptimizeProgram(ref NodeProg prog, ref Dictionary<string, NodeStmtFunction> funcs)
         {
             DeadCodeElimination(ref prog, ref funcs);
