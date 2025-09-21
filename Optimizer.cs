@@ -1,4 +1,6 @@
 ﻿#pragma warning disable RETURN0001
+using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -289,6 +291,45 @@ namespace Epsilon
             var temp = funcs["main"];
             temp.FunctionBody.stmts = [.. PrevMainScope.stmts];
             funcs["main"] = temp;
+        }
+        static bool IsExprIntLit(NodeExpr expr) => expr.type == NodeExpr.NodeExprType.Term && expr.term.type == NodeTerm.NodeTermType.IntLit;
+        static string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
+        {
+            Int64 a = Convert.ToInt64(imm1);
+            Int64 b = Convert.ToInt64(imm2);
+
+            switch (op)
+            {
+                case NodeBinExpr.NodeBinExprType.Add:
+                    return (a + b).ToString();
+                case NodeBinExpr.NodeBinExprType.Sub:
+                    return (a - b).ToString();
+                case NodeBinExpr.NodeBinExprType.Sll:
+                    return (a << (Int32)b).ToString();
+                case NodeBinExpr.NodeBinExprType.Srl:
+                    return (a >>> (Int32)b).ToString();
+                case NodeBinExpr.NodeBinExprType.EqualEqual:
+                    return (a == b ? 1 : 0).ToString();
+                case NodeBinExpr.NodeBinExprType.NotEqual:
+                    return (a != b ? 1 : 0).ToString();
+                case NodeBinExpr.NodeBinExprType.LessThan:
+                    return (a < b ? 1 : 0).ToString();
+                case NodeBinExpr.NodeBinExprType.And:
+                    return (a & b).ToString();
+                case NodeBinExpr.NodeBinExprType.Or:
+                    return (a | b).ToString();
+                case NodeBinExpr.NodeBinExprType.Xor:
+                    return (a ^ b).ToString();
+                case NodeBinExpr.NodeBinExprType.Mul:
+                    return (a * b).ToString();
+                case NodeBinExpr.NodeBinExprType.Div:
+                    return (a / b).ToString();
+                case NodeBinExpr.NodeBinExprType.Rem:
+                    return (a % b).ToString();
+                default:
+                    Shartilities.UNREACHABLE("GetImmedOperation");
+                    return "";
+            }
         }
         public static void OptimizeProgram(ref NodeProg prog, ref Dictionary<string, NodeStmtFunction> funcs)
         {

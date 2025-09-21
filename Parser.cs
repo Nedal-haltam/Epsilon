@@ -10,43 +10,6 @@ namespace Epsilon
         int m_curr_index;
         string? CurrentFunctionName;
         public List<string> STD_FUNCTIONS = ["strlen", "stoa", "unstoa", "write"];
-
-        public string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
-        {
-            Int64 a = Convert.ToInt64(imm1);
-            Int64 b = Convert.ToInt64(imm2);
-
-            if (op == NodeBinExpr.NodeBinExprType.Add)
-                return (a + b).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Sub)
-                return (a - b).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Sll)
-                return (a << (Int32)b).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Srl)
-                return (a >>> (Int32)b).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.EqualEqual)
-                return (a == b ? 1 : 0).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.NotEqual)
-                return (a != b ? 1 : 0).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.LessThan)
-                return (a < b ? 1 : 0).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.And)
-                return (a & b).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Or)
-                return (a | b).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Xor)
-                return (a ^ b).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Mul)
-                return (a * b).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Div)
-                return (a / b).ToString();
-            else if (op == NodeBinExpr.NodeBinExprType.Rem)
-                return (a % b).ToString();
-            Token? peeked = Peek(-1);
-            int line = peeked.HasValue ? peeked.Value.Line : 1;
-            Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Generator: invalid operation `{op}`\n", 1);
-            return "";
-        }
         Token? Peek(int offset = 0) => 0 <= m_curr_index + offset && m_curr_index + offset < m_tokens.Count ? m_tokens[m_curr_index + offset] : null;
         Token? Peek(TokenType type, int offset = 0)
         {
@@ -248,22 +211,13 @@ namespace Epsilon
                 Consume();
                 NodeExpr expr = ExpectedExpression(ParseExpr());
                 ExpectAndConsume(TokenType.CloseParen);
-                if (IsExprIntLit(expr))
+                NodeTermParen paren = new()
                 {
-                    term.type = NodeTerm.NodeTermType.IntLit;
-                    term.intlit = expr.term.intlit;
-                    return term;
-                }
-                else
-                {
-                    NodeTermParen paren = new()
-                    {
-                        expr = expr
-                    };
-                    term.type = NodeTerm.NodeTermType.Paren;
-                    term.paren = paren;
-                    return term;
-                }
+                    expr = expr
+                };
+                term.type = NodeTerm.NodeTermType.Paren;
+                term.paren = paren;
+                return term;
             }
             return null;
         }
@@ -317,7 +271,6 @@ namespace Epsilon
             Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: inavalid operation `{op}`\n", 1);
             return 0;
         }
-        static bool IsExprIntLit(NodeExpr expr) => expr.type == NodeExpr.NodeExprType.Term && expr.term.type == NodeTerm.NodeTermType.IntLit;
         NodeExpr? ParseExpr(int min_prec = 0)
         {
             NodeTerm? _Termlhs = ParseTerm();
@@ -352,18 +305,8 @@ namespace Epsilon
                     expr.lhs = expr_lhs2;
                     expr.rhs = expr_rhs;
 
-                    if (IsExprIntLit(expr.lhs) && IsExprIntLit(expr.rhs))
-                    {
-                        string constant1 = expr.lhs.term.intlit.intlit.Value;
-                        string constant2 = expr.rhs.term.intlit.intlit.Value;
-                        string value = GetImmedOperation(constant1, constant2, expr.type);
-                        exprlhs = NodeExpr.Number(value, expr.lhs.term.intlit.intlit.Line);
-                    }
-                    else
-                    {
-                        exprlhs.type = NodeExpr.NodeExprType.BinExpr;
-                        exprlhs.binexpr = expr;
-                    }
+                    exprlhs.type = NodeExpr.NodeExprType.BinExpr;
+                    exprlhs.binexpr = expr;
                 }
                 return exprlhs;
             }
