@@ -6,13 +6,13 @@ namespace Epsilon
 {
     internal sealed class Program
     {
-        static StringBuilder Compile(string InputFilePath)
+        static StringBuilder Compile(string InputFilePath, bool Optimize)
         {
             string InputCode = Shartilities.ReadFile(InputFilePath);
             List<Token> TokenizedProgram = new Tokenizer(InputCode, InputFilePath).TokenizeProg();
             Parser Parser = new(TokenizedProgram, InputFilePath);
             NodeProg ParsedProgram = Parser.ParseProg();
-            Optimizer.OptimizeProgram(ref ParsedProgram, ref Parser.UserDefinedFunctions);
+            if (Optimize) Optimizer.OptimizeProgram(ref ParsedProgram, ref Parser.UserDefinedFunctions);
             StringBuilder GeneratedProgram = Generator.GenProgram(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
             return GeneratedProgram;
         }
@@ -49,14 +49,14 @@ namespace Epsilon
             }
             return p;
         }
-        static LibUtils.Program CompileAssembleLink(string SourceFilePath, string OutputFilePath, bool DoQemu, bool DoCAS, bool CasGenerate, bool Dump)
+        static LibUtils.Program CompileAssembleLink(string SourceFilePath, string OutputFilePath, bool Optimize, bool DoQemu, bool DoCAS, bool CasGenerate, bool Dump)
         {
             LibUtils.Program p = new();
             if (!SourceFilePath.EndsWith(".S"))
             {
                 string TempAssembly = OutputFilePath + ".S";
                 {
-                    StringBuilder Assembly = Compile(SourceFilePath);
+                    StringBuilder Assembly = Compile(SourceFilePath, Optimize);
                     Shartilities.WriteFile(TempAssembly, Assembly.ToString());
                 }
                 if (DoQemu)
@@ -100,6 +100,7 @@ namespace Epsilon
 
             string? OutputFilePath = null;
             List<string> InputFilePaths = [];
+            bool Optimize = false;
             bool CompileOnly = false;
             bool Run = false; // Run using qemu
             bool Sim = false; // simulate using my cycle accurate simulator
@@ -111,6 +112,10 @@ namespace Epsilon
                     if (!Shartilities.ShiftArgs(ref args, out string OutputFilePathuser))
                         Shartilities.Log(Shartilities.LogType.ERROR, $"Expected output file path after -o\n", 1);
                     OutputFilePath = OutputFilePathuser;
+                }
+                else if (arg == "-O")
+                {
+                    Optimize = true;
                 }
                 else if (arg == "-run")
                 {
@@ -148,7 +153,7 @@ namespace Epsilon
             {
                 if (log) Console.WriteLine("running");
                 OutputFilePath ??= "./a";
-                CompileAssembleLink(SourceFilePath, OutputFilePath, true, false, false, Dump);
+                CompileAssembleLink(SourceFilePath, OutputFilePath, Optimize, true, false, false, Dump);
                 RunOnQemu(OutputFilePath);
                 File.Delete(OutputFilePath);
             }
@@ -156,7 +161,7 @@ namespace Epsilon
             {
                 if (log) Console.WriteLine("simulating");
                 OutputFilePath ??= "./a";
-                LibUtils.Program p = CompileAssembleLink(SourceFilePath, OutputFilePath, false, true, false, Dump);
+                LibUtils.Program p = CompileAssembleLink(SourceFilePath, OutputFilePath, Optimize, false, true, false, Dump);
                 List<string> MC = LibUtils.GetIM(p.MachineCodes);
                 List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
                 LibCPU.SingleCycle.Run(MC, DM, 4096, 4096, null);
@@ -165,14 +170,14 @@ namespace Epsilon
             {
                 if (log) Console.WriteLine("compile only");
                 OutputFilePath ??= "./a.S";
-                StringBuilder Assembly = Compile(SourceFilePath);
+                StringBuilder Assembly = Compile(SourceFilePath, Optimize);
                 Shartilities.WriteFile(OutputFilePath, Assembly.ToString());
             }
             else
             {
                 if (log) Console.WriteLine("compiling and assembling");
                 OutputFilePath ??= "./a";
-                CompileAssembleLink(SourceFilePath, OutputFilePath, true, true, true, Dump);
+                CompileAssembleLink(SourceFilePath, OutputFilePath, Optimize, true, true, true, Dump);
             }
         }
     }
