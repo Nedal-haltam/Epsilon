@@ -95,7 +95,6 @@ namespace Epsilon
                 default:
                     Shartilities.UNREACHABLE("IsIdentUsedInExpr");
                     return false;
-
             }
         }
         static bool IsIdentUsedInElifs(Token ident, NodeIfElifs elifs)
@@ -329,6 +328,33 @@ namespace Epsilon
                 default:
                     Shartilities.UNREACHABLE("GetImmedOperation");
                     return "";
+            }
+        }
+        static NodeTerm FoldTerm(NodeTerm term)
+        {
+            switch (term.type)
+            {
+                case NodeTerm.NodeTermType.IntLit:
+                case NodeTerm.NodeTermType.StringLit:
+                case NodeTerm.NodeTermType.FunctionCall:
+                case NodeTerm.NodeTermType.Ident:
+                    return term;
+                case NodeTerm.NodeTermType.Paren:
+                    term.paren.expr = FoldExpr(term.paren.expr);
+                    if (IsExprIntLit(term.paren.expr))
+                        return new() { type = NodeTerm.NodeTermType.IntLit, intlit = term.paren.expr.term.intlit };
+                    return term;
+                case NodeTerm.NodeTermType.Unary:
+                    term.unary.term = FoldTerm(term.unary.term);
+                    return term;
+                case NodeTerm.NodeTermType.Variadic:
+                    term.variadic.VariadicIndex = FoldExpr(term.variadic.VariadicIndex);
+                    if (IsExprIntLit(term.variadic.VariadicIndex))
+                        return new() { type = NodeTerm.NodeTermType.IntLit, intlit = term.variadic.VariadicIndex.term.intlit };
+                    return term;
+                default:
+                    Shartilities.UNREACHABLE("FoldTerm");
+                    return new();
             }
         }
         public static void OptimizeProgram(ref NodeProg prog, ref Dictionary<string, NodeStmtFunction> funcs)
