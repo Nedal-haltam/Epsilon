@@ -101,7 +101,6 @@ namespace Epsilon
             //    - deal with multiple files
             //        - if you start with .e file you interpret the rest as epsilon files and you start from the compile step
             //        - if you start with .S file you interpret the rest as assembly files and you start from the assemble step
-            return;
             //Compile("../../../main.e");
 
             string? OutputFilePath = null;

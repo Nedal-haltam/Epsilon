@@ -194,84 +194,87 @@ namespace Epsilon
             }
             return false;
         }
+        static List<NodeStmt> EliminateStmts(List<NodeStmt> stmts)
+        {
+            List<NodeStmt> NewStmts = [];
+            for (int j = 0; j < stmts.Count; j++)
+            {
+                NodeStmt stmt = stmts[j];
+                switch (stmt.type)
+                {
+                    case NodeStmt.NodeStmtType.Declare:
+                        {
+                            Token? ident = GetIdentFromStmt(stmt);
+                            if (!ident.HasValue)
+                                Shartilities.UNREACHABLE("DeadCodeElimination::case NodeStmt.NodeStmtType.Declare");
+                            else if (IsIdentUsedInStmts(ident.Value, stmts[(j + 1)..]))
+                                NewStmts.Add(stmt);
+                            break;
+                        }
+                    case NodeStmt.NodeStmtType.Assign:
+                        {
+                            Token? ident = GetIdentFromStmt(stmt);
+                            if (!ident.HasValue)
+                                Shartilities.UNREACHABLE("DeadCodeElimination::case NodeStmt.NodeStmtType.Assign");
+                            else if (IsIdentUsedInStmts(ident.Value, stmts[(j + 1)..]))
+                                NewStmts.Add(stmt);
+                            break;
+                        }
+                    case NodeStmt.NodeStmtType.If:
+                        // TODO: we could eliminate `if` statements if their behaviour can be know at compile time, like the condition results
+                        // and optimize the scopes of the if, elifs, ..., else
+                        NewStmts.Add(stmt);
+                        break;
+                    case NodeStmt.NodeStmtType.For:
+                        // TODO: loop unrolling can be done as a for-loop optimization
+                        // and general scope optimization
+                        NewStmts.Add(stmt);
+                        break;
+                    case NodeStmt.NodeStmtType.While:
+                        // TODO: general scope optimization, that's what i could think of righ now, may need more search
+                        NewStmts.Add(stmt);
+                        break;
+                    case NodeStmt.NodeStmtType.Asm:
+                        // TODO: should we analyze the inline assembly to optimize it out??
+                        NewStmts.Add(stmt);
+                        break;
+                    case NodeStmt.NodeStmtType.Scope:
+                        if (stmt.Scope.stmts.Count != 0)
+                        {
+                            // add more optimizations for nested scopes
+                            NewStmts.Add(stmt);
+                        }
+                        break;
+                    case NodeStmt.NodeStmtType.Break:
+                    case NodeStmt.NodeStmtType.Continue:
+                    case NodeStmt.NodeStmtType.Return:
+                    case NodeStmt.NodeStmtType.Exit:
+                        NewStmts.Add(stmt);
+                        break;
+                    case NodeStmt.NodeStmtType.Function:
+                        // TODO: have to further analyze what does the funciton does to optimize it out
+                        NewStmts.Add(stmt);
+                        break;
+                    default:
+                        Shartilities.UNREACHABLE("invalid statement type");
+                        break;
+                }
+            }
+            return NewStmts;
+        }
         static void DeadCodeElimination(ref NodeProg prog, ref Dictionary<string, NodeStmtFunction> funcs)
         {
             Shartilities.UNUSED(prog);
             // TODO: nested scopes
             // TODO: other functions, not only `main()`
-            NodeStmtScope PrevMainScope = new(funcs["main"].FunctionBody.stmts);
-            NodeStmtScope NewMainScope = new();
+            List<NodeStmt> stmts = [.. funcs["main"].FunctionBody.stmts];
             int Runs = 1;
             for (int i = 0; i < Runs; i++)
             {
-                for (int j = 0; j < PrevMainScope.stmts.Count; j++)
-                {
-                    NodeStmt stmt = PrevMainScope.stmts[j];
-                    switch (stmt.type)
-                    {
-                        case NodeStmt.NodeStmtType.Declare:
-                            {
-                                Token? ident = GetIdentFromStmt(stmt);
-                                if (!ident.HasValue)
-                                    Shartilities.UNREACHABLE("DeadCodeElimination::case NodeStmt.NodeStmtType.Declare");
-                                else if (IsIdentUsedInStmts(ident.Value, PrevMainScope.stmts[(j + 1)..]))
-                                    NewMainScope.stmts.Add(stmt);
-                                break;
-                            }
-                        case NodeStmt.NodeStmtType.Assign:
-                            {
-                                Token? ident = GetIdentFromStmt(stmt);
-                                if (!ident.HasValue)
-                                    Shartilities.UNREACHABLE("DeadCodeElimination::case NodeStmt.NodeStmtType.Assign");
-                                else if (IsIdentUsedInStmts(ident.Value, PrevMainScope.stmts[(j + 1)..]))
-                                    NewMainScope.stmts.Add(stmt);
-                                break;
-                            }
-                        case NodeStmt.NodeStmtType.If:
-                            // TODO: we could eliminate `if` statements if their behaviour can be know at compile time, like the condition results
-                            // and optimize the scopes of the if, elifs, ..., else
-                            NewMainScope.stmts.Add(stmt);
-                            break;
-                        case NodeStmt.NodeStmtType.For:
-                            // TODO: loop unrolling can be done as a for-loop optimization
-                            // and general scope optimization
-                            NewMainScope.stmts.Add(stmt);
-                            break;
-                        case NodeStmt.NodeStmtType.While:
-                            // TODO: general scope optimization, that's what i could think of righ now, may need more search
-                            NewMainScope.stmts.Add(stmt);
-                            break;
-                        case NodeStmt.NodeStmtType.Asm:
-                            // TODO: should we analyze the inline assembly to optimize it out??
-                            NewMainScope.stmts.Add(stmt);
-                            break;
-                        case NodeStmt.NodeStmtType.Scope:
-                            if (stmt.Scope.stmts.Count != 0)
-                            {
-                                // add more optimizations for nested scopes
-                                NewMainScope.stmts.Add(stmt);
-                            }
-                            break;
-                        case NodeStmt.NodeStmtType.Break:
-                        case NodeStmt.NodeStmtType.Continue:
-                        case NodeStmt.NodeStmtType.Return:
-                        case NodeStmt.NodeStmtType.Exit:
-                            NewMainScope.stmts.Add(stmt);
-                            break;
-                        case NodeStmt.NodeStmtType.Function:
-                            // TODO: have to further analyze what does the funciton does
-                            NewMainScope.stmts.Add(stmt);
-                            break;
-                        default:
-                            Shartilities.UNREACHABLE("invalid statement type");
-                            break;
-                    }
-                }
-                PrevMainScope = new(NewMainScope.stmts);
-                NewMainScope = new();
+                stmts = [.. EliminateStmts([.. stmts])];
             }
             var temp = funcs["main"];
-            temp.FunctionBody.stmts = [.. PrevMainScope.stmts];
+            temp.FunctionBody.stmts = [.. stmts];
             funcs["main"] = temp;
         }
         static bool IsExprIntLit(NodeExpr expr) => expr.type == NodeExpr.NodeExprType.Term && expr.term.type == NodeTerm.NodeTermType.IntLit;
@@ -443,7 +446,7 @@ namespace Epsilon
         {
             Shartilities.UNUSED(prog);
             // TODO: other functions, not only `main()`
-            NodeStmtScope FoldedMainScope = new(FoldStmts(funcs["main"].FunctionBody.stmts));
+            NodeStmtScope FoldedMainScope = new(FoldStmts([.. funcs["main"].FunctionBody.stmts]));
             var temp = funcs["main"];
             temp.FunctionBody.stmts = [.. FoldedMainScope.stmts];
             funcs["main"] = temp;
