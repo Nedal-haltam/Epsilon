@@ -250,7 +250,7 @@ namespace Epsilon
                     case NodeStmt.NodeStmtType.Return:
                     case NodeStmt.NodeStmtType.Exit:
                         NewStmts.Add(stmt);
-                        break;
+                        return NewStmts;
                     case NodeStmt.NodeStmtType.Function:
                         // TODO: have to further analyze what does the funciton does to optimize it out
                         NewStmts.Add(stmt);
