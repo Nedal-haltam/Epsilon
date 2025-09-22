@@ -228,15 +228,17 @@ namespace Epsilon
                                 break;
                             }
                         case NodeStmt.NodeStmtType.If:
-                            Shartilities.TODO("didn't optimize: If");
+                            // TODO: we could eliminate `if` statements if their behaviour can be know at compile time, like the condition results
+                            // and optimize the scopes of the if, elifs, ..., else
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.For:
-                            Shartilities.TODO("didn't optimize: For");
+                            // TODO: loop unrolling can be done as a for-loop optimization
+                            // and general scope optimization
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.While:
-                            Shartilities.TODO("didn't optimize: While");
+                            // TODO: general scope optimization, that's what i could think of righ now, may need more search
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Asm:
@@ -244,8 +246,11 @@ namespace Epsilon
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Scope:
-                            Shartilities.TODO("didn't optimize: Scope");
-                            NewMainScope.stmts.Add(stmt);
+                            if (stmt.Scope.stmts.Count != 0)
+                            {
+                                // add more optimizations for nested scopes
+                                NewMainScope.stmts.Add(stmt);
+                            }
                             break;
                         case NodeStmt.NodeStmtType.Break:
                         case NodeStmt.NodeStmtType.Continue:
@@ -254,7 +259,7 @@ namespace Epsilon
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Function:
-                            Shartilities.TODO("didn't optimize: Function");
+                            // TODO: have to further analyze what does the funciton does
                             NewMainScope.stmts.Add(stmt);
                             break;
                         default:
