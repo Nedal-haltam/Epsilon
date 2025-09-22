@@ -87,6 +87,8 @@ namespace Epsilon
             Console.WriteLine($"  -run          Compile, assemble, link, and run using QEMU");
             Console.WriteLine($"  -sim          Compile, assemble, and simulate using the custom simulator (CAS)");
             Console.WriteLine($"  -h            Display this usage information");
+            Console.WriteLine($"  -dump         don't erase any generated files during compilation in general");
+            Console.WriteLine($"  -O            enable optimization");
             Console.WriteLine();
             Console.WriteLine($"Notes:");
             Console.WriteLine($"  - Default behavior (no -S/-run/-sim) compiles, assembles, links, and generates the executable, and files needed by the CAS.");
