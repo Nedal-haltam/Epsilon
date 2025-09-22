@@ -95,10 +95,14 @@ namespace Epsilon
         }
         static void Main(string[] args)
         {
+            // TODO:
+		    //    - from AST -> e-code like the original src code i.e. written
+		    //        - original e-code -> epsilon compiler -> optimize -> Arborist (who care/cut trees) -> optimized e-code
+            //    - deal with multiple files
+            //        - if you start with .e file you interpret the rest as epsilon files and you start from the compile step
+            //        - if you start with .S file you interpret the rest as assembly files and you start from the assemble step
+            return;
             //Compile("../../../main.e");
-            //      - deal with multiple files
-            //          - if you start with .e file you interpret the rest as epsilon files and you start from the compile step
-            //          - if you start with .S file you interpret the rest as assembly files and you start from the assemble step
 
             string? OutputFilePath = null;
             List<string> InputFilePaths = [];

@@ -15,46 +15,23 @@ namespace Epsilon
                 case NodeStmt.NodeStmtType.Declare:
                     return stmt.declare.ident;
                 case NodeStmt.NodeStmtType.Assign:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "Assign");
                     if (stmt.assign.type == NodeStmtIdentifierType.SingleVar)
                         return stmt.assign.singlevar.ident;
                     else if (stmt.assign.type == NodeStmtIdentifierType.Array)
                         return stmt.assign.array.ident;
-                    else
-                        Shartilities.UNREACHABLE("GetIdentFromStmt");
                     break;
                 case NodeStmt.NodeStmtType.If:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "If");
-                    break;
                 case NodeStmt.NodeStmtType.For:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "For");
-                    break;
                 case NodeStmt.NodeStmtType.While:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "While");
-                    break;
                 case NodeStmt.NodeStmtType.Asm:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "Asm");
-                    break;
                 case NodeStmt.NodeStmtType.Scope:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "Scope");
-                    break;
                 case NodeStmt.NodeStmtType.Break:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "Break");
-                    break;
                 case NodeStmt.NodeStmtType.Continue:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "Continue");
-                    break;
                 case NodeStmt.NodeStmtType.Function:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "Function");
-                    break;
                 case NodeStmt.NodeStmtType.Return:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "Return");
-                    break;
                 case NodeStmt.NodeStmtType.Exit:
-                    Shartilities.Logln(Shartilities.LogType.ERROR, "Exit");
-                    break;
                 default:
-                    Shartilities.UNREACHABLE("invalid statement type");
+                    Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot get an identifier from {stmt.type}", 1);
                     break;
             }
             return null;
@@ -67,7 +44,8 @@ namespace Epsilon
                 case NodeTerm.NodeTermType.StringLit:
                     return false;
                 case NodeTerm.NodeTermType.FunctionCall:
-                    Shartilities.TODO("IsIdentUsedInTerm::case NodeTerm.NodeTermType.FunctionCall");
+                    foreach (var expr in term.functioncall.parameters)
+                        if (IsIdentUsedInExpr(ident, expr)) return true;
                     return false;
                 case NodeTerm.NodeTermType.Ident:
                     return ident.Value == term.ident.ident.Value;
@@ -250,23 +228,23 @@ namespace Epsilon
                                 break;
                             }
                         case NodeStmt.NodeStmtType.If:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: If");
+                            Shartilities.TODO("didn't optimize: If");
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.For:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: For");
+                            Shartilities.TODO("didn't optimize: For");
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.While:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: While");
+                            Shartilities.TODO("didn't optimize: While");
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Asm:
-                            // TODO: should we analyze the inined assembly to optimize it out??
+                            // TODO: should we analyze the inline assembly to optimize it out??
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Scope:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Scope");
+                            Shartilities.TODO("didn't optimize: Scope");
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Break:
@@ -276,7 +254,7 @@ namespace Epsilon
                             NewMainScope.stmts.Add(stmt);
                             break;
                         case NodeStmt.NodeStmtType.Function:
-                            Shartilities.Logln(Shartilities.LogType.ERROR, "didn't optimize: Function");
+                            Shartilities.TODO("didn't optimize: Function");
                             NewMainScope.stmts.Add(stmt);
                             break;
                         default:
