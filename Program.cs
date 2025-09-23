@@ -56,7 +56,7 @@ namespace Epsilon
                 string TempAssembly = OutputFilePath + ".S";
                 {
                     StringBuilder Assembly = Compile(SourceFilePath, Optimize);
-                    Shartilities.WriteFile(TempAssembly, Assembly.ToString());
+                    Shartilities.WriteFile(TempAssembly, Assembly.ToString(), false);
                 }
                 if (DoQemu)
                     AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
@@ -94,6 +94,7 @@ namespace Epsilon
         }
         static void Main(string[] args)
         {
+            //Shartilities.TODO("AST -> e-code");
             // TODO:
 		    //    - from AST -> e-code like the original src code i.e. written
 		    //        - original e-code -> epsilon compiler -> optimize -> Arborist (who care/cut trees) -> optimized e-code
@@ -175,7 +176,7 @@ namespace Epsilon
                 if (log) Console.WriteLine("compile only");
                 OutputFilePath ??= "./a.S";
                 StringBuilder Assembly = Compile(SourceFilePath, Optimize);
-                Shartilities.WriteFile(OutputFilePath, Assembly.ToString());
+                Shartilities.WriteFile(OutputFilePath, Assembly.ToString(), false);
             }
             else
             {
