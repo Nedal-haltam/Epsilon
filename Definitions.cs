@@ -3,19 +3,17 @@ using static Epsilon.NodeBinExpr;
 
 namespace Epsilon
 {
-    public struct NodeProg
+    struct NodeProg
     {
         public NodeStmtScope GlobalScope;
+        public Dictionary<string, NodeStmtFunction> UserDefinedFunctions;
         public NodeProg()
         {
             GlobalScope = new();
-        }
-        public NodeProg(NodeStmtScope scope, NodeStmtScope GlobalScope)
-        {
-            this.GlobalScope = GlobalScope;
+            UserDefinedFunctions = [];
         }
     }
-    public struct NodeStmtScope
+    struct NodeStmtScope
     {
         public List<NodeStmt> stmts;
         public NodeStmtScope()
@@ -27,7 +25,7 @@ namespace Epsilon
             this.stmts = [.. stmts];
         }
     }
-    public struct NodeStmt
+    struct NodeStmt
     {
         public enum NodeStmtType
         {
@@ -55,7 +53,7 @@ namespace Epsilon
     {
         Auto, Char
     }
-    public struct NodeStmtDeclare
+    struct NodeStmtDeclare
     {
         public NodeStmtIdentifierType type;
         public NodeStmtDataType datatype;
@@ -89,7 +87,7 @@ namespace Epsilon
             this.ident = ident;
         }
     }
-    public struct NodeStmtAssign
+    struct NodeStmtAssign
     {
         public NodeStmtIdentifierType type;
         public NodeStmtAssignSingleVar singlevar;
@@ -117,7 +115,7 @@ namespace Epsilon
             }
         }
     }
-    public struct NodeStmtDeclareSingleVar
+    struct NodeStmtDeclareSingleVar
     {
         public NodeExpr expr;
         public NodeStmtDeclareSingleVar()
@@ -129,7 +127,7 @@ namespace Epsilon
             this.expr = expr;
         }
     }
-    public struct NodeStmtDeclareArray
+    struct NodeStmtDeclareArray
     {
         public List<uint> Dimensions;
         public NodeStmtDeclareArray()
@@ -141,7 +139,7 @@ namespace Epsilon
             this.Dimensions = Dimensions;
         }
     }
-    public struct NodeStmtAssignSingleVar
+    struct NodeStmtAssignSingleVar
     {
         public Token ident;
         public NodeExpr expr;
@@ -156,7 +154,7 @@ namespace Epsilon
             this.expr = expr;
         }
     }
-    public struct NodeStmtAssignArray
+    struct NodeStmtAssignArray
     {
         public Token ident;
         public List<NodeExpr> indexes;
@@ -172,7 +170,7 @@ namespace Epsilon
             this.expr = expr;
         }
     }
-    public sealed class NodeStmtIF
+    sealed class NodeStmtIF
     {
         public NodeIfPredicate pred;
         public NodeIfElifs? elifs;
@@ -187,7 +185,7 @@ namespace Epsilon
             this.elifs = elifs;
         }
     }
-    public struct NodeIfPredicate
+    struct NodeIfPredicate
     {
         public NodeExpr cond;
         public NodeStmtScope scope;
@@ -202,7 +200,7 @@ namespace Epsilon
             this.scope = scope;
         }
     }
-    public struct NodeIfElifs
+    struct NodeIfElifs
     {
         public enum NodeIfElifsType
         {
@@ -224,27 +222,27 @@ namespace Epsilon
             this.elsee = elsee;
         }
     }
-    public sealed class NodeElif
+    sealed class NodeElif
     {
         public NodeIfPredicate pred;
         public NodeIfElifs? elifs;
     }
-    public struct NodeElse
+    struct NodeElse
     {
         public NodeStmtScope scope;
     }
-    public struct NodeStmtFor
+    struct NodeStmtFor
     {
         public NodeForPredicate pred;
     }
-    public struct NodeForPredicate
+    struct NodeForPredicate
     {
         public NodeForInit? init;
         public NodeForCond? cond;
         public NodeForUpdate udpate;
         public NodeStmtScope scope;
     }
-    public struct NodeForInit
+    struct NodeForInit
     {
         public enum NodeForInitType
         {
@@ -276,7 +274,7 @@ namespace Epsilon
             }
         }
     }
-    public struct NodeForCond
+    struct NodeForCond
     {
         public NodeExpr cond;
         public NodeForCond()
@@ -288,7 +286,7 @@ namespace Epsilon
             this.cond = cond;
         }
     }
-    public struct NodeForUpdate
+    struct NodeForUpdate
     {
         public List<NodeStmtAssign> updates;
         public NodeForUpdate()
@@ -300,12 +298,12 @@ namespace Epsilon
             this.updates = [.. updates];
         }
     }
-    public struct NodeStmtWhile
+    struct NodeStmtWhile
     {
         public NodeExpr cond;
         public NodeStmtScope scope;
     }
-    public struct NodeStmtAsm
+    struct NodeStmtAsm
     {
         public Token assembly;
         public NodeStmtAsm()
@@ -317,34 +315,34 @@ namespace Epsilon
             this.assembly = assembly;
         }
     }
-    public struct NodeStmtBreak
+    struct NodeStmtBreak
     {
         public Token breakk;
     }
-    public struct NodeStmtContinuee
+    struct NodeStmtContinuee
     {
         public Token continuee;
     }
-    public struct NodeStmtFunction
+    struct NodeStmtFunction
     {
         public Token FunctionName;
         public List<Var> parameters;
         public NodeStmtScope FunctionBody;
     }
-    public struct NodeStmtReturn
+    struct NodeStmtReturn
     {
         public NodeExpr expr;
     }
-    public struct NodeStmtFunctionCall
+    struct NodeStmtFunctionCall
     {
         public Token FunctionName;
         public List<NodeExpr> parameters;
     }
-    public struct NodeStmtExit
+    struct NodeStmtExit
     {
         public NodeExpr expr;
     }
-    public struct NodeExpr
+    struct NodeExpr
     {
         public NodeExprType type;
         public NodeTerm term;
@@ -405,7 +403,7 @@ namespace Epsilon
             };
         }
     }
-    public struct NodeTerm
+    struct NodeTerm
     {
         public enum NodeTermType
         {
@@ -420,11 +418,11 @@ namespace Epsilon
         public NodeTermUnaryExpr unary;
         public NodeTermVariadic variadic;
     }
-    public sealed class NodeTermVariadic
+    sealed class NodeTermVariadic
     {
         public NodeExpr VariadicIndex;
     }
-    public sealed class NodeTermUnaryExpr
+    sealed class NodeTermUnaryExpr
     {
         public NodeTermUnaryExprType type;
         public NodeTerm term;
@@ -433,20 +431,20 @@ namespace Epsilon
             negative, complement, not, addressof
         }
     }
-    public struct NodeTermIntLit
+    struct NodeTermIntLit
     {
         public Token intlit;
     }
-    public struct NodeTermStringLit
+    struct NodeTermStringLit
     {
         public Token stringlit;
     }
-    public struct NodeTermFunctionCall
+    struct NodeTermFunctionCall
     {
         public Token FunctionName;
         public List<NodeExpr> parameters;
     }
-    public sealed class NodeTermIdent
+    sealed class NodeTermIdent
     {
         public Token ident;
         public List<NodeExpr> indexes;
@@ -460,11 +458,11 @@ namespace Epsilon
             this.indexes = [.. indexes];
         }
     }
-    public sealed class NodeTermParen
+    sealed class NodeTermParen
     {
         public NodeExpr expr;
     }
-    public sealed class NodeBinExpr
+    sealed class NodeBinExpr
     {
         public enum NodeBinExprType
         {
@@ -475,7 +473,7 @@ namespace Epsilon
         public NodeExpr rhs;
     }
 
-    public struct Var(string value, uint size, uint ElementSize, List<uint> Dimensions, bool IsArray, bool IsParameter, bool IsVariadic, bool IsGlobal = false)
+    struct Var(string value, uint size, uint ElementSize, List<uint> Dimensions, bool IsArray, bool IsParameter, bool IsVariadic, bool IsGlobal = false)
     {
         public uint ElementSize = ElementSize;
         public uint TypeSize
@@ -498,7 +496,7 @@ namespace Epsilon
         public bool IsGlobal = IsGlobal;
         public List<uint> Dimensions = [.. Dimensions];
     }
-    public struct Variables
+    struct Variables
     {
         List<Var> m_vars;
         public List<Var> m_globals;
@@ -584,7 +582,7 @@ namespace Epsilon
             }
         }
     }
-    public struct Token
+    struct Token
     {
         public TokenType Type;
         public string Value;
@@ -651,9 +649,20 @@ namespace Epsilon
         Exit,
         Return,
     }
-    public struct Macro
+    struct Macro
     {
         public List<Token> tokens;
         public string src;
     }
+    static class ConstDefs
+    {
+        static public Dictionary<string, int> STD_FUNCTIONS_PARAMS = new()
+        {
+            { "strlen" , 1},
+            { "stoa"   , 1},
+            { "unstoa" , 1},
+            { "write"  , 3},
+        };
+    }
+
 }

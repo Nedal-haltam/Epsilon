@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Formats.Tar;
 using System.Text;
 
 namespace Epsilon
@@ -12,8 +11,8 @@ namespace Epsilon
             List<Token> TokenizedProgram = new Tokenizer(InputCode, InputFilePath).TokenizeProg();
             Parser Parser = new(TokenizedProgram, InputFilePath);
             NodeProg ParsedProgram = Parser.ParseProg();
-            if (Optimize) Optimizer.OptimizeProgram(ref ParsedProgram, ref Parser.UserDefinedFunctions);
-            StringBuilder GeneratedProgram = Generator.GenProgram(ParsedProgram, Parser.UserDefinedFunctions, InputFilePath, Parser.STD_FUNCTIONS);
+            if (Optimize) Optimizer.OptimizeProgram(ref ParsedProgram);
+            StringBuilder GeneratedProgram = Generator.GenProgram(ParsedProgram, InputFilePath);
             return GeneratedProgram;
         }
         static void AssembleAndLinkForQemu(string SourceFilePath, string OutputFilePath)

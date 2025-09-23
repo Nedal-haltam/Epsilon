@@ -8,9 +8,7 @@ namespace Epsilon
         ////////////////////////////////////////////////////////
         static Variables m_Variables;
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        static Dictionary<string, NodeStmtFunction> m_UserDefinedFunctions;
         static string m_inputFilePath;
-        static List<string> m_STD_FUNCTIONS;
         static List<Var> Globals;
         static Stack<int> m_scopes;
         static uint m_StackSize;
@@ -466,7 +464,7 @@ namespace Epsilon
         }
         static NodeStmtFunction CheckFunctionCallCorrectness(NodeStmtFunctionCall CalledFunction)
         {
-            if (m_UserDefinedFunctions.TryGetValue(CalledFunction.FunctionName.Value, out NodeStmtFunction CalledFunctionDefinition))
+            if (m_program.UserDefinedFunctions.TryGetValue(CalledFunction.FunctionName.Value, out NodeStmtFunction CalledFunctionDefinition))
             {
                 int MaxParamsCount = 7;
                 int ProvidedParamsCount = CalledFunction.parameters.Count;
@@ -484,15 +482,15 @@ namespace Epsilon
                 }
                 return CalledFunctionDefinition;
             }
-            else if (!m_STD_FUNCTIONS.Contains(CalledFunction.FunctionName.Value))
+            else if (ConstDefs.STD_FUNCTIONS_PARAMS.TryGetValue(CalledFunction.FunctionName.Value, out int Arity))
             {
-                Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{CalledFunction.FunctionName.Line}:1: Generator: Function `{CalledFunction.FunctionName.Value}` is not defined", 1);
+
             }
             return new();
         }
         static void FunctionCallFillParameters(NodeStmtFunctionCall CalledFunction, NodeStmtFunction CalledFunctionDefinition)
         {
-            if (m_UserDefinedFunctions.ContainsKey(CalledFunction.FunctionName.Value)) // user defined
+            if (m_program.UserDefinedFunctions.ContainsKey(CalledFunction.FunctionName.Value)) // user defined
             {
                 bool filled = false;
                 for (int i = 0; i < CalledFunction.parameters.Count; i++)
@@ -605,17 +603,17 @@ namespace Epsilon
 
             GenPush("ra");
             m_Variables.AddVariable(new("", 8, 8, [], false, false, false));
-            GenPushFunctionParametersInDefinition(m_UserDefinedFunctions[FunctionName].parameters);
+            GenPushFunctionParametersInDefinition(m_program.UserDefinedFunctions[FunctionName].parameters);
         }
         static void GenFunctionBody()
         {
-            NodeStmtScope FunctionBody = m_UserDefinedFunctions[m_CurrentFunctionName].FunctionBody;
+            NodeStmtScope FunctionBody = m_program.UserDefinedFunctions[m_CurrentFunctionName].FunctionBody;
             foreach (NodeStmt stmt in FunctionBody.stmts)
                 GenStmt(stmt);
         }
         static void GenFunctionEpilogue()
         {
-            NodeStmtScope FunctionBody = m_UserDefinedFunctions[m_CurrentFunctionName].FunctionBody;
+            NodeStmtScope FunctionBody = m_program.UserDefinedFunctions[m_CurrentFunctionName].FunctionBody;
             if (FunctionBody.stmts.Count == 0 || FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
             {
                 m_output.AppendLine($"    mv s0, zero");
@@ -1002,7 +1000,7 @@ namespace Epsilon
         {
             m_output.AppendLine($".section .text");
             m_output.AppendLine($".globl main");
-            if (!m_UserDefinedFunctions.ContainsKey("main"))
+            if (!m_program.UserDefinedFunctions.ContainsKey("main"))
             {
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined", 1);
             }
@@ -1027,8 +1025,8 @@ namespace Epsilon
                 m_output.AppendLine($"StringLits{i}:");
                 m_output.AppendLine($"    .string \"{m_StringLits[i]}\"");
             }
-            if (!m_UserDefinedFunctions.ContainsKey("stoa") && m_CalledFunctions.Contains("stoa")
-            && !m_UserDefinedFunctions.ContainsKey("unstoa") && m_CalledFunctions.Contains("unstoa"))
+            if (!m_program.UserDefinedFunctions.ContainsKey("stoa") && m_CalledFunctions.Contains("stoa")
+            && !m_program.UserDefinedFunctions.ContainsKey("unstoa") && m_CalledFunctions.Contains("unstoa"))
             {
                 m_output.AppendLine($".section .bss");
                 m_output.AppendLine($"itoaTempBuffer:     ");
@@ -1040,20 +1038,17 @@ namespace Epsilon
             GenFunction("main");
             for (int i = 0; i < m_CalledFunctions.Count; i++)
             {
-                if (m_UserDefinedFunctions.ContainsKey(m_CalledFunctions[i]))
+                if (m_program.UserDefinedFunctions.ContainsKey(m_CalledFunctions[i]))
                 {
                     GenFunction(m_CalledFunctions[i]);
                 }
             }
             GenStdFunctions();
         }
-        static void CodeGeneratorPrologue(NodeProg prog, Dictionary<string, NodeStmtFunction> UserDefinedFunctions, string InputFilePath, List<string> std_functions)
+        static void CodeGeneratorPrologue(NodeProg prog, string InputFilePath)
         {
             m_program = prog;
-            m_UserDefinedFunctions = new(UserDefinedFunctions);
             m_inputFilePath = new(InputFilePath);
-            m_STD_FUNCTIONS = [.. std_functions];
-
 
             m_Variables = new();
             Globals = [];
@@ -1071,9 +1066,9 @@ namespace Epsilon
             m_FirstTempReg = "t0";
             m_SecondTempReg = "t1";
         }
-        public static StringBuilder GenProgram(NodeProg prog, Dictionary<string, NodeStmtFunction> UserDefinedFunctions, string InputFilePath, List<string> std_functions)
+        public static StringBuilder GenProgram(NodeProg prog, string InputFilePath)
         {
-            CodeGeneratorPrologue(prog, UserDefinedFunctions, InputFilePath, std_functions);
+            CodeGeneratorPrologue(prog, InputFilePath);
 
             GenProgramPrologue();
             GenProgramFunctions();

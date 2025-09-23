@@ -6,10 +6,8 @@ namespace Epsilon
         NodeProg prog;
         List<Token> m_tokens = [.. tokens];
         string m_inputFilePath = InputFilePath;
-        public Dictionary<string, NodeStmtFunction> UserDefinedFunctions = [];
         int m_curr_index;
         string? CurrentFunctionName;
-        public List<string> STD_FUNCTIONS = ["strlen", "stoa", "unstoa", "write"];
         Token? Peek(int offset = 0) => 0 <= m_curr_index + offset && m_curr_index + offset < m_tokens.Count ? m_tokens[m_curr_index + offset] : null;
         Token? Peek(TokenType type, int offset = 0)
         {
@@ -657,7 +655,7 @@ namespace Epsilon
         void ParseFunctionPrologue(Token FunctionName)
         {
             CurrentFunctionName = FunctionName.Value;
-            if (STD_FUNCTIONS.Contains(FunctionName.Value) || UserDefinedFunctions.ContainsKey(FunctionName.Value))
+            if (ConstDefs.STD_FUNCTIONS_PARAMS.ContainsKey(FunctionName.Value) || prog.UserDefinedFunctions.ContainsKey(FunctionName.Value))
             {
                 Token? peeked = Peek(-1);
                 int line = peeked.HasValue ? peeked.Value.Line : 1;
@@ -687,7 +685,7 @@ namespace Epsilon
                 parameters = parameters,
                 FunctionBody = FunctionBody,
             };
-            UserDefinedFunctions.Add(FunctionName.Value, Function);
+            prog.UserDefinedFunctions.Add(FunctionName.Value, Function);
         }
         List<NodeExpr> ParseFunctionCallParameters()
         {
@@ -704,66 +702,19 @@ namespace Epsilon
         }
         List<NodeStmt> ParseFunctionCall(Token CalledFunctionName)
         {
-            if (STD_FUNCTIONS.Contains(CalledFunctionName.Value))
+            List<NodeExpr> parameters = ParseFunctionCallParameters();
+            ExpectAndConsume(TokenType.SemiColon);
+            NodeStmtFunctionCall CalledFunction = new()
             {
-                NodeStmtFunctionCall CalledFunction = new()
-                {
-                    FunctionName = CalledFunctionName,
-                    parameters = []
-                };
-                if (CalledFunctionName.Value == "strlen")
-                {
-                    Shartilities.TODO("calling strlen when it is not a term");
-                    return [];
-                }
-                else if (CalledFunctionName.Value == "stoa")
-                {
-                    // TODO: change the implementation of `stoa` to operate on the desired buffer no the default one (i.e. `stoaTempBuffer`)
-                    Shartilities.TODO("calling stoa");
-                    return [];
-                }
-                else if (CalledFunctionName.Value == "unstoa")
-                {
-                    // TODO: change the implementation of `unstoa` to operate on the desired buffer no the default one (i.e. `unstoaTempBuffer`)
-                    Shartilities.TODO("calling unstoa");
-                    return [];
-                }
-                else if (CalledFunctionName.Value == "write")
-                {
-                    List<NodeExpr> parameters = ParseFunctionCallParameters();
-                    ExpectAndConsume(TokenType.SemiColon);
-                    CalledFunction.parameters = parameters;
-                    NodeStmt stmt = new()
-                    {
-                        type = NodeStmt.NodeStmtType.Function,
-                        CalledFunction = CalledFunction
-                    };
-                    return [stmt];
-                }
-                else
-                {
-                    Token? peeked = Peek(-1);
-                    int line = peeked.HasValue ? peeked.Value.Line : 1;
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: undefined std function `{CalledFunctionName.Value}`\n", 1);
-                    return [];
-                }
-            }
-            else
+                FunctionName = CalledFunctionName,
+                parameters = parameters
+            };
+            NodeStmt stmt = new()
             {
-                List<NodeExpr> parameters = ParseFunctionCallParameters();
-                ExpectAndConsume(TokenType.SemiColon);
-                NodeStmtFunctionCall CalledFunction = new()
-                {
-                    FunctionName = CalledFunctionName,
-                    parameters = parameters
-                };
-                NodeStmt stmt = new()
-                {
-                    type = NodeStmt.NodeStmtType.Function,
-                    CalledFunction = CalledFunction
-                };
-                return [stmt];
-            }
+                type = NodeStmt.NodeStmtType.Function,
+                CalledFunction = CalledFunction
+            };
+            return [stmt];
         }
         List<NodeStmt> ParseStmt()
         {
@@ -930,7 +881,6 @@ namespace Epsilon
         {
             m_curr_index = 0;
             CurrentFunctionName = null;
-            UserDefinedFunctions = [];
             prog = new();
 
             while (Peek().HasValue)
