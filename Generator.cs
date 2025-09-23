@@ -1025,8 +1025,8 @@ namespace Epsilon
                 m_output.AppendLine($"StringLits{i}:");
                 m_output.AppendLine($"    .string \"{m_StringLits[i]}\"");
             }
-            if (!m_program.UserDefinedFunctions.ContainsKey("stoa") && m_CalledFunctions.Contains("stoa")
-            && !m_program.UserDefinedFunctions.ContainsKey("unstoa") && m_CalledFunctions.Contains("unstoa"))
+            if ((!m_program.UserDefinedFunctions.ContainsKey("stoa") && m_CalledFunctions.Contains("stoa"))
+            || (!m_program.UserDefinedFunctions.ContainsKey("unstoa") && m_CalledFunctions.Contains("unstoa")))
             {
                 m_output.AppendLine($".section .bss");
                 m_output.AppendLine($"itoaTempBuffer:     ");
