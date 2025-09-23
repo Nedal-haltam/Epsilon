@@ -25,7 +25,7 @@ sim: sim-tests sim-examples
 	@echo "✅ Simulated successfully."
 
 main:
-	dotnet ./bin/Debug/net8.0/Epsilon.dll -run ./main/main.e -o ./main/main -dump -O
+	dotnet ./bin/Debug/net8.0/Epsilon.dll -run ./main/main.e -o ./main/main -dump
 	@echo "✅ Built main successfully."
 
 run-examples:

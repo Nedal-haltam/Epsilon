@@ -649,7 +649,13 @@ LABEL24_START:
     LB t0, 0(sp)
     BEQZ t0, LABEL26_elifs
 LABEL27_START:
-    LI t0, -9223372036854775808
+    LI t0, 63
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SLL t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LD t0, 9(sp)

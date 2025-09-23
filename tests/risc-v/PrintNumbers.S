@@ -5,11 +5,29 @@ main:
     SD ra, 0(sp)
     LA a0, StringLits0
     LI a1, 1
-    LI a2, -9223372036854775808
+    LI t0, 63
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI a2, 1
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    SLL a2, a2, t0
     call print
     LA a0, StringLits0
     LI a1, 1
-    LI a2, 9223372036854775807
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 63
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI a2, 1
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    SLL a2, a2, t0
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    SUB a2, a2, t0
     call print
     LA a0, StringLits0
     LI a1, 1
@@ -18,11 +36,29 @@ main:
     call print
     LA a0, StringLits1
     LI a1, 1
-    LI a2, -9223372036854775808
+    LI t0, 63
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI a2, 1
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    SLL a2, a2, t0
     call print
     LA a0, StringLits1
     LI a1, 1
-    LI a2, 9223372036854775807
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 63
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI a2, 1
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    SLL a2, a2, t0
+    LD t0, 0(sp)
+    ADDI sp, sp, 8
+    SUB a2, a2, t0
     call print
     LA a0, StringLits1
     LI a1, 1
@@ -675,7 +711,13 @@ LABEL24_START:
     LB t0, 0(sp)
     BEQZ t0, LABEL26_elifs
 LABEL27_START:
-    LI t0, -9223372036854775808
+    LI t0, 63
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SLL t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LD t0, 9(sp)

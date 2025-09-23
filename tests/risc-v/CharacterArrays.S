@@ -727,7 +727,13 @@ foo:
     ADDI sp, sp, -1
     SB t0, 0(sp)
 LABEL24_START:
-    LI t0, 123
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 122
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LB t0, 8(sp)
@@ -769,7 +775,13 @@ LABEL26_START:
 LABEL25_END:
     LI t0, 1
     ADD sp, sp, t0
-    LI t0, 26
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 27
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SUB t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 1
@@ -858,7 +870,13 @@ LABEL33_START:
     LB t0, 0(sp)
     BEQZ t0, LABEL35_elifs
 LABEL36_START:
-    LI t0, -9223372036854775808
+    LI t0, 63
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SLL t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LD t0, 9(sp)

@@ -15,7 +15,19 @@ main:
     ADDI sp, sp, -1
     SB t0, 0(sp)
 LABEL1_START:
-    LI t0, 111
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 15
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 97
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SUB t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LB t0, 8(sp)
@@ -57,7 +69,13 @@ LABEL3_START:
 LABEL2_END:
     LI t0, 1
     ADD sp, sp, t0
-    LI t0, 14
+    LI t0, 1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 15
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SUB t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 1
@@ -1932,7 +1950,13 @@ LABEL81_START:
     LB t0, 0(sp)
     BEQZ t0, LABEL83_elifs
 LABEL84_START:
-    LI t0, -9223372036854775808
+    LI t0, 63
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SLL t0, t0, t1
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LD t0, 9(sp)
