@@ -2,7 +2,7 @@
 using System.Text;
 namespace Epsilon
 {
-    sealed class Tokenizer(string SoureCode, string InputFilePath)
+    struct Tokenizer(string SoureCode, string InputFilePath)
     {
         readonly string m_thecode = SoureCode;
         readonly string m_inputFilePath = InputFilePath;

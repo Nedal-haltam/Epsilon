@@ -1,7 +1,7 @@
 ﻿#pragma warning disable RETURN0001
 namespace Epsilon
 {
-    sealed class Parser(List<Token> tokens, string InputFilePath)
+    struct Parser(List<Token> tokens, string InputFilePath)
     {
         NodeProg prog;
         List<Token> m_tokens = [.. tokens];

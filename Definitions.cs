@@ -170,7 +170,7 @@ namespace Epsilon
             this.expr = expr;
         }
     }
-    sealed class NodeStmtIF
+    struct NodeStmtIF
     {
         public NodeIfPredicate pred;
         public NodeIfElifs? elifs;
