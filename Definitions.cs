@@ -407,7 +407,7 @@ namespace Epsilon
     {
         public enum NodeTermType
         {
-            IntLit, StringLit, FunctionCall, Ident, Paren, Unary, Variadic
+            IntLit, StringLit, FunctionCall, Ident, Paren, Unary, Variadic,
         }
         public NodeTermType type;
         public NodeTermIntLit intlit;
@@ -428,7 +428,7 @@ namespace Epsilon
         public NodeTerm term;
         public enum NodeTermUnaryExprType
         {
-            negative, complement, not, addressof
+            negative, complement, not, addressof,
         }
     }
     struct NodeTermIntLit
@@ -466,7 +466,7 @@ namespace Epsilon
     {
         public enum NodeBinExprType
         {
-            Add, Sub, Mul, Rem, Div, Sll, Srl, EqualEqual, NotEqual, LessThan, And, Or, Xor
+            Add, Sub, Mul, Rem, Div, Sll, Srl, EqualEqual, NotEqual, LessThan, And, Or, Xor,
         }
         public NodeBinExprType type;
         public NodeExpr lhs;
