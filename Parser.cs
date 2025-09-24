@@ -603,7 +603,7 @@ namespace Epsilon
                 {
                     Consume();
                     //int NumberofVariadics = 8 - parameters.Count;
-                    parameters.Add(new($"NO_NEED_TO_FILL", 0, 0, [0], false, true, true));
+                    parameters.Add(new($"...", 0, 0, [0], false, true, true));
                     if (Peek(TokenType.Comma).HasValue)
                     {
                         Token? peeked = Peek(-1);
