@@ -354,8 +354,6 @@ namespace Epsilon
                     return term;
                 case NodeTerm.NodeTermType.Variadic:
                     term.variadic.VariadicIndex = FoldExpr(term.variadic.VariadicIndex);
-                    if (IsExprIntLit(term.variadic.VariadicIndex))
-                        return new() { type = NodeTerm.NodeTermType.IntLit, intlit = term.variadic.VariadicIndex.term.intlit };
                     return term;
                 default:
                     Shartilities.UNREACHABLE("FoldTerm");
