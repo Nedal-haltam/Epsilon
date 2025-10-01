@@ -333,12 +333,30 @@ namespace Epsilon
         static LibUtils.Program AssembleAndLinkForCAS(string SourceFilePath, string OutputFilePath, bool Generate)
         {
             LibUtils.Program p = Assembler.Assembler.AssembleProgram(SourceFilePath, false);
-            List<string> IM = LibUtils.GetIM(p.MachineCodes);
-            List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
             if (Generate)
             {
-                File.WriteAllLines(OutputFilePath + "_IM", IM);
-                File.WriteAllLines(OutputFilePath + "_DM", DM);
+                string IM_INIT_filepath = $"{OutputFilePath}_IM_INIT.INIT";
+                string DM_INIT_filepath = $"{OutputFilePath}_DM_INIT.INIT";
+                string MC_filepath = $"{OutputFilePath}_MC.txt";
+                string DM_filepath = $"{OutputFilePath}_DM.txt";
+                string IM_MIF_filepath = $"{OutputFilePath}_IM_MIF.mif";
+                string DM_MIF_filepath = $"{OutputFilePath}_DM_MIF.mif";
+
+                StringBuilder IM_INIT = LibUtils.GetIM_INIT(p.MachineCodes, p.Instructions);
+                Shartilities.WriteFile(IM_INIT_filepath, IM_INIT.ToString(), false, 1);
+
+                StringBuilder DM_INIT = LibUtils.GetDM_INIT(p.DataMemoryValues);
+                Shartilities.WriteFile(DM_INIT_filepath, DM_INIT.ToString(), false, 1);
+
+                List<string> IM = LibUtils.GetIM(p.MachineCodes);
+                File.WriteAllLines(MC_filepath, IM);
+
+                List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
+                File.WriteAllLines(DM_filepath, DM);
+
+                //Shartilities.WriteFile(IM_MIF_filepath, LibUtils.GetIMMIF(p.MachineCodes, 32, 2048, 2).ToString(), false, 1);
+
+                Shartilities.WriteFile(DM_MIF_filepath, LibUtils.GetDMMIF(p.DataMemoryValues).ToString(), false, 1);
             }
             return p;
         }
