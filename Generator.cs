@@ -604,6 +604,14 @@ namespace Epsilon
             GenPush("ra");
             m_Variables.AddVariable(new("", 8, 8, [], false, false, false));
             GenPushFunctionParametersInDefinition(m_program.UserDefinedFunctions[FunctionName].parameters);
+            if (FunctionName == "main")
+            {
+                // write(1, 0, 0);
+                m_output.AppendLine($"    li a0, 1");
+                m_output.AppendLine($"    li a1, 0");
+                m_output.AppendLine($"    li a2, 0");
+                m_output.AppendLine($"    call write");
+            }
         }
         static void GenFunctionBody()
         {
@@ -988,7 +996,7 @@ namespace Epsilon
                 m_output.AppendLine($"    mv s0, t2");
                 m_output.AppendLine($"    ret");
             }
-            if (m_CalledFunctions.Contains("write"))
+            //if (m_CalledFunctions.Contains("write"))
             {
                 m_output.AppendLine($"write:");
                 m_output.AppendLine($"    li a7, 64");
