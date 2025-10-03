@@ -354,7 +354,7 @@ namespace Epsilon
                 List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
                 File.WriteAllLines(DM_filepath, DM);
 
-                //Shartilities.WriteFile(IM_MIF_filepath, LibUtils.GetIMMIF(p.MachineCodes, 32, 2048, 2).ToString(), false, 1);
+                Shartilities.WriteFile(IM_MIF_filepath, LibUtils.GetIMMIF(p.MachineCodes).ToString(), false, 1);
 
                 Shartilities.WriteFile(DM_MIF_filepath, LibUtils.GetDMMIF(p.DataMemoryValues).ToString(), false, 1);
             }
