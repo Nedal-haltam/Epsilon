@@ -301,9 +301,13 @@ namespace Epsilon
             List<Token> TokenizedProgram = new Tokenizer(InputCode, InputFilePath).TokenizeProg();
             NodeProg ParsedProgram = new Parser(TokenizedProgram, InputFilePath).ParseProg();
 
+            //StringBuilder Before = Arborist.CutProgram(ParsedProgram);
+            //Shartilities.WriteFile("./Before.e", Before.ToString(), false);
 
             if (Optimize) Optimizer.OptimizeProgram(ref ParsedProgram);
 
+            //StringBuilder After = Arborist.CutProgram(ParsedProgram);
+            //Shartilities.WriteFile("./After.e", After.ToString(), false);
 
             StringBuilder GeneratedProgram = Generator.GenProgram(ParsedProgram, InputFilePath);
 

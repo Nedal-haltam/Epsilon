@@ -3,6 +3,10 @@
 main:
     ADDI sp, sp, -8
     SD ra, 0(sp)
+    li a0, 1
+    li a1, 0
+    li a2, 0
+    call write
     LA a0, StringLits0
     LI a1, 1
     ADDI sp, sp, -16

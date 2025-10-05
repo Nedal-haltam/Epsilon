@@ -3,6 +3,10 @@
 main:
     ADDI sp, sp, -8
     SD ra, 0(sp)
+    li a0, 1
+    li a1, 0
+    li a2, 0
+    call write
     ADDI sp, sp, -800
     LI t0, 0
     ADDI sp, sp, -8

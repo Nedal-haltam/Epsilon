@@ -3,6 +3,10 @@
 main:
     ADDI sp, sp, -8
     SD ra, 0(sp)
+    li a0, 1
+    li a1, 0
+    li a2, 0
+    call write
     call Returnchar256
     MV t0, s0
     ADDI sp, sp, -1
