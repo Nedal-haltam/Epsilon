@@ -504,7 +504,8 @@ namespace Epsilon
             }
             else if (ConstDefs.STD_FUNCTIONS_PARAMS.TryGetValue(CalledFunction.FunctionName.Value, out int Arity))
             {
-
+                if (CalledFunction.parameters.Count != Arity)
+                    Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{CalledFunction.FunctionName.Line}:1: Generator: Function call to `{CalledFunctionDefinition.FunctionName.Value}` is not valid, check function arity", 1);
             }
             return new();
         }
