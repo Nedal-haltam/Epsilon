@@ -15,10 +15,15 @@ namespace Epsilon
                 case NodeStmt.NodeStmtType.Declare:
                     return stmt.declare.ident;
                 case NodeStmt.NodeStmtType.Assign:
-                    if (stmt.assign.type == NodeStmtIdentifierType.SingleVar)
-                        return stmt.assign.singlevar.ident;
-                    else if (stmt.assign.type == NodeStmtIdentifierType.Array)
-                        return stmt.assign.array.ident;
+                    switch (stmt.assign.type)
+                    {
+                        case NodeStmtIdentifierType.SingleVar:
+                            return stmt.assign.singlevar.ident;
+                        case NodeStmtIdentifierType.Array:
+                            return stmt.assign.array.ident;
+                        default:
+                            break;
+                    }
                     break;
                 case NodeStmt.NodeStmtType.If:
                 case NodeStmt.NodeStmtType.For:

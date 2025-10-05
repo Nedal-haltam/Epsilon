@@ -140,47 +140,50 @@ namespace Epsilon
                 {
                     case NodeStmt.NodeStmtType.Declare:
                         sb.Append(pp);
-                        if (stmt.declare.datatype == NodeStmtDataType.Auto)
-                            sb.Append($"auto ");
-                        else if (stmt.declare.datatype == NodeStmtDataType.Char)
-                            sb.Append($"char ");
+                        sb.Append($"{stmt.declare.datatype.ToString().ToLower()} ");
                         sb.Append($"{stmt.declare.ident.Value}");
-                        if (stmt.declare.type == NodeStmtIdentifierType.SingleVar)
+                        switch (stmt.declare.type)
                         {
-                            if (stmt.declare.singlevar.expr.type != NodeExpr.NodeExprType.None)
-                            {
-                                sb.Append($" = ");
-                                sb.Append($"{CutExpr(stmt.declare.singlevar.expr)}");
-                            }
-                            sb.AppendLine($";");
-                        }
-                        else if (stmt.declare.type == NodeStmtIdentifierType.Array)
-                        {
-                            foreach (var dim in stmt.declare.array.Dimensions)
-                                sb.Append($"[{dim}]");
-                            sb.AppendLine($";");
+                            case NodeStmtIdentifierType.SingleVar:
+                                if (stmt.declare.singlevar.expr.type != NodeExpr.NodeExprType.None)
+                                {
+                                    sb.Append($" = ");
+                                    sb.Append($"{CutExpr(stmt.declare.singlevar.expr)}");
+                                }
+                                sb.AppendLine($";");
+                                break;
+                            case NodeStmtIdentifierType.Array:
+                                foreach (var dim in stmt.declare.array.Dimensions)
+                                    sb.Append($"[{dim}]");
+                                sb.AppendLine($";");
+                                break;
+                            default:
+                                break;
                         }
                         break;
                     case NodeStmt.NodeStmtType.Assign:
                         sb.Append(pp);
-                        if (stmt.assign.type == NodeStmtIdentifierType.SingleVar)
+                        switch (stmt.assign.type)
                         {
-                            sb.Append($"{stmt.assign.singlevar.ident.Value}");
-                            if (stmt.assign.singlevar.expr.type != NodeExpr.NodeExprType.None)
-                            {
+                            case NodeStmtIdentifierType.SingleVar:
+                                sb.Append($"{stmt.assign.singlevar.ident.Value}");
+                                if (stmt.assign.singlevar.expr.type != NodeExpr.NodeExprType.None)
+                                {
+                                    sb.Append($" = ");
+                                    sb.Append($"{CutExpr(stmt.assign.singlevar.expr)}");
+                                }
+                                sb.AppendLine($";");
+                                break;
+                            case NodeStmtIdentifierType.Array:
+                                sb.Append($"{stmt.assign.array.ident.Value}");
+                                foreach (var expr in stmt.assign.array.indexes)
+                                    sb.Append($"[{CutExpr(expr)}]");
                                 sb.Append($" = ");
-                                sb.Append($"{CutExpr(stmt.assign.singlevar.expr)}");
-                            }
-                            sb.AppendLine($";");
-                        }
-                        else if (stmt.assign.type == NodeStmtIdentifierType.Array)
-                        {
-                            sb.Append($"{stmt.assign.array.ident.Value}");
-                            foreach (var expr in stmt.assign.array.indexes)
-                                sb.Append($"[{CutExpr(expr)}]");
-                            sb.Append($" = ");
-                            sb.Append($"{CutExpr(stmt.assign.array.expr)}");
-                            sb.AppendLine($";");
+                                sb.Append($"{CutExpr(stmt.assign.array.expr)}");
+                                sb.AppendLine($";");
+                                break;
+                            default:
+                                break;
                         }
                         break;
                     case NodeStmt.NodeStmtType.If:
