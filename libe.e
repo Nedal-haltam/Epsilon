@@ -25,17 +25,19 @@ func printnumber_signed(auto Number)
 func print(char msg[], ...)
 {
     auto msg_len = strlen(msg);
+    if (msg_len == 0) return 0;
     auto VariadicCount = __VARIADIC_COUNT__;
     if (VariadicCount == 0)
     {
         write(1, msg, msg_len);
         return 0;
     }
+    // variadic args won't exceed 10
     auto specifiers[10];
     auto specifiers_count = 0;
-    for (auto i = 0; i < msg_len; i = i + 1)
+    for (auto i = 0; i < msg_len - 1; i = i + 1)
     {
-        if (msg[i] == '%' & i + 1 < msg_len)
+        if (msg[i] == '%')
         {
             auto msgp1 = msg[i + 1];
             if (msgp1 == 'd')
@@ -43,17 +45,17 @@ func print(char msg[], ...)
                 specifiers[specifiers_count] = i;
                 specifiers_count = specifiers_count + 1;
             }
-            else if (msgp1 == 's')
+            elif (msgp1 == 's')
             {
                 specifiers[specifiers_count] = i;
                 specifiers_count = specifiers_count + 1;
             }
-            else if (msgp1 == 'c')
+            elif (msgp1 == 'c')
             {
                 specifiers[specifiers_count] = i;
                 specifiers_count = specifiers_count + 1;
             }
-            else if (msgp1 == 'z' & i + 2 < msg_len & msg[i + 2] == 'u')
+            elif (msgp1 == 'z' & i + 2 < msg_len & msg[i + 2] == 'u')
             {
                 specifiers[specifiers_count] = i;
                 specifiers_count = specifiers_count + 1;
@@ -76,25 +78,24 @@ func print(char msg[], ...)
         write(1, msg + index, spec - index);
 
         auto Number = __VARIADIC_ARGS__(i);
-        auto specifiers_width = 0;
         auto msgp1 = msg[spec + 1];
         if (msgp1 == 'd')
         {
             printnumber_signed(Number);
-            specifiers_width = 2;
+            index = spec + 2;
         }
-        if (msgp1 == 's')
+        elif (msgp1 == 's')
         {
             auto NumberTextLen = strlen(Number);
             write(1, Number, NumberTextLen);
-            specifiers_width = 2;
+            index = spec + 2;
         }
-        if (msgp1 == 'c')
+        elif (msgp1 == 'c')
         {
             write(1, &Number, 1);
-            specifiers_width = 2;
+            index = spec + 2;
         }
-        if (msgp1 == 'z' & spec + 2 < msg_len & msg[spec + 2] == 'u')
+        elif (msgp1 == 'z' & spec + 2 < msg_len & msg[spec + 2] == 'u')
         {
             if (!Number)
             {
@@ -106,10 +107,8 @@ func print(char msg[], ...)
                 auto NumberTextLen = strlen(NumberText);
                 write(1, NumberText, NumberTextLen);
             }
-            specifiers_width = 3;
+            index = spec + 3;
         }
-
-        index = spec + specifiers_width;
     }
     write(1, msg + index, msg_len - index);
 }
