@@ -1,80 +1,25 @@
 
 
-func printnumber(auto Number, char IsSigned)
+func printnumber_signed(auto Number)
 {
     if (!Number)
     {
         write(1, "0", 1);
         return 0;
     }
-
-    if (IsSigned)
+    if (Number == 1 << 63)
     {
-        if (Number == 1 << 63)
-        {
-            write(1, "-9223372036854775808", 20);
-            return 0;
-        }
-        if (Number < 0)
-        {
-            Number = -Number;
-            write(1, "-", 1);
-        }
-        auto NumberText = stoa(Number);
-        auto NumberTextLen = strlen(NumberText);
-        write(1, NumberText, NumberTextLen);
+        write(1, "-9223372036854775808", 20);
+        return 0;
     }
-    else
+    if (Number < 0)
     {
-        auto NumberText = unstoa(Number);
-        auto NumberTextLen = strlen(NumberText);
-        write(1, NumberText, NumberTextLen);
+        Number = -Number;
+        write(1, "-", 1);
     }
-}
-
-func IsSpecifier(char msg[], auto msg_len, auto i)
-{
-    if (msg[i] == '%' & i + 1 < msg_len)
-    {
-        if (msg[i + 1] == 'd')
-            return 1;
-        if (msg[i + 1] == 'z' & i + 2 < msg_len & msg[i + 2] == 'u')
-            return 1;
-        if (msg[i + 1] == 'c')
-            return 1;
-        if (msg[i + 1] == 's')
-            return 1;
-    }
-}
-
-func printhelper(char msg[], auto msg_len, auto i, auto Number)
-{
-    if (msg[i] == '%' & i + 1 < msg_len)
-    {
-        if (msg[i + 1] == 'd')
-        {
-            printnumber(Number, 1);
-            return 2;
-        }
-        if (msg[i + 1] == 'z' & i + 2 < msg_len & msg[i + 2] == 'u')
-        {
-            printnumber(Number, 0);
-            return 3;
-        }
-        if (msg[i + 1] == 'c')
-        {
-            write(1, &Number, 1);
-            return 2;
-        }
-        if (msg[i + 1] == 's')
-        {
-            auto NumberTextLen = strlen(Number);
-            write(1, Number, NumberTextLen);
-            return 2;
-        }
-    }
-    write(1, msg + i, 1);
-    return 1;
+    auto NumberText = stoa(Number);
+    auto NumberTextLen = strlen(NumberText);
+    write(1, NumberText, NumberTextLen);
 }
 
 func print(char msg[], ...)
@@ -90,10 +35,29 @@ func print(char msg[], ...)
     auto specifiers_count = 0;
     for (auto i = 0; i < msg_len; i = i + 1)
     {
-        if (IsSpecifier(msg, msg_len, i))
+        if (msg[i] == '%' & i + 1 < msg_len)
         {
-            specifiers[specifiers_count] = i;
-            specifiers_count = specifiers_count + 1;
+            auto msgp1 = msg[i + 1];
+            if (msgp1 == 'd')
+            {
+                specifiers[specifiers_count] = i;
+                specifiers_count = specifiers_count + 1;
+            }
+            else if (msgp1 == 's')
+            {
+                specifiers[specifiers_count] = i;
+                specifiers_count = specifiers_count + 1;
+            }
+            else if (msgp1 == 'c')
+            {
+                specifiers[specifiers_count] = i;
+                specifiers_count = specifiers_count + 1;
+            }
+            else if (msgp1 == 'z' & i + 2 < msg_len & msg[i + 2] == 'u')
+            {
+                specifiers[specifiers_count] = i;
+                specifiers_count = specifiers_count + 1;
+            }
         }
     }
     if (specifiers_count == 0)
@@ -104,13 +68,48 @@ func print(char msg[], ...)
     auto args_count = VariadicCount;
     if (specifiers_count < args_count) args_count = specifiers_count;
 
-
     auto index = 0;
     for (auto i = 0; i < args_count; i = i + 1)
     {
-        write(1, msg + index, specifiers[i] - index);
-        auto specifiers_width = printhelper(msg, msg_len, specifiers[i], __VARIADIC_ARGS__(i));
-        index = specifiers[i] + specifiers_width;
+        auto spec = specifiers[i];
+
+        write(1, msg + index, spec - index);
+
+        auto Number = __VARIADIC_ARGS__(i);
+        auto specifiers_width = 0;
+        auto msgp1 = msg[spec + 1];
+        if (msgp1 == 'd')
+        {
+            printnumber_signed(Number);
+            specifiers_width = 2;
+        }
+        if (msgp1 == 's')
+        {
+            auto NumberTextLen = strlen(Number);
+            write(1, Number, NumberTextLen);
+            specifiers_width = 2;
+        }
+        if (msgp1 == 'c')
+        {
+            write(1, &Number, 1);
+            specifiers_width = 2;
+        }
+        if (msgp1 == 'z' & spec + 2 < msg_len & msg[spec + 2] == 'u')
+        {
+            if (!Number)
+            {
+                write(1, "0", 1);
+            }
+            else
+            {
+                auto NumberText = unstoa(Number);
+                auto NumberTextLen = strlen(NumberText);
+                write(1, NumberText, NumberTextLen);
+            }
+            specifiers_width = 3;
+        }
+
+        index = spec + specifiers_width;
     }
     write(1, msg + index, msg_len - index);
 }
