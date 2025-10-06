@@ -1,27 +1,4 @@
 
-
-func printnumber_signed(auto Number)
-{
-    if (!Number)
-    {
-        write(1, "0", 1);
-        return 0;
-    }
-    if (Number == 1 << 63)
-    {
-        write(1, "-9223372036854775808", 20);
-        return 0;
-    }
-    if (Number < 0)
-    {
-        Number = -Number;
-        write(1, "-", 1);
-    }
-    auto NumberText = stoa(Number);
-    auto NumberTextLen = strlen(NumberText);
-    write(1, NumberText, NumberTextLen);
-}
-
 func print(char msg[], ...)
 {
     auto msg_len = strlen(msg);

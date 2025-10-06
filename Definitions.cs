@@ -662,6 +662,7 @@ namespace Epsilon
             { "stoa"   , 1},
             { "unstoa" , 1},
             { "write"  , 3},
+            { "printnumber_signed"  , 1},
         };
     }
 

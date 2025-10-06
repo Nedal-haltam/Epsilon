@@ -958,7 +958,7 @@ namespace Epsilon
             m_output.AppendLine($"    li a7, 93");
             m_output.AppendLine($"    ecall");
             m_output.AppendLine($"    ret");
-            if (m_CalledFunctions.Contains("strlen"))
+            //if (m_CalledFunctions.Contains("strlen"))
             {
                 m_output.AppendLine($"strlen:");
                 m_output.AppendLine($"    mv t0, a0");
@@ -972,7 +972,7 @@ namespace Epsilon
                 m_output.AppendLine($"strlen_done:");
                 m_output.AppendLine($"    ret");
             }
-            if (m_CalledFunctions.Contains("stoa"))
+            //if (m_CalledFunctions.Contains("stoa"))
             {
                 m_output.AppendLine($"stoa:");
                 m_output.AppendLine($"    mv t1, a0");
@@ -1021,6 +1021,72 @@ namespace Epsilon
                 m_output.AppendLine($"    ecall");
                 m_output.AppendLine($"    ret");
             }
+            {
+                m_output.AppendLine($"printnumber_signed:");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD ra, 0(sp)");
+                m_output.AppendLine($"    mv t2, a0");
+                m_output.AppendLine($"ps_LABEL40_START:");
+                m_output.AppendLine($"    SEQZ t0, t2");
+                m_output.AppendLine($"    BEQZ t0, ps_LABEL42_elifs");
+                m_output.AppendLine($"    LI a0, 1");
+                m_output.AppendLine($"    LA a1, zero_str");
+                m_output.AppendLine($"    LI a2, 1");
+                m_output.AppendLine($"    call write");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+                m_output.AppendLine($"    LD ra, -8(sp)");
+                m_output.AppendLine($"    ret");
+                m_output.AppendLine($"ps_LABEL42_elifs:");
+                m_output.AppendLine($"ps_LABEL41_END:");
+                m_output.AppendLine($"ps_LABEL43_START:");
+                m_output.AppendLine($"    LI t0, -9223372036854775808");
+                m_output.AppendLine($"    XOR t0, t2, t0");
+                m_output.AppendLine($"    SEQZ t0, t0");
+                m_output.AppendLine($"    BEQZ t0, ps_LABEL45_elifs");
+                m_output.AppendLine($"    LI a0, 1");
+                m_output.AppendLine($"    LA a1, big_neg_num_str");
+                m_output.AppendLine($"    LI a2, 20");
+                m_output.AppendLine($"    call write");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+                m_output.AppendLine($"    LD ra, -8(sp)");
+                m_output.AppendLine($"    ret");
+                m_output.AppendLine($"ps_LABEL45_elifs:");
+                m_output.AppendLine($"ps_LABEL44_END:");
+                m_output.AppendLine($"ps_LABEL46_START:");
+                m_output.AppendLine($"    LI t1, 0");
+                m_output.AppendLine($"    SLT t0, t2, t1");
+                m_output.AppendLine($"    BEQZ t0, ps_LABEL48_elifs");
+                m_output.AppendLine($"    NEG t2, t2");
+                m_output.AppendLine($"    LI a0, 1");
+                m_output.AppendLine($"    LA a1, hyphen_str");
+                m_output.AppendLine($"    LI a2, 1");
+                m_output.AppendLine($"    call write");
+                m_output.AppendLine($"ps_LABEL48_elifs:");
+                m_output.AppendLine($"ps_LABEL47_END:");
+                m_output.AppendLine($"    mv t0, a0");
+                m_output.AppendLine($"    mv a0, t2");
+                m_output.AppendLine($"    call stoa");
+                m_output.AppendLine($"    MV a0, t0");
+                m_output.AppendLine($"    MV t0, s0");
+
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD t0, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD a0, 0(sp)");
+                m_output.AppendLine($"    LD a0, 8(sp)");
+                m_output.AppendLine($"    call strlen");
+                m_output.AppendLine($"    LD a0, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+
+                m_output.AppendLine($"    LI a0, 1");
+                m_output.AppendLine($"    LD a1, 0(sp)");
+                m_output.AppendLine($"    MV a2, s0");
+                m_output.AppendLine($"    call write");
+                m_output.AppendLine($"    mv s0, zero");
+                m_output.AppendLine($"    ADDI sp, sp, 16");
+                m_output.AppendLine($"    LD ra, -8(sp)");
+                m_output.AppendLine($"    ret");
+            }
         }
         static void GenProgramPrologue()
         {
@@ -1051,8 +1117,14 @@ namespace Epsilon
                 m_output.AppendLine($"StringLits{i}:");
                 m_output.AppendLine($"    .string \"{m_StringLits[i]}\"");
             }
-            if ((!m_program.UserDefinedFunctions.ContainsKey("stoa") && m_CalledFunctions.Contains("stoa"))
-            || (!m_program.UserDefinedFunctions.ContainsKey("unstoa") && m_CalledFunctions.Contains("unstoa")))
+            m_output.AppendLine($"zero_str:");
+            m_output.AppendLine($"    .string \"0\"");
+            m_output.AppendLine($"big_neg_num_str:");
+            m_output.AppendLine($"    .string \"-9223372036854775808\"");
+            m_output.AppendLine($"hyphen_str:");
+            m_output.AppendLine($"    .string \"-\"");
+            //if ((!m_program.UserDefinedFunctions.ContainsKey("stoa") && m_CalledFunctions.Contains("stoa"))
+            //|| (!m_program.UserDefinedFunctions.ContainsKey("unstoa") && m_CalledFunctions.Contains("unstoa")))
             {
                 m_output.AppendLine($".section .bss");
                 m_output.AppendLine($"itoaTempBuffer:     ");

@@ -1562,95 +1562,6 @@ LABEL89_END:
     ADDI sp, sp, 24
     LD ra, -8(sp)
     ret
-printnumber_signed:
-    ADDI sp, sp, -8
-    SD ra, 0(sp)
-    ADDI sp, sp, -8
-    SD a0, 0(sp)
-LABEL94_START:
-    LD t0, 0(sp)
-    SEQZ t0, t0
-    BEQZ t0, LABEL96_elifs
-    LI a0, 1
-    LA a1, StringLits3
-    LI a2, 1
-    call write
-    LI s0, 0
-    ADDI sp, sp, 16
-    LD ra, -8(sp)
-    ret
-LABEL96_elifs:
-LABEL95_END:
-LABEL97_START:
-    LI t0, 63
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SLL t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    BEQZ t0, LABEL99_elifs
-    LI a0, 1
-    LA a1, StringLits4
-    LI a2, 20
-    call write
-    LI s0, 0
-    ADDI sp, sp, 16
-    LD ra, -8(sp)
-    ret
-LABEL99_elifs:
-LABEL98_END:
-LABEL100_START:
-    LI t0, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SLT t0, t0, t1
-    BEQZ t0, LABEL102_elifs
-    LD t0, 0(sp)
-    NEG t0, t0
-    SD t0, 0(sp)
-    LI a0, 1
-    LA a1, StringLits5
-    LI a2, 1
-    call write
-LABEL102_elifs:
-LABEL101_END:
-    ADDI sp, sp, -8
-    SD a0, 0(sp)
-    LD a0, 8(sp)
-    call stoa
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    MV t0, s0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    ADDI sp, sp, -8
-    SD a0, 0(sp)
-    LD a0, 8(sp)
-    call strlen
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    MV t0, s0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI a0, 1
-    LD a1, 8(sp)
-    LD a2, 0(sp)
-    call write
-    mv s0, zero
-    ADDI sp, sp, 32
-    LD ra, -8(sp)
-    ret
 exit:
     li a7, 93
     ecall
@@ -1704,6 +1615,68 @@ write:
     li a7, 64
     ecall
     ret
+printnumber_signed:
+    ADDI sp, sp, -8
+    SD ra, 0(sp)
+    mv t2, a0
+ps_LABEL40_START:
+    SEQZ t0, t2
+    BEQZ t0, ps_LABEL42_elifs
+    LI a0, 1
+    LA a1, zero_str
+    LI a2, 1
+    call write
+    ADDI sp, sp, 8
+    LD ra, -8(sp)
+    ret
+ps_LABEL42_elifs:
+ps_LABEL41_END:
+ps_LABEL43_START:
+    LI t0, -9223372036854775808
+    XOR t0, t2, t0
+    SEQZ t0, t0
+    BEQZ t0, ps_LABEL45_elifs
+    LI a0, 1
+    LA a1, big_neg_num_str
+    LI a2, 20
+    call write
+    ADDI sp, sp, 8
+    LD ra, -8(sp)
+    ret
+ps_LABEL45_elifs:
+ps_LABEL44_END:
+ps_LABEL46_START:
+    LI t1, 0
+    SLT t0, t2, t1
+    BEQZ t0, ps_LABEL48_elifs
+    NEG t2, t2
+    LI a0, 1
+    LA a1, hyphen_str
+    LI a2, 1
+    call write
+ps_LABEL48_elifs:
+ps_LABEL47_END:
+    mv t0, a0
+    mv a0, t2
+    call stoa
+    MV a0, t0
+    MV t0, s0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    ADDI sp, sp, -8
+    SD a0, 0(sp)
+    LD a0, 8(sp)
+    call strlen
+    LD a0, 0(sp)
+    ADDI sp, sp, 8
+    LI a0, 1
+    LD a1, 0(sp)
+    MV a2, s0
+    call write
+    mv s0, zero
+    ADDI sp, sp, 16
+    LD ra, -8(sp)
+    ret
 .section .data
 StringLits0:
     .string "#"
@@ -1713,9 +1686,11 @@ StringLits2:
     .string "\n"
 StringLits3:
     .string "0"
-StringLits4:
+zero_str:
+    .string "0"
+big_neg_num_str:
     .string "-9223372036854775808"
-StringLits5:
+hyphen_str:
     .string "-"
 .section .bss
 itoaTempBuffer:     
