@@ -912,25 +912,15 @@ ps_LABEL46_START:
     call write
 ps_LABEL48_elifs:
 ps_LABEL47_END:
-    mv t0, a0
     mv a0, t2
     call stoa
-    MV a0, t0
-    MV t0, s0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    ADDI sp, sp, -8
-    SD a0, 0(sp)
-    LD a0, 8(sp)
+    mv a1, s0
+    mv a0, s0
     call strlen
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    LI a0, 1
-    LD a1, 0(sp)
     MV a2, s0
+    LI a0, 1
     call write
-    mv s0, zero
-    ADDI sp, sp, 16
+    ADDI sp, sp, 8
     LD ra, -8(sp)
     ret
 .section .data

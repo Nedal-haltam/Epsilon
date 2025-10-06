@@ -1063,27 +1063,15 @@ namespace Epsilon
                 m_output.AppendLine($"    call write");
                 m_output.AppendLine($"ps_LABEL48_elifs:");
                 m_output.AppendLine($"ps_LABEL47_END:");
-                m_output.AppendLine($"    mv t0, a0");
                 m_output.AppendLine($"    mv a0, t2");
                 m_output.AppendLine($"    call stoa");
-                m_output.AppendLine($"    MV a0, t0");
-                m_output.AppendLine($"    MV t0, s0");
-
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD t0, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD a0, 0(sp)");
-                m_output.AppendLine($"    LD a0, 8(sp)");
+                m_output.AppendLine($"    mv a1, s0");
+                m_output.AppendLine($"    mv a0, s0");
                 m_output.AppendLine($"    call strlen");
-                m_output.AppendLine($"    LD a0, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-
-                m_output.AppendLine($"    LI a0, 1");
-                m_output.AppendLine($"    LD a1, 0(sp)");
                 m_output.AppendLine($"    MV a2, s0");
+                m_output.AppendLine($"    LI a0, 1");
                 m_output.AppendLine($"    call write");
-                m_output.AppendLine($"    mv s0, zero");
-                m_output.AppendLine($"    ADDI sp, sp, 16");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
                 m_output.AppendLine($"    LD ra, -8(sp)");
                 m_output.AppendLine($"    ret");
             }
