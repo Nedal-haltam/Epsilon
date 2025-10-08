@@ -55,6 +55,23 @@ stoa_loop:
 stoa_done:
     mv s0, t2
     ret
+unstoa:
+    mv t1, a0
+    la t2, itoaTempBuffer
+    ADDI t2, t2, 32
+    sb zero, 0(t2)
+unstoa_loop:
+    beqz t1, unstoa_done
+    li t3, 10
+    remu t4, t1, t3
+    ADDI t4, t4, 48
+    ADDI t2, t2, -1
+    sb t4, 0(t2)
+    divu t1, t1, t3
+    j unstoa_loop
+unstoa_done:
+    mv s0, t2
+    ret
 write:
     li a7, 64
     ecall
@@ -110,6 +127,100 @@ ps_LABEL47_END:
     call write
     ADDI sp, sp, 8
     LD ra, -8(sp)
+    ret
+printhelper:
+    ADD t2, a0, a2
+    LB t0, 0(t2)
+    ADDI t1, zero, 37
+    BNE t0, t1, ph_LABEL36_elifs
+    LB t2, 1(t2)
+    ADDI t0, zero, 100
+    BNE t2, t0, ph_LABEL39_elifs
+    ADDI s0, zero, 1
+    ret
+ph_LABEL39_elifs:
+    ADDI t0, zero, 115
+    BNE t2, t0, ph_LABEL40_elifs
+    ADDI s0, zero, 1
+    ret
+ph_LABEL40_elifs:
+    ADDI t0, zero, 99
+    BNE t2, t0, ph_LABEL41_elifs
+    ADDI s0, zero, 1
+    ret
+ph_LABEL41_elifs:
+    ADDI sp, sp, -8
+    SD a0, 0(sp)
+    ADDI sp, sp, -8
+    SD a1, 0(sp)
+    ADDI sp, sp, -8
+    SD a2, 0(sp)
+    ADDI sp, sp, -8
+    SD t2, 0(sp)
+    LI t0, 117
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 2
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 24(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    MUL t0, t0, t1
+    LD t1, 32(sp)
+    ADD t0, t1, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    LB t0, 0(t1)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    XOR t0, t0, t1
+    SEQZ t0, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 24(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 2
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 32(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SLT t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 122
+    LD t1, 16(sp)
+    XOR t0, t0, t1
+    SEQZ t0, t0
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    AND t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    AND t0, t0, t1
+    BEQZ t0, ph_LABEL42_elifs
+    ADDI s0, zero, 1
+    ADDI sp, sp, 32
+    ret
+ph_LABEL42_elifs:
+ph_LABEL38_END:
+    ADDI sp, sp, 8
+ph_LABEL36_elifs:
+ph_LABEL35_END:
+    ADDI s0, zero, 0
     ret
 .section .data
 StringLits0:

@@ -993,7 +993,7 @@ namespace Epsilon
                 m_output.AppendLine($"    mv s0, t2");
                 m_output.AppendLine($"    ret");
             }
-            if (m_CalledFunctions.Contains("unstoa"))
+            //if (m_CalledFunctions.Contains("unstoa"))
             {
                 m_output.AppendLine($"unstoa:");
                 m_output.AppendLine($"    mv t1, a0");
@@ -1073,6 +1073,107 @@ namespace Epsilon
                 m_output.AppendLine($"    call write");
                 m_output.AppendLine($"    ADDI sp, sp, 8");
                 m_output.AppendLine($"    LD ra, -8(sp)");
+                m_output.AppendLine($"    ret");
+            }
+            {
+                m_output.AppendLine($"printhelper:");
+                m_output.AppendLine($"    ADD t2, a0, a2");
+                m_output.AppendLine($"    LB t0, 0(t2)");
+                m_output.AppendLine($"    ADDI t1, zero, 37");
+                m_output.AppendLine($"    BNE t0, t1, ph_LABEL36_elifs");
+                m_output.AppendLine($"    LB t2, 1(t2)");
+
+                m_output.AppendLine($"    ADDI t0, zero, 100");
+                m_output.AppendLine($"    BNE t2, t0, ph_LABEL39_elifs");
+                m_output.AppendLine($"    ADDI s0, zero, 1");
+                m_output.AppendLine($"    ret");
+
+                m_output.AppendLine($"ph_LABEL39_elifs:");
+                m_output.AppendLine($"    ADDI t0, zero, 115");
+                m_output.AppendLine($"    BNE t2, t0, ph_LABEL40_elifs");
+                m_output.AppendLine($"    ADDI s0, zero, 1");
+                m_output.AppendLine($"    ret");
+
+                m_output.AppendLine($"ph_LABEL40_elifs:");
+                m_output.AppendLine($"    ADDI t0, zero, 99");
+                m_output.AppendLine($"    BNE t2, t0, ph_LABEL41_elifs");
+                m_output.AppendLine($"    ADDI s0, zero, 1");
+                m_output.AppendLine($"    ret");
+
+                m_output.AppendLine($"ph_LABEL41_elifs:");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD a0, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD a1, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD a2, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD t2, 0(sp)");
+
+                m_output.AppendLine($"    LI t0, 117");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD t0, 0(sp)");
+                m_output.AppendLine($"    LI t0, 2");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD t0, 0(sp)");
+                m_output.AppendLine($"    LD t0, 24(sp)");
+                m_output.AppendLine($"    LD t1, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+                m_output.AppendLine($"    ADD t0, t0, t1");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD t0, 0(sp)");
+                m_output.AppendLine($"    LI t0, 1");
+                m_output.AppendLine($"    LD t1, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+                m_output.AppendLine($"    MUL t0, t0, t1");
+                m_output.AppendLine($"    LD t1, 32(sp)");
+                m_output.AppendLine($"    ADD t0, t1, t0");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD t0, 0(sp)");
+                m_output.AppendLine($"    LD t1, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+                m_output.AppendLine($"    LB t0, 0(t1)");
+                m_output.AppendLine($"    LD t1, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+                m_output.AppendLine($"    XOR t0, t0, t1");
+                m_output.AppendLine($"    SEQZ t0, t0");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD t0, 0(sp)");
+                m_output.AppendLine($"    LD t0, 24(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD t0, 0(sp)");
+                m_output.AppendLine($"    LI t0, 2");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD t0, 0(sp)");
+                m_output.AppendLine($"    LD t0, 32(sp)");
+                m_output.AppendLine($"    LD t1, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+                m_output.AppendLine($"    ADD t0, t0, t1");
+                m_output.AppendLine($"    LD t1, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+                m_output.AppendLine($"    SLT t0, t0, t1");
+                m_output.AppendLine($"    ADDI sp, sp, -8");
+                m_output.AppendLine($"    SD t0, 0(sp)");
+                m_output.AppendLine($"    LI t0, 122");
+                m_output.AppendLine($"    LD t1, 16(sp)");
+                m_output.AppendLine($"    XOR t0, t0, t1");
+                m_output.AppendLine($"    SEQZ t0, t0");
+                m_output.AppendLine($"    LD t1, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+                m_output.AppendLine($"    AND t0, t0, t1");
+                m_output.AppendLine($"    LD t1, 0(sp)");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+                m_output.AppendLine($"    AND t0, t0, t1");
+                m_output.AppendLine($"    BEQZ t0, ph_LABEL42_elifs");
+                m_output.AppendLine($"    ADDI s0, zero, 1");
+                m_output.AppendLine($"    ADDI sp, sp, 32");
+                m_output.AppendLine($"    ret");
+                m_output.AppendLine($"ph_LABEL42_elifs:");
+                m_output.AppendLine($"ph_LABEL38_END:");
+                m_output.AppendLine($"    ADDI sp, sp, 8");
+                m_output.AppendLine($"ph_LABEL36_elifs:");
+                m_output.AppendLine($"ph_LABEL35_END:");
+                m_output.AppendLine($"    ADDI s0, zero, 0");
                 m_output.AppendLine($"    ret");
             }
         }

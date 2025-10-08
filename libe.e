@@ -14,29 +14,10 @@ func print(char msg[], ...)
     auto specifiers_count = 0;
     for (auto i = 0; i < msg_len - 1; i = i + 1)
     {
-        if (msg[i] == '%')
+        if (printhelper(msg, msg_len, i))
         {
-            auto msgp1 = msg[i + 1];
-            if (msgp1 == 'd')
-            {
-                specifiers[specifiers_count] = i;
-                specifiers_count = specifiers_count + 1;
-            }
-            elif (msgp1 == 's')
-            {
-                specifiers[specifiers_count] = i;
-                specifiers_count = specifiers_count + 1;
-            }
-            elif (msgp1 == 'c')
-            {
-                specifiers[specifiers_count] = i;
-                specifiers_count = specifiers_count + 1;
-            }
-            elif (msgp1 == 'z' & i + 2 < msg_len & msg[i + 2] == 'u')
-            {
-                specifiers[specifiers_count] = i;
-                specifiers_count = specifiers_count + 1;
-            }
+            specifiers[specifiers_count] = i;
+            specifiers_count = specifiers_count + 1;
         }
     }
     if (specifiers_count == 0)

@@ -855,242 +855,43 @@ LABEL58_START:
     SLT t0, t0, t1
     BEQZ t0, LABEL59_END
 LABEL61_START:
-    LI t0, 37
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 8(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    MUL t0, t0, t1
-    LD t1, 176(sp)
-    ADD t0, t1, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    LB t0, 0(t1)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
+    ADDI sp, sp, -24
+    SD a0, 0(sp)
+    SD a1, 8(sp)
+    SD a2, 16(sp)
+    LD a0, 192(sp)
+    LD a1, 128(sp)
+    LD a2, 24(sp)
+    call printhelper
+    LD a2, 16(sp)
+    LD a1, 8(sp)
+    LD a0, 0(sp)
+    ADDI sp, sp, 24
+    MV t0, s0
     BEQZ t0, LABEL63_elifs
-    LI t0, 1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    MUL t0, t0, t1
-    LD t1, 168(sp)
-    ADD t0, t1, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    LB t0, 0(t1)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-LABEL64_START:
-    LI t0, 100
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    BEQZ t0, LABEL66_elifs
-    LD t0, 16(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
     ADDI sp, sp, 8
     MUL t0, t0, t1
-    ADDI t0, t0, 24
+    ADDI t0, t0, 16
     ADD t0, sp, t0
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LD t0, 16(sp)
+    LD t0, 8(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SD t0, 0(t1)
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    SD t0, 16(sp)
-    J LABEL65_END
-LABEL66_elifs:
-    LI t0, 115
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    BEQZ t0, LABEL67_elifs
-    LD t0, 16(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 8
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    MUL t0, t0, t1
-    ADDI t0, t0, 24
-    ADD t0, sp, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     LD t0, 16(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
-    SD t0, 0(t1)
-    LI t0, 1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
     ADD t0, t0, t1
-    SD t0, 16(sp)
-    J LABEL65_END
-    J LABEL65_END
-LABEL67_elifs:
-    LI t0, 99
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    BEQZ t0, LABEL68_elifs
-    LD t0, 16(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 8
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    MUL t0, t0, t1
-    ADDI t0, t0, 24
-    ADD t0, sp, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 16(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SD t0, 0(t1)
-    LI t0, 1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    SD t0, 16(sp)
-    J LABEL65_END
-    J LABEL65_END
-LABEL68_elifs:
-    LI t0, 117
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 2
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    MUL t0, t0, t1
-    LD t1, 184(sp)
-    ADD t0, t1, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    LB t0, 0(t1)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 120(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 2
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 32(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SLT t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 122
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
-    SEQZ t0, t0
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    AND t0, t0, t1
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    AND t0, t0, t1
-    BEQZ t0, LABEL69_elifs
-    LD t0, 16(sp)
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t0, 8
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    MUL t0, t0, t1
-    ADDI t0, t0, 24
-    ADD t0, sp, t0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 16(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SD t0, 0(t1)
-    LI t0, 1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 24(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    ADD t0, t0, t1
-    SD t0, 16(sp)
-    J LABEL65_END
-LABEL69_elifs:
-LABEL65_END:
-    LI t0, 8
-    ADD sp, sp, t0
+    SD t0, 8(sp)
 LABEL63_elifs:
 LABEL62_END:
 LABEL60_START:
@@ -1106,7 +907,7 @@ LABEL60_START:
 LABEL59_END:
     LI t0, 8
     ADD sp, sp, t0
-LABEL70_START:
+LABEL64_START:
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1115,7 +916,7 @@ LABEL70_START:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SEQZ t0, t0
-    BEQZ t0, LABEL72_elifs
+    BEQZ t0, LABEL66_elifs
     LI a0, 1
     LD a1, 160(sp)
     LD a2, 96(sp)
@@ -1124,12 +925,12 @@ LABEL70_START:
     ADDI sp, sp, 176
     LD ra, -8(sp)
     ret
-LABEL72_elifs:
-LABEL71_END:
+LABEL66_elifs:
+LABEL65_END:
     LD t0, 88(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-LABEL73_START:
+LABEL67_START:
     LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1137,18 +938,18 @@ LABEL73_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, LABEL75_elifs
+    BEQZ t0, LABEL69_elifs
     LD t0, 8(sp)
     SD t0, 0(sp)
-LABEL75_elifs:
-LABEL74_END:
+LABEL69_elifs:
+LABEL68_END:
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
-LABEL76_START:
+LABEL70_START:
     LD t0, 16(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1156,7 +957,7 @@ LABEL76_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, LABEL77_END
+    BEQZ t0, LABEL71_END
     LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1228,7 +1029,7 @@ LABEL76_START:
     LB t0, 0(t1)
     ADDI sp, sp, -8
     SD t0, 0(sp)
-LABEL79_START:
+LABEL73_START:
     LI t0, 100
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1237,7 +1038,7 @@ LABEL79_START:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SEQZ t0, t0
-    BEQZ t0, LABEL81_elifs
+    BEQZ t0, LABEL75_elifs
     LD a0, 8(sp)
     call printnumber_signed
     LI t0, 2
@@ -1248,8 +1049,8 @@ LABEL79_START:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 32(sp)
-    J LABEL80_END
-LABEL81_elifs:
+    J LABEL74_END
+LABEL75_elifs:
     LI t0, 115
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1258,7 +1059,7 @@ LABEL81_elifs:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SEQZ t0, t0
-    BEQZ t0, LABEL82_elifs
+    BEQZ t0, LABEL76_elifs
     ADDI sp, sp, -8
     SD a0, 0(sp)
     LD a0, 16(sp)
@@ -1282,9 +1083,9 @@ LABEL81_elifs:
     SD t0, 40(sp)
     LI t0, 8
     ADD sp, sp, t0
-    J LABEL80_END
-    J LABEL80_END
-LABEL82_elifs:
+    J LABEL74_END
+    J LABEL74_END
+LABEL76_elifs:
     LI t0, 99
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1293,7 +1094,7 @@ LABEL82_elifs:
     ADDI sp, sp, 8
     XOR t0, t0, t1
     SEQZ t0, t0
-    BEQZ t0, LABEL83_elifs
+    BEQZ t0, LABEL77_elifs
     LI a0, 1
     ADDI a1, sp, 8
     LI a2, 1
@@ -1306,9 +1107,9 @@ LABEL82_elifs:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 32(sp)
-    J LABEL80_END
-    J LABEL80_END
-LABEL83_elifs:
+    J LABEL74_END
+    J LABEL74_END
+LABEL77_elifs:
     LI t0, 117
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1367,17 +1168,17 @@ LABEL83_elifs:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1
-    BEQZ t0, LABEL84_elifs
-LABEL85_START:
+    BEQZ t0, LABEL78_elifs
+LABEL79_START:
     LD t0, 8(sp)
     SEQZ t0, t0
-    BEQZ t0, LABEL87_elifs
+    BEQZ t0, LABEL81_elifs
     LI a0, 1
     LA a1, StringLits3
     LI a2, 1
     call write
-    J LABEL86_END
-LABEL87_elifs:
+    J LABEL80_END
+LABEL81_elifs:
     ADDI sp, sp, -8
     SD a0, 0(sp)
     LD a0, 16(sp)
@@ -1402,7 +1203,7 @@ LABEL87_elifs:
     call write
     LI t0, 16
     ADD sp, sp, t0
-LABEL86_END:
+LABEL80_END:
     LI t0, 3
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1411,12 +1212,12 @@ LABEL86_END:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 32(sp)
-    J LABEL80_END
-LABEL84_elifs:
-LABEL80_END:
+    J LABEL74_END
+LABEL78_elifs:
+LABEL74_END:
     LI t0, 24
     ADD sp, sp, t0
-LABEL78_START:
+LABEL72_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1425,8 +1226,8 @@ LABEL78_START:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 0(sp)
-    J LABEL76_START
-LABEL77_END:
+    J LABEL70_START
+LABEL71_END:
     LI t0, 8
     ADD sp, sp, t0
     LI a0, 1
@@ -1459,7 +1260,7 @@ Copy:
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
-LABEL88_START:
+LABEL82_START:
     LI t0, 10
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1467,11 +1268,11 @@ LABEL88_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, LABEL89_END
+    BEQZ t0, LABEL83_END
     LI t0, 0
     ADDI sp, sp, -8
     SD t0, 0(sp)
-LABEL91_START:
+LABEL85_START:
     LI t0, 10
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1479,7 +1280,7 @@ LABEL91_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SLT t0, t0, t1
-    BEQZ t0, LABEL92_END
+    BEQZ t0, LABEL86_END
     LD t0, 0(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1532,7 +1333,7 @@ LABEL91_START:
     LD t1, 0(sp)
     ADDI sp, sp, 8
     SD t0, 0(t1)
-LABEL93_START:
+LABEL87_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1541,11 +1342,11 @@ LABEL93_START:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 0(sp)
-    J LABEL91_START
-LABEL92_END:
+    J LABEL85_START
+LABEL86_END:
     LI t0, 8
     ADD sp, sp, t0
-LABEL90_START:
+LABEL84_START:
     LI t0, 1
     ADDI sp, sp, -8
     SD t0, 0(sp)
@@ -1554,8 +1355,8 @@ LABEL90_START:
     ADDI sp, sp, 8
     ADD t0, t0, t1
     SD t0, 0(sp)
-    J LABEL88_START
-LABEL89_END:
+    J LABEL82_START
+LABEL83_END:
     LI t0, 8
     ADD sp, sp, t0
     mv s0, zero
@@ -1666,6 +1467,100 @@ ps_LABEL47_END:
     call write
     ADDI sp, sp, 8
     LD ra, -8(sp)
+    ret
+printhelper:
+    ADD t2, a0, a2
+    LB t0, 0(t2)
+    ADDI t1, zero, 37
+    BNE t0, t1, ph_LABEL36_elifs
+    LB t2, 1(t2)
+    ADDI t0, zero, 100
+    BNE t2, t0, ph_LABEL39_elifs
+    ADDI s0, zero, 1
+    ret
+ph_LABEL39_elifs:
+    ADDI t0, zero, 115
+    BNE t2, t0, ph_LABEL40_elifs
+    ADDI s0, zero, 1
+    ret
+ph_LABEL40_elifs:
+    ADDI t0, zero, 99
+    BNE t2, t0, ph_LABEL41_elifs
+    ADDI s0, zero, 1
+    ret
+ph_LABEL41_elifs:
+    ADDI sp, sp, -8
+    SD a0, 0(sp)
+    ADDI sp, sp, -8
+    SD a1, 0(sp)
+    ADDI sp, sp, -8
+    SD a2, 0(sp)
+    ADDI sp, sp, -8
+    SD t2, 0(sp)
+    LI t0, 117
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 2
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 24(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    MUL t0, t0, t1
+    LD t1, 32(sp)
+    ADD t0, t1, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    LB t0, 0(t1)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    XOR t0, t0, t1
+    SEQZ t0, t0
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 24(sp)
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 2
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LD t0, 32(sp)
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    ADD t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    SLT t0, t0, t1
+    ADDI sp, sp, -8
+    SD t0, 0(sp)
+    LI t0, 122
+    LD t1, 16(sp)
+    XOR t0, t0, t1
+    SEQZ t0, t0
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    AND t0, t0, t1
+    LD t1, 0(sp)
+    ADDI sp, sp, 8
+    AND t0, t0, t1
+    BEQZ t0, ph_LABEL42_elifs
+    ADDI s0, zero, 1
+    ADDI sp, sp, 32
+    ret
+ph_LABEL42_elifs:
+ph_LABEL38_END:
+    ADDI sp, sp, 8
+ph_LABEL36_elifs:
+ph_LABEL35_END:
+    ADDI s0, zero, 0
     ret
 .section .data
 StringLits0:
