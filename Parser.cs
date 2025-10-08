@@ -655,7 +655,7 @@ namespace Epsilon
         void ParseFunctionPrologue(Token FunctionName)
         {
             CurrentFunctionName = FunctionName.Value;
-            if (ConstDefs.STD_FUNCTIONS_PARAMS.ContainsKey(FunctionName.Value) || prog.UserDefinedFunctions.ContainsKey(FunctionName.Value))
+            if (ConstDefs.STD_FUNCTIONS_MAP.ContainsKey(FunctionName.Value) || prog.UserDefinedFunctions.ContainsKey(FunctionName.Value))
             {
                 Token? peeked = Peek(-1);
                 int line = peeked.HasValue ? peeked.Value.Line : 1;

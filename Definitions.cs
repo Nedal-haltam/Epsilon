@@ -656,13 +656,21 @@ namespace Epsilon
     }
     static class ConstDefs
     {
-        static public Dictionary<string, int> STD_FUNCTIONS_PARAMS = new()
+        public enum STD_FUNCTIONS
         {
-            { "strlen" , 1},
-            { "stoa"   , 1},
-            { "unstoa" , 1},
-            { "write"  , 3},
-            { "printnumber_signed"  , 1},
+            strlen,
+            stoa,
+            unstoa,
+            write,
+            print,
+        }
+        static public Dictionary<string, STD_FUNCTIONS> STD_FUNCTIONS_MAP = new()
+        {
+            { "strlen", STD_FUNCTIONS.strlen},
+            { "stoa"  , STD_FUNCTIONS.stoa},
+            { "unstoa", STD_FUNCTIONS.unstoa},
+            { "write" , STD_FUNCTIONS.write},
+            { "print" , STD_FUNCTIONS.print},
         };
     }
 

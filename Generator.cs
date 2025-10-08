@@ -502,10 +502,12 @@ namespace Epsilon
                 }
                 return CalledFunctionDefinition;
             }
-            else if (ConstDefs.STD_FUNCTIONS_PARAMS.TryGetValue(CalledFunction.FunctionName.Value, out int Arity))
+            else if (ConstDefs.STD_FUNCTIONS_MAP.ContainsKey(CalledFunction.FunctionName.Value))
             {
-                if (CalledFunction.parameters.Count != Arity)
-                    Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{CalledFunction.FunctionName.Line}:1: Generator: Function call to `{CalledFunctionDefinition.FunctionName.Value}` is not valid, check function arity", 1);
+            }
+            else
+            {
+                Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{CalledFunction.FunctionName.Line}:1: Generator: function {CalledFunction.FunctionName.Value} is undeclared", 1);
             }
             return new();
         }
@@ -537,9 +539,40 @@ namespace Epsilon
             }
             else // std function
             {
-                for (int i = 0; i < CalledFunction.parameters.Count; i++)
+                if (!ConstDefs.STD_FUNCTIONS_MAP.TryGetValue(CalledFunction.FunctionName.Value, out ConstDefs.STD_FUNCTIONS std)) Shartilities.UNREACHABLE("FunctionCallFillParameters");
+                int i = 0;
+                switch (std)
                 {
-                    GenExpr(CalledFunction.parameters[i], $"a{i}");
+                    case ConstDefs.STD_FUNCTIONS.strlen:
+                        Shartilities.Assert(CalledFunction.parameters.Count == 1, $"{std.ToString()} arity is 1");
+                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
+                        break;
+                    case ConstDefs.STD_FUNCTIONS.stoa:
+                        Shartilities.Assert(CalledFunction.parameters.Count == 1, $"{std.ToString()} arity is 1");
+                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
+                        break;
+                    case ConstDefs.STD_FUNCTIONS.unstoa:
+                        Shartilities.Assert(CalledFunction.parameters.Count == 1, $"{std.ToString()} arity is 1");
+                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
+                        break;
+                    case ConstDefs.STD_FUNCTIONS.write:
+                        Shartilities.Assert(CalledFunction.parameters.Count == 3, $"{std.ToString()} arity is 3");
+                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
+                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
+                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
+                        break;
+                    case ConstDefs.STD_FUNCTIONS.print:
+                        if (CalledFunction.parameters.Count < 1)
+                            Shartilities.Logln(Shartilities.LogType.ERROR, $"minimum number parameters for {std.ToString()} is 1");
+                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
+                        GenExpr(NodeExpr.Number((CalledFunction.parameters.Count - i).ToString(), -1), $"a{i}");
+                        for (int j = i; j < CalledFunction.parameters.Count; j++)
+                        {
+                            GenExpr(CalledFunction.parameters[j], $"a{j + 1}");
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -954,228 +987,8 @@ namespace Epsilon
         }
         static void GenStdFunctions()
         {
-            m_output.AppendLine($"exit:");
-            m_output.AppendLine($"    li a7, 93");
-            m_output.AppendLine($"    ecall");
-            m_output.AppendLine($"    ret");
-            //if (m_CalledFunctions.Contains("strlen"))
-            {
-                m_output.AppendLine($"strlen:");
-                m_output.AppendLine($"    mv t0, a0");
-                m_output.AppendLine($"    li s0, 0");
-                m_output.AppendLine($"strlen_loop:");
-                m_output.AppendLine($"    lbu t1, 0(t0)");
-                m_output.AppendLine($"    beqz t1, strlen_done");
-                m_output.AppendLine($"    ADDI s0, s0, 1");
-                m_output.AppendLine($"    ADDI t0, t0, 1");
-                m_output.AppendLine($"    j strlen_loop");
-                m_output.AppendLine($"strlen_done:");
-                m_output.AppendLine($"    ret");
-            }
-            //if (m_CalledFunctions.Contains("stoa"))
-            {
-                m_output.AppendLine($"stoa:");
-                m_output.AppendLine($"    mv t1, a0");
-                //m_output.AppendLine($"    ADDI t2, a1, 32");
-                m_output.AppendLine($"    la t2, itoaTempBuffer");
-                m_output.AppendLine($"    ADDI t2, t2, 32");
-                m_output.AppendLine($"    sb zero, 0(t2)");
-                m_output.AppendLine($"stoa_loop:");
-                m_output.AppendLine($"    beqz t1, stoa_done");
-                m_output.AppendLine($"    li t3, 10");
-                m_output.AppendLine($"    rem t4, t1, t3");
-                m_output.AppendLine($"    ADDI t4, t4, 48");
-                m_output.AppendLine($"    ADDI t2, t2, -1");
-                m_output.AppendLine($"    sb t4, 0(t2)");
-                m_output.AppendLine($"    div t1, t1, t3");
-                m_output.AppendLine($"    j stoa_loop");
-                m_output.AppendLine($"stoa_done:");
-                m_output.AppendLine($"    mv s0, t2");
-                m_output.AppendLine($"    ret");
-            }
-            //if (m_CalledFunctions.Contains("unstoa"))
-            {
-                m_output.AppendLine($"unstoa:");
-                m_output.AppendLine($"    mv t1, a0");
-                //m_output.AppendLine($"    ADDI t2, a1, 32");
-                m_output.AppendLine($"    la t2, itoaTempBuffer");
-                m_output.AppendLine($"    ADDI t2, t2, 32");
-                m_output.AppendLine($"    sb zero, 0(t2)");
-                m_output.AppendLine($"unstoa_loop:");
-                m_output.AppendLine($"    beqz t1, unstoa_done");
-                m_output.AppendLine($"    li t3, 10");
-                m_output.AppendLine($"    remu t4, t1, t3");
-                m_output.AppendLine($"    ADDI t4, t4, 48");
-                m_output.AppendLine($"    ADDI t2, t2, -1");
-                m_output.AppendLine($"    sb t4, 0(t2)");
-                m_output.AppendLine($"    divu t1, t1, t3");
-                m_output.AppendLine($"    j unstoa_loop");
-                m_output.AppendLine($"unstoa_done:");
-                m_output.AppendLine($"    mv s0, t2");
-                m_output.AppendLine($"    ret");
-            }
-            //if (m_CalledFunctions.Contains("write"))
-            {
-                m_output.AppendLine($"write:");
-                m_output.AppendLine($"    li a7, 64");
-                m_output.AppendLine($"    ecall");
-                m_output.AppendLine($"    ret");
-            }
-            {
-                m_output.AppendLine($"printnumber_signed:");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD ra, 0(sp)");
-                m_output.AppendLine($"    mv t2, a0");
-                m_output.AppendLine($"ps_LABEL40_START:");
-                m_output.AppendLine($"    SEQZ t0, t2");
-                m_output.AppendLine($"    BEQZ t0, ps_LABEL42_elifs");
-                m_output.AppendLine($"    LI a0, 1");
-                m_output.AppendLine($"    LA a1, zero_str");
-                m_output.AppendLine($"    LI a2, 1");
-                m_output.AppendLine($"    call write");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"    LD ra, -8(sp)");
-                m_output.AppendLine($"    ret");
-                m_output.AppendLine($"ps_LABEL42_elifs:");
-                m_output.AppendLine($"ps_LABEL41_END:");
-                m_output.AppendLine($"ps_LABEL43_START:");
-                m_output.AppendLine($"    LI t0, -9223372036854775808");
-                m_output.AppendLine($"    XOR t0, t2, t0");
-                m_output.AppendLine($"    SEQZ t0, t0");
-                m_output.AppendLine($"    BEQZ t0, ps_LABEL45_elifs");
-                m_output.AppendLine($"    LI a0, 1");
-                m_output.AppendLine($"    LA a1, big_neg_num_str");
-                m_output.AppendLine($"    LI a2, 20");
-                m_output.AppendLine($"    call write");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"    LD ra, -8(sp)");
-                m_output.AppendLine($"    ret");
-                m_output.AppendLine($"ps_LABEL45_elifs:");
-                m_output.AppendLine($"ps_LABEL44_END:");
-                m_output.AppendLine($"ps_LABEL46_START:");
-                m_output.AppendLine($"    LI t1, 0");
-                m_output.AppendLine($"    SLT t0, t2, t1");
-                m_output.AppendLine($"    BEQZ t0, ps_LABEL48_elifs");
-                m_output.AppendLine($"    NEG t2, t2");
-                m_output.AppendLine($"    LI a0, 1");
-                m_output.AppendLine($"    LA a1, hyphen_str");
-                m_output.AppendLine($"    LI a2, 1");
-                m_output.AppendLine($"    call write");
-                m_output.AppendLine($"ps_LABEL48_elifs:");
-                m_output.AppendLine($"ps_LABEL47_END:");
-                m_output.AppendLine($"    mv a0, t2");
-                m_output.AppendLine($"    call stoa");
-                m_output.AppendLine($"    mv a1, s0");
-                m_output.AppendLine($"    mv a0, s0");
-                m_output.AppendLine($"    call strlen");
-                m_output.AppendLine($"    MV a2, s0");
-                m_output.AppendLine($"    LI a0, 1");
-                m_output.AppendLine($"    call write");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"    LD ra, -8(sp)");
-                m_output.AppendLine($"    ret");
-            }
-            {
-                m_output.AppendLine($"printhelper:");
-                m_output.AppendLine($"    ADD t2, a0, a2");
-                m_output.AppendLine($"    LB t0, 0(t2)");
-                m_output.AppendLine($"    ADDI t1, zero, 37");
-                m_output.AppendLine($"    BNE t0, t1, ph_LABEL36_elifs");
-                m_output.AppendLine($"    LB t2, 1(t2)");
-
-                m_output.AppendLine($"    ADDI t0, zero, 100");
-                m_output.AppendLine($"    BNE t2, t0, ph_LABEL39_elifs");
-                m_output.AppendLine($"    ADDI s0, zero, 1");
-                m_output.AppendLine($"    ret");
-
-                m_output.AppendLine($"ph_LABEL39_elifs:");
-                m_output.AppendLine($"    ADDI t0, zero, 115");
-                m_output.AppendLine($"    BNE t2, t0, ph_LABEL40_elifs");
-                m_output.AppendLine($"    ADDI s0, zero, 1");
-                m_output.AppendLine($"    ret");
-
-                m_output.AppendLine($"ph_LABEL40_elifs:");
-                m_output.AppendLine($"    ADDI t0, zero, 99");
-                m_output.AppendLine($"    BNE t2, t0, ph_LABEL41_elifs");
-                m_output.AppendLine($"    ADDI s0, zero, 1");
-                m_output.AppendLine($"    ret");
-
-                m_output.AppendLine($"ph_LABEL41_elifs:");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD a0, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD a1, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD a2, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD t2, 0(sp)");
-
-                m_output.AppendLine($"    LI t0, 117");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD t0, 0(sp)");
-                m_output.AppendLine($"    LI t0, 2");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD t0, 0(sp)");
-                m_output.AppendLine($"    LD t0, 24(sp)");
-                m_output.AppendLine($"    LD t1, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"    ADD t0, t0, t1");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD t0, 0(sp)");
-                m_output.AppendLine($"    LI t0, 1");
-                m_output.AppendLine($"    LD t1, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"    MUL t0, t0, t1");
-                m_output.AppendLine($"    LD t1, 32(sp)");
-                m_output.AppendLine($"    ADD t0, t1, t0");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD t0, 0(sp)");
-                m_output.AppendLine($"    LD t1, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"    LB t0, 0(t1)");
-                m_output.AppendLine($"    LD t1, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"    XOR t0, t0, t1");
-                m_output.AppendLine($"    SEQZ t0, t0");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD t0, 0(sp)");
-                m_output.AppendLine($"    LD t0, 24(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD t0, 0(sp)");
-                m_output.AppendLine($"    LI t0, 2");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD t0, 0(sp)");
-                m_output.AppendLine($"    LD t0, 32(sp)");
-                m_output.AppendLine($"    LD t1, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"    ADD t0, t0, t1");
-                m_output.AppendLine($"    LD t1, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"    SLT t0, t0, t1");
-                m_output.AppendLine($"    ADDI sp, sp, -8");
-                m_output.AppendLine($"    SD t0, 0(sp)");
-                m_output.AppendLine($"    LI t0, 122");
-                m_output.AppendLine($"    LD t1, 16(sp)");
-                m_output.AppendLine($"    XOR t0, t0, t1");
-                m_output.AppendLine($"    SEQZ t0, t0");
-                m_output.AppendLine($"    LD t1, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"    AND t0, t0, t1");
-                m_output.AppendLine($"    LD t1, 0(sp)");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"    AND t0, t0, t1");
-                m_output.AppendLine($"    BEQZ t0, ph_LABEL42_elifs");
-                m_output.AppendLine($"    ADDI s0, zero, 1");
-                m_output.AppendLine($"    ADDI sp, sp, 32");
-                m_output.AppendLine($"    ret");
-                m_output.AppendLine($"ph_LABEL42_elifs:");
-                m_output.AppendLine($"ph_LABEL38_END:");
-                m_output.AppendLine($"    ADDI sp, sp, 8");
-                m_output.AppendLine($"ph_LABEL36_elifs:");
-                m_output.AppendLine($"ph_LABEL35_END:");
-                m_output.AppendLine($"    ADDI s0, zero, 0");
-                m_output.AppendLine($"    ret");
-            }
+            // TODO: should link with libe.S
+            m_output.Append(Shartilities.ReadFile($"{Environment.GetCommandLineArgs()[0]}/../../../../libe.S", 1));
         }
         static void GenProgramPrologue()
         {
