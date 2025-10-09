@@ -213,6 +213,15 @@ return 127:
 char: 127
 auto: 127
 string
+signed:
+x    = 123
+negx = -123
+unsigned:
+x    = 123
+negx = 18446744073709551493
+print empty:``
+this is an str message with specifiers, 34 + 35 = char(E), signed(69), unsigned(69)
+auto str = specifier(s) -> this is an str message with specifiers, 34 + 35 = char(%c), signed(%d), unsigned(%zu)
 ..........
 ..#.......
 ...#......
