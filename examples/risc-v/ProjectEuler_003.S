@@ -145,22 +145,13 @@ print:
     SD a6, 0(sp)
     ADDI sp, sp, -8
     SD a7, 0(sp)
-    ADDI sp, sp, -8
-    SD a0, 0(sp)
-    LD a0, 64(sp)
+
     call strlen
-    LD a0, 0(sp)
-    ADDI sp, sp, 8
-    MV t0, s0
     ADDI sp, sp, -8
-    SD t0, 0(sp)
+    SD s0, 0(sp)
+
 libe_LABEL4_START:
-    LI t0, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LD t0, 0(sp)
     XOR t0, t0, t1
     SEQZ t0, t0
     BEQZ t0, libe_LABEL6_elifs
@@ -170,25 +161,11 @@ libe_LABEL4_START:
     ret
 libe_LABEL6_elifs:
 libe_LABEL5_END:
-    LI t0, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LI t1, 8
-    LD t0, 0(sp)
-    ADDI sp, sp, 8
-    MUL t1, t1, t0
-    SUB t1, sp, t1
-    LD t0, 56(t1)
+    LD t0, 56(sp)
     ADDI sp, sp, -8
     SD t0, 0(sp)
 libe_LABEL7_START:
-    LI t0, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    XOR t0, t0, t1
+    LD t0, 0(sp)
     SEQZ t0, t0
     BEQZ t0, libe_LABEL9_elifs
     LI a0, 1
@@ -209,18 +186,11 @@ libe_LABEL8_END:
     ADDI sp, sp, -8
     SD t0, 0(sp)
 libe_LABEL10_START:
+
     LI t0, 1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 112(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
-    SUB t0, t0, t1
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    LD t0, 8(sp)
-    LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LD t1, 104(sp)
+    SUB t1, t1, t0
+    LD t0, 0(sp)
     SLT t0, t0, t1
     BEQZ t0, libe_LABEL11_END
 libe_LABEL13_START:
