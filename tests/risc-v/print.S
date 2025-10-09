@@ -66,6 +66,9 @@ main:
     LB a3, 0(sp)
     LB a4, 0(sp)
     call print
+    LD a0, 1(sp)
+    LI a1, 0
+    call print
     LA a0, StringLits11
     LI a1, 1
     LD a2, 1(sp)

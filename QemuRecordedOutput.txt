@@ -221,6 +221,7 @@ x    = 123
 negx = 18446744073709551493
 print empty:``
 this is an str message with specifiers, 34 + 35 = char(E), signed(69), unsigned(69)
+this is an str message with specifiers, 34 + 35 = char(%c), signed(%d), unsigned(%zu)
 auto str = specifier(s) -> this is an str message with specifiers, 34 + 35 = char(%c), signed(%d), unsigned(%zu)
 ..........
 ..#.......

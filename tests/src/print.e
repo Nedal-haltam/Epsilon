@@ -20,6 +20,7 @@ func main()
     auto str = "this is an str message with specifiers, 34 + 35 = char(%c), signed(%d), unsigned(%zu)\n";
     char sn = 34 + 35;
     print(str, sn, sn, sn);
+    print(str);
 
     print("auto str = specifier(s) -> %s", str);
 
