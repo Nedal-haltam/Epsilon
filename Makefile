@@ -10,7 +10,7 @@ TESTS_BUILD_FOLDER := ./tests/risc-v
 QEMU_SAVED_OUTPUT_PATH := ./QemuRecordedOutput.txt
 SIMU_SAVED_OUTPUT_PATH := ./SimuRecordedOutput.txt
 
-EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 mandelbrot
+EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 mandelbrot fizzbuzz
 TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc PrintNumbers Globals ForLoops ReturnFromFuncs InlineAsm print
 
 .PHONY:	all all-parallel run sim main run-examples run-tests run-all-parallel sim-all-parallel sim-examples sim-tests record-log diff-diff clean-examples clean-tests clean
