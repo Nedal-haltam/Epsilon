@@ -37,7 +37,6 @@ diff-diff:
 	@touch ./QemuRecordedOutput2.txt
 	@rm -rf ./SimuRecordedOutput2.txt
 	@touch ./SimuRecordedOutput2.txt
-# 	@$(MAKE) LOG=1 QEMU_SAVED_OUTPUT_PATH=./QemuRecordedOutput2.txt SIMU_SAVED_OUTPUT_PATH=./SimuRecordedOutput2.txt
 	@$(MAKE) LOG=1 QEMU_SAVED_OUTPUT_PATH=./QemuRecordedOutput2.txt SIMU_SAVED_OUTPUT_PATH=./SimuRecordedOutput2.txt
 	@sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" ./QemuRecordedOutput2.txt | col -b > ./temp-logs/QemuRecordedOutput2.txt
 	@sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" ./SimuRecordedOutput2.txt | col -b > ./temp-logs/SimuRecordedOutput2.txt

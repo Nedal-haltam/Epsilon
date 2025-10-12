@@ -318,23 +318,15 @@ namespace Epsilon
         }
         static void AssembleAndLinkForQemu(string SourceFilePath, string OutputFilePath)
         {
-            Shartilities.Command cmd = new(["riscv64-linux-gnu-gcc", "-o", OutputFilePath, SourceFilePath, "-static"]);
-            Process? p = new();
-            if (!cmd.RunSync(ref p))
-            {
-                Console.Write($"standard output:\n");
-                Console.Write(p!.StandardOutput.ReadToEnd());
-                Console.Write($"standard error:\n");
-                Console.Write(p!.StandardError.ReadToEnd());
-                Environment.Exit(p!.ExitCode);
-            }
-            Console.Write(p!.StandardOutput.ReadToEnd());
+            Shartilities.Command cmd = new(["riscv64-linux-gnu-gcc","-o", OutputFilePath,SourceFilePath,"-static"]);
+            Process? p = null;
+            if (!cmd.RunSyncRealTime(ref p, out string stdout, out string stderr)) Environment.Exit(p!.ExitCode);
         }
         static void RunOnQemu(string FilePath)
         {
-            Process? p = new();
-            new Shartilities.Command(["qemu-riscv64", FilePath]).RunSync(ref p);
-            Console.Write(p!.StandardOutput.ReadToEnd());
+            Shartilities.Command cmd = new Shartilities.Command(["qemu-riscv64", FilePath]);
+            Process? p = null;
+            cmd.RunSyncRealTime(ref p, out string stdout, out string stderr);
             Environment.Exit(p!.ExitCode);
         }
         static LibUtils.Program AssembleAndLinkForCAS(string SourceFilePath, string OutputFilePath, bool Generate)
