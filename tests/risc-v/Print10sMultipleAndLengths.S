@@ -160,8 +160,7 @@ print:
     SD s0, 0(sp)
 libe_LABEL4_START:
     LD t0, 0(sp)
-    XOR t0, t0, t1
-    BNE t0, zero, libe_LABEL6_elifs
+    BNE t0, t1, libe_LABEL6_elifs
     ADDI s0, zero, 0
     ADDI sp, sp, 80
     LD ra, -8(sp)
@@ -184,33 +183,21 @@ libe_LABEL7_START:
     ret
 libe_LABEL9_elifs:
 libe_LABEL8_END:
-    ADDI sp, sp, -80
-    ADDI sp, sp, -8
+    ADDI sp, sp, -96
     SD zero, 0(sp)
-    ADDI sp, sp, -8
-    SD zero, 0(sp)
+    SD zero, 8(sp)
 libe_LABEL10_START:
     ADDI t0, zero, 1
     LD t1, 104(sp)
     SUB t1, t1, t0
     LD t0, 0(sp)
-    SLT t0, t0, t1
-    BEQZ t0, libe_LABEL11_END
+    BGE t0, t1, libe_LABEL11_END
 libe_LABEL13_START:
-    ADDI sp, sp, -24
-    SD a0, 0(sp)
-    SD a1, 8(sp)
-    SD a2, 16(sp)
-    LD a0, 192(sp)
-    LD a1, 128(sp)
-    LD a2, 24(sp)
+    LD a0, 168(sp)
+    LD a1, 104(sp)
+    LD a2, 0(sp)
     call printhelper
-    LD a2, 16(sp)
-    LD a1, 8(sp)
-    LD a0, 0(sp)
-    ADDI sp, sp, 24
-    MV t0, s0
-    BEQZ t0, libe_LABEL15_elifs
+    BEQZ s0, libe_LABEL15_elifs
     LD t0, 8(sp)
     ADDI t1, zero, 8
     MUL t0, t0, t1
@@ -230,8 +217,7 @@ libe_LABEL12_START:
     SD t0, 0(sp)
     J libe_LABEL10_START
 libe_LABEL11_END:
-    ADDI t0, zero, 8
-    ADD sp, sp, t0
+    ADDI sp, sp, 8
 libe_LABEL16_START:
     LD t0, 0(sp)
     BNE t0, zero, libe_LABEL18_elifs
@@ -251,24 +237,19 @@ libe_LABEL17_END:
 libe_LABEL19_START:
     LD t1, 0(sp)
     LD t0, 8(sp)
-    SLT t0, t0, t1
-    BEQZ t0, libe_LABEL21_elifs
+    BGE t0, t1, libe_LABEL21_elifs
     LD t0, 8(sp)
     SD t0, 0(sp)
 libe_LABEL21_elifs:
 libe_LABEL20_END:
-    ADDI t0, zero, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
-    ADDI t0, zero, 0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
+    ADDI sp, sp, -16
+    SD zero, 0(sp)
+    SD zero, 8(sp)
 libe_LABEL22_START:
     LD t0, 16(sp)
     mv t1, t0
     LD t0, 0(sp)
-    SLT t0, t0, t1
-    BEQZ t0, libe_LABEL23_END
+    BGE t0, t1, libe_LABEL23_END
     LD t0, 0(sp)
     ADDI t1, zero, 8
     MUL t0, t0, t1
@@ -306,8 +287,7 @@ libe_LABEL22_START:
 libe_LABEL25_START:
     LD t0, 0(sp)
     ADDI t1, zero, 100
-    XOR t0, t0, t1
-    BNE t0, zero, libe_LABEL27_elifs
+    BNE t0, t1, libe_LABEL27_elifs
     LD a0, 8(sp)
     call printnumber_signed
     LD t0, 16(sp)
@@ -317,21 +297,17 @@ libe_LABEL25_START:
 libe_LABEL27_elifs:
     ADDI t1, zero, 115
     LD t0, 0(sp)
-    XOR t0, t0, t1
-    BNE t0, zero, libe_LABEL28_elifs
+    BNE t0, t1, libe_LABEL28_elifs
     LD a0, 8(sp)
     call strlen
     MV t0, s0
-    ADDI sp, sp, -8
-    SD t0, 0(sp)
     ADDI a0, zero, 1
-    LD a1, 16(sp)
-    LD a2, 0(sp)
+    LD a1, 8(sp)
+    MV a2, s0
     call write
-    LD t0, 24(sp)
+    LD t0, 16(sp)
     ADDI t0, t0, 2
-    SD t0, 40(sp)
-    ADDI sp, sp, 8
+    SD t0, 32(sp)
     J libe_LABEL26_END
     J libe_LABEL26_END
 libe_LABEL28_elifs:
@@ -385,17 +361,13 @@ libe_LABEL31_START:
 libe_LABEL33_elifs:
     LD a0, 8(sp)
     call unstoa
-    ADDI sp, sp, -8
-    SD s0, 0(sp)
-    LD a0, 0(sp)
+    MV t2, s0
+    MV a0, t2
     call strlen
-    ADDI sp, sp, -8
-    SD s0, 0(sp)
     ADDI a0, zero, 1
-    LD a1, 8(sp)
-    LD a2, 0(sp)
+    MV a1, t2
+    MV a2, s0
     call write
-    ADDI sp, sp, 16
 libe_LABEL32_END:
     LD t0, 16(sp)
     ADDI t0, t0, 3
@@ -441,8 +413,7 @@ libe_ps_LABEL42_elifs:
 libe_LABEL41_END:
 libe_LABEL43_START:
     LI t0, -9223372036854775808
-    XOR t0, t2, t0
-    BNE t0, zero, libe_LABEL45_elifs
+    BNE t2, t0, libe_LABEL45_elifs
     ADDI a0, zero, 1
     LA a1, big_neg_num_str
     ADDI a2, zero, 20
@@ -454,8 +425,7 @@ libe_LABEL45_elifs:
 libe_LABEL44_END:
 libe_LABEL46_START:
     ADDI t1, zero, 0
-    SLT t0, t2, t1
-    BEQZ t0, libe_LABEL48_elifs
+    BGE t2, t1, libe_LABEL48_elifs
     NEG t2, t2
     ADDI a0, zero, 1
     LA a1, hyphen_str
@@ -552,12 +522,12 @@ libe_LABEL35_END:
 #printhelper
 
 exit:
-    li a7, 93
+    ADDI a7, zero, 93
     ecall
     ret
 strlen:
     mv t0, a0
-    li s0, 0
+    ADDI s0, zero, 0
 strlen_loop:
     lbu t1, 0(t0)
     beqz t1, strlen_done
@@ -574,7 +544,7 @@ stoa:
     sb zero, 0(t2)
 stoa_loop:
     beqz t1, stoa_done
-    li t3, 10
+    ADDI t3, zero, 10
     rem t4, t1, t3
     ADDI t4, t4, 48
     ADDI t2, t2, -1
@@ -592,7 +562,7 @@ unstoa:
     sb zero, 0(t2)
 unstoa_loop:
     beqz t1, unstoa_done
-    li t3, 10
+    ADDI t3, zero, 10
     remu t4, t1, t3
     ADDI t4, t4, 48
     ADDI t2, t2, -1
@@ -603,7 +573,7 @@ unstoa_done:
     mv s0, t2
     ret
 write:
-    li a7, 64
+    ADDI a7, zero, 64
     ecall
     ret
 .section .data
