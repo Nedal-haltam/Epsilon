@@ -242,7 +242,7 @@ namespace Epsilon
                 {
                     buffer.Append(Consume());
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Srl, Line = line });
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Sra, Line = line });
                 }
                 else if (Peek("=="))
                 {

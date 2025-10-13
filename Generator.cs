@@ -721,8 +721,8 @@ namespace Epsilon
                 case NodeBinExpr.NodeBinExprType.Sll:
                     m_output.AppendLine($"    SLL {RegData}, {RegData}, {RegData2}");
                     break;
-                case NodeBinExpr.NodeBinExprType.Srl:
-                    m_output.AppendLine($"    SRL {RegData}, {RegData}, {RegData2}");
+                case NodeBinExpr.NodeBinExprType.Sra:
+                    m_output.AppendLine($"    SRA {RegData}, {RegData}, {RegData2}");
                     break;
                 case NodeBinExpr.NodeBinExprType.EqualEqual:
                     m_output.AppendLine($"    XOR {RegData}, {RegData}, {RegData2}");

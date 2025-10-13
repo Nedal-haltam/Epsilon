@@ -17,7 +17,7 @@ namespace Epsilon
                 case NodeBinExprType.Rem:        return "%";
                 case NodeBinExprType.Div:        return "/";
                 case NodeBinExprType.Sll:        return "<<";
-                case NodeBinExprType.Srl:        return ">>";
+                case NodeBinExprType.Sra:        return ">>";
                 case NodeBinExprType.EqualEqual: return "==";
                 case NodeBinExprType.NotEqual:   return "!=";
                 case NodeBinExprType.LessThan:   return "<";

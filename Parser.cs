@@ -59,7 +59,7 @@ namespace Epsilon
                                  Peek(TokenType.Or).HasValue         ||
                                  Peek(TokenType.Xor).HasValue        ||
                                  Peek(TokenType.Sll).HasValue        ||
-                                 Peek(TokenType.Srl).HasValue        ||
+                                 Peek(TokenType.Sra).HasValue        ||
                                  Peek(TokenType.EqualEqual).HasValue ||
                                  Peek(TokenType.NotEqual).HasValue   ||
                                  Peek(TokenType.LessThan).HasValue;
@@ -221,20 +221,18 @@ namespace Epsilon
         }
         static int? GetPrec(TokenType type)
         {
-            int? prec = type switch
+            return type switch
             {
-                TokenType.Mul or TokenType.Rem or TokenType.Div => 3,
-                TokenType.Plus or TokenType.Minus => 4,
-                TokenType.Sll or TokenType.Srl => 5,
-                TokenType.LessThan => 6,
-                TokenType.EqualEqual or TokenType.NotEqual => 7,
-                TokenType.And => 8,
-                TokenType.Xor => 9,
-                TokenType.Or => 10,
-               _ => null,
+                TokenType.Mul or TokenType.Div or TokenType.Rem => 7,
+                TokenType.Plus or TokenType.Minus => 6,
+                TokenType.Sll or TokenType.Sra => 5,
+                TokenType.LessThan => 4,
+                TokenType.EqualEqual or TokenType.NotEqual => 3,
+                TokenType.And => 2,
+                TokenType.Xor => 1,
+                TokenType.Or => 0,
+                _ => null,
             };
-            if (!prec.HasValue) return null;
-            return 10 - prec.Value;
         }
         NodeBinExpr.NodeBinExprType GetOpType(TokenType op)
         {
@@ -250,8 +248,8 @@ namespace Epsilon
                 return NodeBinExpr.NodeBinExprType.Sub;
             if (op == TokenType.Sll)
                 return NodeBinExpr.NodeBinExprType.Sll;
-            if (op == TokenType.Srl)
-                return NodeBinExpr.NodeBinExprType.Srl;
+            if (op == TokenType.Sra)
+                return NodeBinExpr.NodeBinExprType.Sra;
             if (op == TokenType.EqualEqual)
                 return NodeBinExpr.NodeBinExprType.EqualEqual;
             if (op == TokenType.NotEqual)

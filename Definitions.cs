@@ -466,7 +466,7 @@ namespace Epsilon
     {
         public enum NodeBinExprType
         {
-            Add, Sub, Mul, Rem, Div, Sll, Srl, EqualEqual, NotEqual, LessThan, And, Or, Xor,
+            Add, Sub, Mul, Rem, Div, Sll, Sra, EqualEqual, NotEqual, LessThan, And, Or, Xor,
         }
         public NodeBinExprType type;
         public NodeExpr lhs;
@@ -614,7 +614,7 @@ namespace Epsilon
         Or,
         Xor,
         Sll,
-        Srl,
+        Sra,
 
         EqualEqual,
         NotEqual,

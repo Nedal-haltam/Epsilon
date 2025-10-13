@@ -315,8 +315,8 @@ namespace Epsilon
                     return (a - b).ToString();
                 case NodeBinExpr.NodeBinExprType.Sll:
                     return (a << (Int32)b).ToString();
-                case NodeBinExpr.NodeBinExprType.Srl:
-                    return (a >>> (Int32)b).ToString();
+                case NodeBinExpr.NodeBinExprType.Sra:
+                    return (a >> (Int32)b).ToString();
                 case NodeBinExpr.NodeBinExprType.EqualEqual:
                     return (a == b ? 1 : 0).ToString();
                 case NodeBinExpr.NodeBinExprType.NotEqual:
