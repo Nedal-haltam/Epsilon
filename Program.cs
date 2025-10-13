@@ -476,7 +476,7 @@ namespace Epsilon
                 LibUtils.Program p = CompileAssembleLink(SourceFilePath, OutputFilePath, Optimize, false, true, false, Dump);
                 List<string> MC = LibUtils.GetIM(p.MachineCodes);
                 List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
-                LibCPU.SingleCycle.Run(MC, DM, 4096, 4096, null);
+                LibCPU.SingleCycle.Run(MC, DM, 16384, 16384, null);
             }
             else if (CompileOnly)
             {
