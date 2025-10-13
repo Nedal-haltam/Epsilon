@@ -297,7 +297,7 @@ LABEL11_START:
     LI t0, 110
     LD t1, 0(sp)
     ADDI sp, sp, 8
-    SRL t0, t0, t1
+    SRA t0, t0, t1
     LD t1, 0(sp)
     ADDI sp, sp, 8
     AND t0, t0, t1

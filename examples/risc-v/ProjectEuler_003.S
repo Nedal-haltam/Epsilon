@@ -36,7 +36,7 @@ LABEL1_START:
     LD t0, 24(sp)
     LD t1, 0(sp)
     ADDI sp, sp, 8
-    SRL t0, t0, t1
+    SRA t0, t0, t1
     SD t0, 16(sp)
     J LABEL1_START
 LABEL2_END:
