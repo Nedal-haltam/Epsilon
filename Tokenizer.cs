@@ -2,13 +2,13 @@
 using System.Text;
 namespace Epsilon
 {
-    struct Tokenizer(string SoureCode, string InputFilePath)
+    struct Tokenizer(string SoureCode, string InputFilePath, Dictionary<string, Macro> InputMacro)
     {
         readonly string m_thecode = SoureCode;
         readonly string m_inputFilePath = InputFilePath;
         int m_curr_index = 0;
         List<Token> m_tokens = [];
-        readonly Dictionary<string, Macro> macro = [];
+        readonly Dictionary<string, Macro> macro = InputMacro;
         readonly Dictionary<string, TokenType> KeyWords = new()
         {
             { "auto"               , TokenType.Auto},
@@ -139,7 +139,6 @@ namespace Epsilon
         public List<Token> TokenizeProg()
         {
             m_curr_index = 0;
-            macro.Clear();
             m_tokens = [];
             StringBuilder buffer = new(); // this buffer is for multiple letter tokens
             int line = 1;
@@ -202,7 +201,7 @@ namespace Epsilon
                     if (!File.Exists(IncludeFilePath))
                         Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: file `{IncludeFilePath}` doesn't exists\n", 1);
                     string FileContent = File.ReadAllText(IncludeFilePath);
-                    List<Token> FileContentTokenized = new Tokenizer(FileContent, IncludeFilePath).TokenizeProg();
+                    List<Token> FileContentTokenized = new Tokenizer(FileContent, IncludeFilePath, macro).TokenizeProg();
                     {
                         // for error checking
                         new Parser(FileContentTokenized, IncludeFilePath).ParseProg();
@@ -225,7 +224,7 @@ namespace Epsilon
                     Consume();
                     string MacroSrc = buffer.ToString();
                     
-                    List<Token> macrovalue = new Tokenizer(MacroSrc, m_inputFilePath).TokenizeProg();
+                    List<Token> macrovalue = new Tokenizer(MacroSrc, m_inputFilePath, macro).TokenizeProg();
                     macro.Add(macroname, new() { src = MacroSrc, tokens = macrovalue });
                 }
                 else if (IsComment())

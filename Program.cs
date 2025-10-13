@@ -301,7 +301,7 @@ namespace Epsilon
         {
             string InputCode = Shartilities.ReadFile(InputFilePath);
 
-            List<Token> TokenizedProgram = new Tokenizer(InputCode, InputFilePath).TokenizeProg();
+            List<Token> TokenizedProgram = new Tokenizer(InputCode, InputFilePath, []).TokenizeProg();
             NodeProg ParsedProgram = new Parser(TokenizedProgram, InputFilePath).ParseProg();
 
             //StringBuilder Before = Arborist.CutProgram(ParsedProgram);
