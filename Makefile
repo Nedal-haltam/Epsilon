@@ -10,7 +10,7 @@ TESTS_BUILD_FOLDER := ./tests/risc-v
 QEMU_SAVED_OUTPUT_PATH := ./QemuRecordedOutput.txt
 SIMU_SAVED_OUTPUT_PATH := ./SimuRecordedOutput.txt
 
-EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 mandelbrot fizzbuzz
+EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 mandelbrot fizzbuzz donut
 TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc PrintNumbers Globals ForLoops ReturnFromFuncs InlineAsm print
 
 .PHONY: all clean clean-examples clean-tests run-all sim-all main record-log diff-diff
@@ -107,6 +107,9 @@ sim-all:
 	@echo "🚀 Simulating all examples and tests..."
 	@{ \
 		for ex in $(EXAMPLES); do \
+			if [ "$$ex" = "donut" ]; then \
+				continue; \
+			fi; \
 			if [ "$(LOG)" = "1" ]; then \
 				rm -rf $(EXAMPLES_BUILD_FOLDER)/sim_$$ex.txt; \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll -sim $(EXAMPLES_SRC_PATH)/$$ex.e \
