@@ -301,7 +301,7 @@ namespace Epsilon
             temp.FunctionBody.stmts = [.. stmts];
             prog.UserDefinedFunctions["main"] = temp;
         }
-        static bool IsExprIntLit(NodeExpr expr) => expr.type == NodeExpr.NodeExprType.Term && expr.term.type == NodeTerm.NodeTermType.IntLit;
+        public static bool IsExprIntLit(NodeExpr expr) => expr.type == NodeExpr.NodeExprType.Term && expr.term.type == NodeTerm.NodeTermType.IntLit;
         static string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
         {
             Int64 a = Convert.ToInt64(imm1);
@@ -365,7 +365,7 @@ namespace Epsilon
                     return new();
             }
         }
-        static NodeExpr FoldExpr(NodeExpr expr)
+        public static NodeExpr FoldExpr(NodeExpr expr)
         {
             switch (expr.type)
             {

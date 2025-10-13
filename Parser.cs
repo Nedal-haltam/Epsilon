@@ -484,15 +484,17 @@ namespace Epsilon
         Token Parsedimension()
         {
             Consume();
-            Token size_token = Consume();
-            if (!uint.TryParse(size_token.Value, out uint _))
+            NodeExpr dim = ExpectedExpression(ParseExpr());
+            dim = Optimizer.FoldExpr(dim);
+            
+            if (!Optimizer.IsExprIntLit(dim))
             {
                 Token? peeked = Peek(-1);
                 int line = peeked.HasValue ? peeked.Value.Line : 1;
                 Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: Error Expected a constant size for the array\n", 1);
             }
             ExpectAndConsume(TokenType.CloseSquare);
-            return size_token;
+            return dim.term.intlit.intlit;
         }
         List<NodeStmt> ParseDeclare()
         {
