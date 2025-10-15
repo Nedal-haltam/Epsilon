@@ -561,6 +561,10 @@ namespace Epsilon
                         GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
                         GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
                         break;
+                    case ConstDefs.STD_FUNCTIONS.atoi:
+                        Shartilities.Assert(CalledFunction.parameters.Count == 1, $"{std.ToString()} arity is 1");
+                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
+                        break;
                     case ConstDefs.STD_FUNCTIONS.print:
                         if (CalledFunction.parameters.Count < 1)
                             Shartilities.Logln(Shartilities.LogType.ERROR, $"minimum number parameters for {std.ToString()} is 1");
