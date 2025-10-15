@@ -517,6 +517,26 @@ write:
     ADDI a7, zero, 64
     ecall
     ret
+atoi:
+    mv t0, a0
+    ADDI s0, zero, 0
+    ADDI t1, zero, 0
+atoi_loop:
+    lbu t2, 0(t0)
+    beqz t2, atoi_done
+    ADDI t3, zero, 48
+    BLT t2, t3, atoi_done
+    ADDI t3, zero, 57
+    BLT t3, t2, atoi_done
+    ADDI t2, t2, -48
+    ADDI t1, zero, 10
+    MUL s0, s0, t1
+    ADD s0, s0, t2
+    ADDI t0, t0, 1
+    j atoi_loop
+atoi_done:
+    mv a0, s0
+    ret
 .section .data
 StringLits0:
     .string "signed:\n"

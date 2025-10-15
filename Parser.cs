@@ -98,7 +98,7 @@ namespace Epsilon
                 };
                 return term;
             }
-            if (Peek(TokenType.ExclamationMark).HasValue)
+            else if (Peek(TokenType.ExclamationMark).HasValue)
             {
                 Consume();
                 NodeTerm? termunary = ParseTerm();
