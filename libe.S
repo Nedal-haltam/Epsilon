@@ -448,7 +448,7 @@ atoi_loop:
     ADDI t3, zero, 48
     BLT t2, t3, atoi_done
     ADDI t3, zero, 57
-    BGT t2, t3, atoi_done
+    BLT t3, t2, atoi_done
     ADDI t2, t2, -48
     ADDI t1, zero, 10
     MUL s0, s0, t1
