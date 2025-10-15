@@ -142,6 +142,20 @@ namespace Epsilon
                 };
                 return term;
             }
+            else if (Peek(TokenType.Mul).HasValue)
+            {
+                Consume();
+                NodeTerm? termunary = ParseTerm();
+                if (!termunary.HasValue)
+                    return null;
+                term.type = NodeTerm.NodeTermType.Unary;
+                term.unary = new()
+                {
+                    type = NodeTermUnaryExpr.NodeTermUnaryExprType.deref,
+                    term = termunary.Value,
+                };
+                return term;
+            }
             else if (Peek(TokenType.IntLit).HasValue)
             {
                 term.type = NodeTerm.NodeTermType.IntLit;

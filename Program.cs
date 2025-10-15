@@ -38,6 +38,7 @@ namespace Epsilon
                 case NodeTermUnaryExprType.complement: return "!";
                 case NodeTermUnaryExprType.not:        return "~";
                 case NodeTermUnaryExprType.addressof:  return "&";
+                case NodeTermUnaryExprType.deref:      return "*";
                 default:
                     Shartilities.UNREACHABLE("GetUnOpStr");
                     break;

@@ -305,6 +305,14 @@ namespace Epsilon
                                         GenPush(RegData, size);
                                 }
                                 break;
+                            case NodeTermUnaryExpr.NodeTermUnaryExprType.deref:
+                                {
+                                    GenTerm(term.unary.term, RegData, size);
+                                    m_output.AppendLine($"    LD {RegData}, 0({RegData})");
+                                    if (DestReg == null)
+                                        GenPush(RegData, size);
+                                }
+                                break;
                             default:
                                 break;
 

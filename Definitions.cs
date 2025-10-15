@@ -428,7 +428,7 @@ namespace Epsilon
         public NodeTerm term;
         public enum NodeTermUnaryExprType
         {
-            negative, complement, not, addressof,
+            negative, complement, not, addressof, deref
         }
     }
     struct NodeTermIntLit
