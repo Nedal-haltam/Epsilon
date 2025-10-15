@@ -234,7 +234,7 @@ namespace Epsilon
                 reg, 8
             );
         }
-        static void GenArrayAddr(List<NodeExpr> indexes, Var var, uint? RelativeLocationOfBaseAddress= null)
+        static void GenArrayAddr(List<NodeExpr> indexes, Var var, uint? RelativeLocationOfBaseAddress = null)
         {
             string Address = m_FirstTempReg;
             GenArrayIndex(indexes, var.Dimensions, var, Address);
@@ -261,167 +261,169 @@ namespace Epsilon
             switch (term.type)
             {
                 case NodeTerm.NodeTermType.Unary:
-                {
-                    switch (term.unary.type)
                     {
-                        case NodeTermUnaryExpr.NodeTermUnaryExprType.complement:
-                            GenTerm(term.unary.term, RegData, size);
-                            m_output.AppendLine($"    SEQZ {RegData}, {RegData}");
-                            if (DestReg == null)
-                                GenPush(RegData, size);
-                            break;
-                        case NodeTermUnaryExpr.NodeTermUnaryExprType.not:
-                            GenTerm(term.unary.term, RegData, size);
-                            m_output.AppendLine($"    NOT {RegData}, {RegData}");
-                            if (DestReg == null)
-                                GenPush(RegData, size);
-                            break;
-                        case NodeTermUnaryExpr.NodeTermUnaryExprType.negative:
-                            GenTerm(term.unary.term, RegData, size);
-                            m_output.AppendLine($"    NEG {RegData}, {RegData}");
-                            if (DestReg == null)
-                                GenPush(RegData, size);
-                            break;
-                        case NodeTermUnaryExpr.NodeTermUnaryExprType.addressof:
-                            NodeTermIdent ident = term.unary.term.ident;
-                            if (ident.indexes.Count == 0)
-                            {
-                                Var var = m_Variables.GetVariable(ident.ident.Value, m_inputFilePath, ident.ident.Line);
-                                if (var.IsGlobal)
+                        switch (term.unary.type)
+                        {
+                            case NodeTermUnaryExpr.NodeTermUnaryExprType.complement:
+                                GenTerm(term.unary.term, RegData, size);
+                                m_output.AppendLine($"    SEQZ {RegData}, {RegData}");
+                                if (DestReg == null)
+                                    GenPush(RegData, size);
+                                break;
+                            case NodeTermUnaryExpr.NodeTermUnaryExprType.not:
+                                GenTerm(term.unary.term, RegData, size);
+                                m_output.AppendLine($"    NOT {RegData}, {RegData}");
+                                if (DestReg == null)
+                                    GenPush(RegData, size);
+                                break;
+                            case NodeTermUnaryExpr.NodeTermUnaryExprType.negative:
+                                GenTerm(term.unary.term, RegData, size);
+                                m_output.AppendLine($"    NEG {RegData}, {RegData}");
+                                if (DestReg == null)
+                                    GenPush(RegData, size);
+                                break;
+                            case NodeTermUnaryExpr.NodeTermUnaryExprType.addressof:
                                 {
-                                    m_output.AppendLine($"    LA {RegData}, {var.Value}");
+                                    NodeTermIdent ident = term.unary.term.ident;
+                                    if (ident.indexes.Count == 0)
+                                    {
+                                        Var var = m_Variables.GetVariable(ident.ident.Value, m_inputFilePath, ident.ident.Line);
+                                        if (var.IsGlobal)
+                                        {
+                                            m_output.AppendLine($"    LA {RegData}, {var.Value}");
+                                        }
+                                        else
+                                        {
+                                            uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
+                                            if (var.IsParameter)
+                                                m_output.AppendLine($"    ADDI {RegData}, sp, {RelativeLocation}");
+                                            else
+                                                m_output.AppendLine($"    ADDI {RegData}, sp, {RelativeLocation - (var.TypeSize * (var.Count - 1))}");
+                                        }
+                                    }
+                                    if (DestReg == null)
+                                        GenPush(RegData, size);
+                                }
+                                break;
+                            default:
+                                break;
+
+                        }
+                    }
+                    break;
+                case NodeTerm.NodeTermType.IntLit:
+                    {
+                        m_output.AppendLine($"    LI {RegData}, {term.intlit.intlit.Value}");
+                        if (DestReg == null)
+                            GenPush(RegData, size);
+                    }
+                    break;
+                case NodeTerm.NodeTermType.StringLit:
+                    {
+                        string literal = term.stringlit.stringlit.Value;
+                        if (!m_StringLits.Contains(literal))
+                            m_StringLits.Add(literal);
+                        int index = m_StringLits.IndexOf(literal);
+                        m_output.AppendLine($"    LA {RegData}, StringLits{index}");
+                        if (DestReg == null)
+                            GenPush(RegData, size);
+                    }
+                    break;
+                case NodeTerm.NodeTermType.FunctionCall:
+                    {
+                        GenStmtFunctionCall(new() { FunctionName = term.functioncall.FunctionName, parameters = term.functioncall.parameters }, true);
+                        m_output.AppendLine($"    MV {RegData}, s0");
+                        if (DestReg == null)
+                            GenPush(RegData, size);
+                    }
+                    break;
+                case NodeTerm.NodeTermType.Ident:
+                    {
+                        NodeTermIdent ident = term.ident;
+                        Var var = m_Variables.GetVariable(ident.ident.Value, m_inputFilePath, ident.ident.Line);
+                        if (ident.indexes.Count == 0)
+                        {
+                            if (var.IsArray)
+                            {
+                                if (var.IsParameter)
+                                {
+                                    if (var.IsGlobal)
+                                        Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot put global variable as a parameter", 1);
+                                    uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
+                                    m_output.AppendLine($"    LD {RegData}, {RelativeLocation}(sp)");
                                 }
                                 else
                                 {
-                                    uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
-                                    if (var.IsParameter)
-                                        m_output.AppendLine($"    ADDI {RegData}, sp, {RelativeLocation}");
+                                    if (var.IsGlobal)
+                                        m_output.AppendLine($"    LA {RegData}, {var.Value}");
                                     else
+                                    {
+                                        uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
                                         m_output.AppendLine($"    ADDI {RegData}, sp, {RelativeLocation - (var.TypeSize * (var.Count - 1))}");
+                                    }
                                 }
                             }
-                            if (DestReg == null)
-                                GenPush(RegData, size);
-                            break;
-                        default:
-                            break;
-
-                    }
-                }
-                        break;
-                case NodeTerm.NodeTermType.IntLit:
-                {
-                    m_output.AppendLine($"    LI {RegData}, {term.intlit.intlit.Value}");
-                    if (DestReg == null)
-                        GenPush(RegData, size);
-                }
-                    break;
-                case NodeTerm.NodeTermType.StringLit:
-                {
-                    string literal = term.stringlit.stringlit.Value;
-                    if (!m_StringLits.Contains(literal))
-                        m_StringLits.Add(literal);
-                    int index = m_StringLits.IndexOf(literal);
-                    m_output.AppendLine($"    LA {RegData}, StringLits{index}");
-                    if (DestReg == null)
-                        GenPush(RegData, size);
-                }
-                    break;
-                case NodeTerm.NodeTermType.FunctionCall:
-                {
-                    GenStmtFunctionCall(new() { FunctionName = term.functioncall.FunctionName, parameters = term.functioncall.parameters }, true);
-                    m_output.AppendLine($"    MV {RegData}, s0");
-                    if (DestReg == null)
-                        GenPush(RegData, size);
-                }
-                    break;
-                case NodeTerm.NodeTermType.Ident:
-                {
-                    NodeTermIdent ident = term.ident;
-                    Var var = m_Variables.GetVariable(ident.ident.Value, m_inputFilePath, ident.ident.Line);
-                    if (ident.indexes.Count == 0)
-                    {
-                        if (var.IsArray)
+                            else
+                            {
+                                uint RelativeLocation = 0;
+                                string BaseReg = var.IsGlobal ? GetOthertempRegisgter(RegData) : "sp";
+                                if (var.IsGlobal)
+                                    m_output.AppendLine($"    LA {BaseReg}, {var.Value}");
+                                else
+                                    RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
+                                LoadStoreBasedOnSize("load", RegData, BaseReg, RelativeLocation.ToString(), var.ElementSize);
+                            }
+                        }
+                        else
                         {
+                            string RegAddr = GetOthertempRegisgter(RegData);
                             if (var.IsParameter)
                             {
                                 if (var.IsGlobal)
                                     Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot put global variable as a parameter", 1);
-                                uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
-                                m_output.AppendLine($"    LD {RegData}, {RelativeLocation}(sp)");
+                                uint RelativeLocationOfBaseAddress = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
+                                GenArrayAddr(ident.indexes, var, RelativeLocationOfBaseAddress);
                             }
                             else
                             {
                                 if (var.IsGlobal)
-                                    m_output.AppendLine($"    LA {RegData}, {var.Value}");
+                                {
+                                    GenArrayIndex(ident.indexes, var.Dimensions, var, RegData);
+                                    m_output.AppendLine($"    LA {RegAddr}, {var.Value}");
+                                    m_output.AppendLine($"    ADD {RegAddr}, {RegAddr}, {RegData}");
+                                    GenPush(RegAddr);
+                                }
                                 else
                                 {
-                                    uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
-                                    m_output.AppendLine($"    ADDI {RegData}, sp, {RelativeLocation - (var.TypeSize * (var.Count - 1))}");
+                                    GenArrayAddr(ident.indexes, var);
                                 }
                             }
+                            GenPop(RegAddr);
+                            LoadStoreBasedOnSize("load", RegData, RegAddr, "0", var.ElementSize);
                         }
-                        else
-                        {
-                            uint RelativeLocation = 0;
-                            string BaseReg = var.IsGlobal ? GetOthertempRegisgter(RegData) : "sp";
-                            if (var.IsGlobal)
-                                m_output.AppendLine($"    LA {BaseReg}, {var.Value}");
-                            else
-                                RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
-                            LoadStoreBasedOnSize("load", RegData, BaseReg, RelativeLocation.ToString(), var.ElementSize);
-                        }
+                        if (DestReg == null)
+                            GenPush(RegData, size);
                     }
-                    else
-                    {
-                        string RegAddr = GetOthertempRegisgter(RegData);
-                        if (var.IsParameter)
-                        {
-                            if (var.IsGlobal)
-                                Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot put global variable as a parameter", 1);
-                            uint RelativeLocationOfBaseAddress= m_Variables.GetVariableRelativeLocation(var, m_StackSize);
-                            GenArrayAddr(ident.indexes, var, RelativeLocationOfBaseAddress);
-                        }
-                        else
-                        {
-                            if (var.IsGlobal)
-                            {
-                                GenArrayIndex(ident.indexes, var.Dimensions, var, RegData);
-                                m_output.AppendLine($"    LA {RegAddr}, {var.Value}");
-                                m_output.AppendLine($"    ADD {RegAddr}, {RegAddr}, {RegData}");
-                                GenPush(RegAddr);
-                            }
-                            else
-                            {
-                                GenArrayAddr(ident.indexes, var);
-                            }
-                        }
-                        GenPop(RegAddr);
-                        LoadStoreBasedOnSize("load", RegData, RegAddr, "0", var.ElementSize);
-                    }
-                    if (DestReg == null)
-                        GenPush(RegData, size);
-                }
                     break;
                 case NodeTerm.NodeTermType.Variadic:
-                {
-                    Var var = m_Variables.GetVariadic();
-                    string RegAddr = GetOthertempRegisgter(RegData);
+                    {
+                        Var var = m_Variables.GetVariadic();
+                        string RegAddr = GetOthertempRegisgter(RegData);
 
-                    uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
-                    GenExpr(NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Mul, NodeExpr.Number("8", -1), term.variadic.VariadicIndex), RegAddr);
-                    m_output.AppendLine($"    SUB {RegAddr}, sp, {RegAddr}");
-                    m_output.AppendLine($"    LD {RegData}, {RelativeLocation}({RegAddr})");
-                    if (DestReg == null)
-                        GenPush(RegData, size);
-                }
+                        uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
+                        GenExpr(NodeExpr.BinExpr(NodeBinExpr.NodeBinExprType.Mul, NodeExpr.Number("8", -1), term.variadic.VariadicIndex), RegAddr);
+                        m_output.AppendLine($"    SUB {RegAddr}, sp, {RegAddr}");
+                        m_output.AppendLine($"    LD {RegData}, {RelativeLocation}({RegAddr})");
+                        if (DestReg == null)
+                            GenPush(RegData, size);
+                    }
                     break;
                 case NodeTerm.NodeTermType.Paren:
-                {
-                    GenExpr(term.paren.expr, RegData, size);
-                    if (DestReg == null)
-                        GenPush(RegData, size);
-                }
+                    {
+                        GenExpr(term.paren.expr, RegData, size);
+                        if (DestReg == null)
+                            GenPush(RegData, size);
+                    }
                     break;
                 default:
                     break;
