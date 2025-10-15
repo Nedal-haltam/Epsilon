@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# ENUM0001: Populate switch
+dotnet_diagnostic.ENUM0001.severity = error
