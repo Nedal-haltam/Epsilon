@@ -9,7 +9,6 @@ namespace Epsilon
         static Variables m_Variables;
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         static string m_inputFilePath;
-        static List<Var> Globals;
         static Stack<int> m_scopes;
         static uint m_StackSize;
         static Stack<string?> m_scopestart;
@@ -648,9 +647,9 @@ namespace Epsilon
                 }
             }
         }
-        static void GetGlobalVariables(bool GenExpressions)
+        static List<Var> GetGlobalVariables(bool GenExpressions)
         {
-            Globals = [];
+            List<Var> Globals = [];
             for (int i = 0; i < m_program.GlobalScope.stmts.Count; i++)
             {
                 NodeStmt stmt = m_program.GlobalScope.stmts[i];
@@ -658,6 +657,7 @@ namespace Epsilon
                     Shartilities.Logln(Shartilities.LogType.ERROR, $"global statements should be Variable declarations", 1);
                 Globals.Add(GenVariableDeclare(stmt.declare, GenExpressions, true));
             }
+            return Globals;
         }
         static void GenFunctionPrologue(NodeStmtFunction function)
         {
@@ -1012,8 +1012,7 @@ namespace Epsilon
             {
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined", 1);
             }
-            GetGlobalVariables(false);
-            m_Variables.m_globals = [.. Globals];
+            m_Variables.m_globals = [.. GetGlobalVariables(false)];
         }
         static void GenProgramEpilogue()
         {
@@ -1022,10 +1021,10 @@ namespace Epsilon
         static void GenProgramDataSection()
         {
             m_output.AppendLine($".section .data");
-            for (int i = 0; i < Globals.Count; i++)
+            for (int i = 0; i < m_Variables.m_globals.Count; i++)
             {
-                m_output.AppendLine($"{Globals[i].Value}:");
-                uint count = Globals[i].IsArray ? Globals[i].Size : Globals[i].ElementSize;
+                m_output.AppendLine($"{m_Variables.m_globals[i].Value}:");
+                uint count = m_Variables.m_globals[i].IsArray ? m_Variables.m_globals[i].Size : m_Variables.m_globals[i].ElementSize;
                 m_output.AppendLine($"    .space {count}");
             }
             for (int i = 0; i < m_StringLits.Count; i++)
@@ -1065,7 +1064,6 @@ namespace Epsilon
             m_inputFilePath = new(InputFilePath);
 
             m_Variables = new();
-            Globals = [];
             m_scopes = [];
             m_StackSize = 0;
             m_scopestart = new();
