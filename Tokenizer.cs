@@ -254,6 +254,18 @@ namespace Epsilon
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.NotEqual, Line = line });
                 }
+                else if (Peek("+="))
+                {
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.PlusEqual, Line = line });
+                }
+                else if (Peek("-="))
+                {
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.MinusEqual, Line = line });
+                }
                 else if (Peek('\"').HasValue)
                 {
                     Consume();
@@ -279,47 +291,47 @@ namespace Epsilon
                 else if (Peek('(').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.OpenParen, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.OpenParen, Line = line });
                 }
                 else if (Peek(')').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.CloseParen, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.CloseParen, Line = line });
                 }
                 else if (Peek('[').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.OpenSquare, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.OpenSquare, Line = line });
                 }
                 else if (Peek(']').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.CloseSquare, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.CloseSquare, Line = line });
                 }
                 else if (Peek('{').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.OpenCurly, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.OpenCurly, Line = line });
                 }
                 else if (Peek('}').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.CloseCurly, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.CloseCurly, Line = line });
                 }
                 else if (Peek(',').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Comma, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.Comma, Line = line });
                 }
                 else if (Peek('!').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.ExclamationMark, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.ExclamationMark, Line = line });
                 }
                 else if (Peek('~').HasValue)
                 {
                     buffer.Append(Consume());
-                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.tilde, Line = line});
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.tilde, Line = line });
                 }
                 else if (Peek('+').HasValue)
                 {

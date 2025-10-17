@@ -616,6 +616,9 @@ namespace Epsilon
         Sll,
         Sra,
 
+        PlusEqual,
+        MinusEqual,
+
         EqualEqual,
         NotEqual,
         LessThan,

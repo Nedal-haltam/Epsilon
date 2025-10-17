@@ -1,4 +1,7 @@
 ﻿#pragma warning disable RETURN0001
+using System;
+using System.Collections.Generic;
+
 namespace Epsilon
 {
     struct Parser(List<Token> tokens, string InputFilePath)
@@ -49,7 +52,13 @@ namespace Epsilon
             Peek(TokenType.Char).HasValue
             ) && 
             Peek(TokenType.Ident, 1).HasValue;
-        readonly bool IsStmtAssign()   => Peek(TokenType.Ident).HasValue && (Peek(TokenType.OpenSquare, 1).HasValue || Peek(TokenType.Equal, 1).HasValue);
+        readonly bool IsStmtAssign()   => Peek(TokenType.Ident).HasValue && 
+            (
+                Peek(TokenType.OpenSquare, 1).HasValue || 
+                Peek(TokenType.Equal, 1).HasValue      ||
+                Peek(TokenType.PlusEqual, 1).HasValue  ||
+                Peek(TokenType.MinusEqual, 1).HasValue
+            );
         readonly bool IsBinExpr()      => Peek(TokenType.Plus).HasValue       ||
                                  Peek(TokenType.Mul).HasValue        ||
                                  Peek(TokenType.Rem).HasValue        ||
@@ -557,6 +566,42 @@ namespace Epsilon
 
             return stmts;
         }
+        NodeBinExpr.NodeBinExprType? IsCompoundAssign(Token? t)
+        {
+            if (!t.HasValue) return null;
+#pragma warning disable ENUM0001 // Populate switch
+            switch (t.Value.Type)
+            {
+                case TokenType.PlusEqual:
+                    return NodeBinExpr.NodeBinExprType.Add;
+                case TokenType.MinusEqual:
+                    return NodeBinExpr.NodeBinExprType.Sub;
+                default:
+                    return null;
+            }
+#pragma warning restore ENUM0001 // Populate switch
+
+        }
+        NodeExpr GetExprFromAssignStmt(Token Ident, List<NodeExpr> indexes)
+        {
+            if (PeekAndConsume(TokenType.Equal).HasValue)
+            {
+                return ExpectedExpression(ParseExpr());
+            }
+            else
+            {
+                Token? t = Peek();
+                NodeBinExpr.NodeBinExprType? type = IsCompoundAssign(t);
+                if (type.HasValue)
+                {
+                    Consume();
+                    return NodeExpr.BinExpr(type.Value, NodeExpr.Identifier(new(Ident, indexes)), ExpectedExpression(ParseExpr()));
+                }
+                else
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{Peek(-1).Value.Line}:{1}: Parser: expected compound assignment operator\n", 1);
+            }
+            return new();
+        }
         NodeStmt ParseAssign()
         {
             Token Ident = Consume();
@@ -577,22 +622,17 @@ namespace Epsilon
                 {
                     stmt.assign.array.indexes.Add(Parseindex());
                 }
-                ExpectAndConsume(TokenType.Equal);
-                stmt.assign.array.expr = ExpectedExpression(ParseExpr());
+                stmt.assign.array.expr = GetExprFromAssignStmt(Ident, stmt.assign.array.indexes);
             }
-            else if (PeekAndConsume(TokenType.Equal).HasValue)
+            else
             {
                 IdentifierType = NodeStmtIdentifierType.SingleVar;
-                NodeExpr expr = ExpectedExpression(ParseExpr());
+                NodeExpr expr = GetExprFromAssignStmt(Ident, []);
                 stmt.assign.singlevar = new()
                 {
                     ident = Ident,
                     expr = expr,
                 };
-            }
-            else
-            {
-                Shartilities.UNREACHABLE("");
             }
             stmt.assign.type = IdentifierType;
             return stmt;
