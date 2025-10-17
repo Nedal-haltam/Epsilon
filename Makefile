@@ -40,10 +40,11 @@ diff-diff:
 	@$(MAKE) LOG=1 QEMU_SAVED_OUTPUT_PATH=./QemuRecordedOutput2.txt SIMU_SAVED_OUTPUT_PATH=./SimuRecordedOutput2.txt
 	@sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" ./QemuRecordedOutput2.txt | col -b > ./temp-logs/QemuRecordedOutput2.txt
 	@sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" ./SimuRecordedOutput2.txt | col -b > ./temp-logs/SimuRecordedOutput2.txt
-	@sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" $(QEMU_SAVED_OUTPUT_PATH) | col -b > temp-logs/QemuRecordedOutput.txt
-	@sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" $(SIMU_SAVED_OUTPUT_PATH) | col -b > temp-logs/SimuRecordedOutput.txt
+	@sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" $(QEMU_SAVED_OUTPUT_PATH) | col -b > ./temp-logs/QemuRecordedOutput.txt
+	@sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" $(SIMU_SAVED_OUTPUT_PATH) | col -b > ./temp-logs/SimuRecordedOutput.txt
 	@diff -as --suppress-common-lines --color=always ./temp-logs/QemuRecordedOutput.txt ./temp-logs/QemuRecordedOutput2.txt
 	@diff -as --suppress-common-lines --color=always ./temp-logs/SimuRecordedOutput.txt ./temp-logs/SimuRecordedOutput2.txt
+# 	@diff -as --suppress-common-lines --color=always ./temp-logs/QemuRecordedOutput.txt ./temp-logs/SimuRecordedOutput.txt
 	@rm -rf ./QemuRecordedOutput2.txt
 	@rm -rf ./SimuRecordedOutput2.txt
 	@rm -rf temp-logs
