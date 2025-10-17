@@ -32,6 +32,25 @@ namespace Epsilon
             Process? p = null;
             if (!cmd.RunSyncRealTime(ref p, out string stdout, out string stderr)) Environment.Exit(p!.ExitCode);
         }
+        static void CompileAssembleLinkForQemu(string SourceFilePath, string OutputFilePath, bool Optimize, bool Dump)
+        {
+            bool IsAssemblyFile = SourceFilePath.EndsWith(".S");
+            if (IsAssemblyFile)
+            {
+                AssembleAndLinkForQemu(SourceFilePath, OutputFilePath);
+            }
+            else
+            {
+                string TempAssembly = OutputFilePath + ".S";
+                {
+                    StringBuilder Assembly = Compile(SourceFilePath, Optimize);
+                    Shartilities.WriteFile(TempAssembly, Assembly.ToString(), false);
+                }
+                AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
+                if (!Dump && File.Exists(TempAssembly))
+                    File.Delete(TempAssembly);
+            }
+        }
         static void RunOnQemu(string FilePath)
         {
             Shartilities.Command cmd = new Shartilities.Command(["qemu-riscv64", FilePath]);
@@ -69,32 +88,32 @@ namespace Epsilon
             }
             return p;
         }
-        static LibUtils.Program CompileAssembleLink(string SourceFilePath, string OutputFilePath, bool Optimize, bool DoQemu, bool DoCAS, bool CasGenerate, bool Dump)
+        static LibUtils.Program CompileAssembleLinkForCAS(string SourceFilePath, string OutputFilePath, bool Optimize, bool Dump)
         {
             LibUtils.Program p = new();
-            if (!SourceFilePath.EndsWith(".S"))
+            bool IsAssemblyFile = SourceFilePath.EndsWith(".S");
+            if (IsAssemblyFile)
+            {
+                p = AssembleAndLinkForCAS(SourceFilePath, OutputFilePath, Dump);
+            }
+            else
             {
                 string TempAssembly = OutputFilePath + ".S";
                 {
                     StringBuilder Assembly = Compile(SourceFilePath, Optimize);
                     Shartilities.WriteFile(TempAssembly, Assembly.ToString(), false);
                 }
-                if (DoQemu)
-                    AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
-                if (DoCAS)
-                    p = AssembleAndLinkForCAS(TempAssembly, OutputFilePath, CasGenerate || Dump);
+                p = AssembleAndLinkForCAS(TempAssembly, OutputFilePath, Dump);
                 if (!Dump && File.Exists(TempAssembly))
                     File.Delete(TempAssembly);
             }
-            else
-            {
-                string TempAssembly = SourceFilePath;
-                if (DoQemu)
-                    AssembleAndLinkForQemu(TempAssembly, OutputFilePath);
-                if (DoCAS)
-                    p = AssembleAndLinkForCAS(TempAssembly, OutputFilePath, CasGenerate || Dump);
-            }
             return p;
+        }
+        static void SimOnCAS(LibUtils.Program p)
+        {
+            List<string> MC = LibUtils.GetIM(p.MachineCodes);
+            List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
+            LibCPU.SingleCycle.Run(MC, DM, 16384, 16384, null);
         }
         static void Usage()
         {
@@ -176,17 +195,15 @@ namespace Epsilon
             {
                 if (log) Console.WriteLine("running");
                 OutputFilePath ??= "./a";
-                CompileAssembleLink(SourceFilePath, OutputFilePath, Optimize, true, false, false, Dump);
+                CompileAssembleLinkForQemu(SourceFilePath, OutputFilePath, Optimize, Dump);
                 RunOnQemu(OutputFilePath);
             }
             else if (Sim)
             {
                 if (log) Console.WriteLine("simulating");
                 OutputFilePath ??= "./a";
-                LibUtils.Program p = CompileAssembleLink(SourceFilePath, OutputFilePath, Optimize, false, true, false, Dump);
-                List<string> MC = LibUtils.GetIM(p.MachineCodes);
-                List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
-                LibCPU.SingleCycle.Run(MC, DM, 16384, 16384, null);
+                LibUtils.Program p = CompileAssembleLinkForCAS(SourceFilePath, OutputFilePath, Optimize, Dump);
+                SimOnCAS(p);
             }
             else if (CompileOnly)
             {
@@ -199,7 +216,8 @@ namespace Epsilon
             {
                 if (log) Console.WriteLine("compiling and assembling");
                 OutputFilePath ??= "./a";
-                CompileAssembleLink(SourceFilePath, OutputFilePath, Optimize, true, true, true, Dump);
+                CompileAssembleLinkForQemu(SourceFilePath, OutputFilePath, Optimize, Dump);
+                LibUtils.Program p = CompileAssembleLinkForCAS(SourceFilePath, OutputFilePath, Optimize, true);
             }
         }
     }
