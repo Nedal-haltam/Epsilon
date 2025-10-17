@@ -223,6 +223,56 @@ print empty:``
 this is an str message with specifiers, 34 + 35 = char(E), signed(69), unsigned(69)
 this is an str message with specifiers, 34 + 35 = char(%c), signed(%d), unsigned(%zu)
 auto str = specifier(s) -> this is an str message with specifiers, 34 + 35 = char(%c), signed(%d), unsigned(%zu)
+----------------------
+calling foo
+variadics count = 0
+----------------------
+calling foo
+variadics count = 3
+varaidic(0) = 10
+varaidic(1) = 20
+varaidic(2) = 30
+----------------------
+calling foo
+variadics count = 5
+varaidic(0) = 10
+varaidic(1) = 20
+varaidic(2) = 30
+varaidic(3) = 40
+varaidic(4) = 50
+----------------------
+calling foo
+variadics count = 7
+varaidic(0) = 10
+varaidic(1) = 20
+varaidic(2) = 30
+varaidic(3) = 40
+varaidic(4) = 50
+varaidic(5) = 60
+varaidic(6) = 70
+----------------------
+calling bar
+x = 123
+variadics count = 0
+----------------------
+calling bar
+x = 123
+variadics count = 4
+varaidic(0) = 10
+varaidic(1) = 20
+varaidic(2) = 30
+varaidic(3) = 40
+----------------------
+calling bar
+x = 123
+variadics count = 6
+varaidic(0) = 10
+varaidic(1) = 20
+varaidic(2) = 30
+varaidic(3) = 40
+varaidic(4) = 50
+varaidic(5) = 60
+----------------------
 ..........
 ..#.......
 ...#......
