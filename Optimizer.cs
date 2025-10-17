@@ -255,7 +255,7 @@ namespace Epsilon
                         NewStmts.Add(stmt);
                         break;
                     case NodeStmt.NodeStmtType.While:
-                        // TODO: general scope optimization, that's what i could think of righ now, may need more search
+                        // TODO: general scope optimization, that's what i could think of right now, may need more search
                         NewStmts.Add(stmt);
                         break;
                     case NodeStmt.NodeStmtType.Asm:
@@ -276,7 +276,7 @@ namespace Epsilon
                         NewStmts.Add(stmt);
                         return NewStmts;
                     case NodeStmt.NodeStmtType.Function:
-                        // TODO: have to further analyze what does the funciton does to optimize it out
+                        // TODO: have to further analyze what the funciton effects to optimize it out
                         NewStmts.Add(stmt);
                         break;
                     default:

@@ -3,13 +3,13 @@ namespace Epsilon
 {
     struct Parser(List<Token> tokens, string InputFilePath)
     {
-        NodeProg prog;
-        List<Token> m_tokens = [.. tokens];
-        string m_inputFilePath = InputFilePath;
-        int m_curr_index;
-        string? CurrentFunctionName;
-        Token? Peek(int offset = 0) => 0 <= m_curr_index + offset && m_curr_index + offset < m_tokens.Count ? m_tokens[m_curr_index + offset] : null;
-        Token? Peek(TokenType type, int offset = 0)
+        readonly List<Token> m_tokens = [.. tokens];
+        readonly string m_inputFilePath = InputFilePath;
+        NodeProg prog = new();
+        int m_curr_index = 0;
+        bool IsInGlobal = false;
+        readonly Token? Peek(int offset = 0) => 0 <= m_curr_index + offset && m_curr_index + offset < m_tokens.Count ? m_tokens[m_curr_index + offset] : null;
+        readonly Token? Peek(TokenType type, int offset = 0)
         {
             Token? token = Peek(offset);
             if (token.HasValue && token.Value.Type == type)
@@ -18,7 +18,7 @@ namespace Epsilon
             }
             return null;
         }
-        void Expect(TokenType type, int offset = 0)
+        readonly void Expect(TokenType type, int offset = 0)
         {
             if (!Peek(type, offset).HasValue)
             {
@@ -42,15 +42,15 @@ namespace Epsilon
         }
         Token? PeekAndConsume(TokenType type, int offset = 0) => Peek(type, offset).HasValue ? Consume() : null;
         Token Consume() => m_tokens.ElementAt(m_curr_index++);
-        Token GetToken(int offset = 0) => m_tokens[m_curr_index + offset];
+        readonly Token GetToken(int offset = 0) => m_tokens[m_curr_index + offset];
         void ConsumeMany(int n) => m_curr_index += n;
-        bool IsStmtDeclare()  => (
+        readonly bool IsStmtDeclare()  => (
             Peek(TokenType.Auto).HasValue || 
             Peek(TokenType.Char).HasValue
             ) && 
             Peek(TokenType.Ident, 1).HasValue;
-        bool IsStmtAssign()   => Peek(TokenType.Ident).HasValue && (Peek(TokenType.OpenSquare, 1).HasValue || Peek(TokenType.Equal, 1).HasValue);
-        bool IsBinExpr()      => Peek(TokenType.Plus).HasValue       ||
+        readonly bool IsStmtAssign()   => Peek(TokenType.Ident).HasValue && (Peek(TokenType.OpenSquare, 1).HasValue || Peek(TokenType.Equal, 1).HasValue);
+        readonly bool IsBinExpr()      => Peek(TokenType.Plus).HasValue       ||
                                  Peek(TokenType.Mul).HasValue        ||
                                  Peek(TokenType.Rem).HasValue        ||
                                  Peek(TokenType.Div).HasValue        ||
@@ -63,7 +63,7 @@ namespace Epsilon
                                  Peek(TokenType.EqualEqual).HasValue ||
                                  Peek(TokenType.NotEqual).HasValue   ||
                                  Peek(TokenType.LessThan).HasValue;
-        NodeExpr ExpectedExpression(NodeExpr? expr)
+        readonly NodeExpr ExpectedExpression(NodeExpr? expr)
         {
             if (!expr.HasValue)
             {
@@ -132,8 +132,6 @@ namespace Epsilon
                 NodeTerm? termunary = ParseTerm();
                 if (!termunary.HasValue)
                     return null;
-                if (termunary.Value.type != NodeTerm.NodeTermType.Ident)
-                    Shartilities.Log(Shartilities.LogType.ERROR, $"address of operator is only on identifiers with no offsets\n", 1);
                 term.type = NodeTerm.NodeTermType.Unary;
                 term.unary = new()
                 {
@@ -248,7 +246,7 @@ namespace Epsilon
                 _ => null,
             };
         }
-        NodeBinExpr.NodeBinExprType GetOpType(TokenType op)
+        readonly NodeBinExpr.NodeBinExprType GetOpType(TokenType op)
         {
             if (op == TokenType.Plus)
                 return NodeBinExpr.NodeBinExprType.Add;
@@ -278,7 +276,7 @@ namespace Epsilon
                 return NodeBinExpr.NodeBinExprType.Xor;
             Token? peeked = Peek(-1);
             int line = peeked.HasValue ? peeked.Value.Line : 1;
-            Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: inavalid operation `{op}`\n", 1);
+            Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: inavalid operation `{op}`\n", 1);
             return 0;
         }
         NodeExpr? ParseExpr(int min_prec = 0)
@@ -374,7 +372,7 @@ namespace Epsilon
         {
             if (!Peek(TokenType.OpenParen).HasValue)
             {
-                Token? peeked = Peek(-1);
+                Token? peeked = Peek();
                 int line = peeked.HasValue ? peeked.Value.Line : 1;
                 Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: expected `(` after `if`\n", 1);
             }
@@ -399,8 +397,6 @@ namespace Epsilon
                     int line = peeked.HasValue ? peeked.Value.Line : 1;
                     Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: cannot declare more than one variable in `for-loops`\n", 1);
                 }
-                if (stmt[0].type != NodeStmt.NodeStmtType.Declare)
-                    Shartilities.UNREACHABLE("");
                 forinit.type = NodeForInit.NodeForInitType.Declare;
                 forinit.declare = stmt[0].declare;
                 return forinit;
@@ -409,8 +405,6 @@ namespace Epsilon
             {
                 NodeStmt stmt = ParseAssign();
                 ExpectAndConsume(TokenType.SemiColon);
-                if (stmt.type != NodeStmt.NodeStmtType.Assign)
-                    Shartilities.UNREACHABLE("");
                 forinit.type = NodeForInit.NodeForInitType.Assign;
                 forinit.assign = stmt.assign;
                 return forinit;
@@ -560,11 +554,7 @@ namespace Epsilon
                 stmts.Add(stmt);
             } while (PeekAndConsume(TokenType.Comma).HasValue);
             ExpectAndConsume(TokenType.SemiColon);
-            if (CurrentFunctionName == null) // it is in Global scope
-            {
-                prog.GlobalScope.stmts.AddRange(stmts);
-                return [];
-            }
+
             return stmts;
         }
         NodeStmt ParseAssign()
@@ -622,7 +612,7 @@ namespace Epsilon
                     {
                         Token? peeked = Peek(-1);
                         int line = peeked.HasValue ? peeked.Value.Line : 1;
-                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: cannot declare afer variadic argument\n", 1);
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: cannot declare afer variadic arguments\n", 1);
                     }
                 }
                 else if (IsStmtDeclare())
@@ -668,17 +658,17 @@ namespace Epsilon
         }
         void ParseFunctionPrologue(Token FunctionName)
         {
-            CurrentFunctionName = FunctionName.Value;
+            IsInGlobal = false;
             if (ConstDefs.STD_FUNCTIONS_MAP.ContainsKey(FunctionName.Value) || prog.UserDefinedFunctions.ContainsKey(FunctionName.Value))
             {
                 Token? peeked = Peek(-1);
                 int line = peeked.HasValue ? peeked.Value.Line : 1;
-                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: function with the name `{FunctionName.Value}` is already defined\n", 1);
+                Shartilities.Log(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: function `{FunctionName.Value}` is already defined\n", 1);
             }
         }
         void ParseFunctionEpilogue()
         {
-            CurrentFunctionName = null;
+            IsInGlobal = true;
         }
         NodeStmtScope ParseFunctionBody()
         {
@@ -734,7 +724,13 @@ namespace Epsilon
         {
             if (IsStmtDeclare())
             {
-                return ParseDeclare();
+                List<NodeStmt> stmts = ParseDeclare();
+                if (IsInGlobal)
+                {
+                    prog.GlobalScope.stmts.AddRange(stmts);
+                    return [];
+                }
+                return stmts;
             }
             else if (IsStmtAssign())
             {
@@ -893,13 +889,13 @@ namespace Epsilon
         }
         public NodeProg ParseProg()
         {
-            m_curr_index = 0;
-            CurrentFunctionName = null;
             prog = new();
+            m_curr_index = 0;
+            IsInGlobal = true;
 
             while (Peek().HasValue)
             {
-                List<NodeStmt> stmts = ParseStmt();
+                ParseStmt();
             }
             return prog;
         }

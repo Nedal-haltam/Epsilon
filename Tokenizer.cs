@@ -29,7 +29,7 @@ namespace Epsilon
             { "return"             , TokenType.Return},
             { "exit"               , TokenType.Exit},
         };
-        char? Peek(int offset = 0)
+        readonly char? Peek(int offset = 0)
         {
             if (0 <= m_curr_index + offset && m_curr_index + offset < m_thecode.Length)
             {
@@ -37,7 +37,7 @@ namespace Epsilon
             }
             return null;
         }
-        char? Peek(char type, int offset = 0)
+        readonly char? Peek(char type, int offset = 0)
         {
             char? token = Peek(offset);
             if (token.HasValue && token.Value == type)
@@ -46,7 +46,7 @@ namespace Epsilon
             }
             return null;
         }
-        bool Peek(string type, int offset = 0)
+        readonly bool Peek(string type, int offset = 0)
         {
             for (int i = 0; i < type.Length; i++)
             {
@@ -69,7 +69,7 @@ namespace Epsilon
             m_curr_index += ConsumeLength;
             return consumed;
         }
-        bool IsComment()
+        readonly bool IsComment()
         {
             return Peek("//") || Peek("/*");
         }
@@ -108,14 +108,9 @@ namespace Epsilon
                 Shartilities.UNREACHABLE("ConsumeComment");
             }
         }
-        bool IsPartOfName()
+        static bool IsPartOfName(char c)
         {
-            char? peeked = Peek();
-            if (peeked.HasValue)
-            {
-                return char.IsAsciiLetterOrDigit(peeked.Value) || Peek('_').HasValue;
-            }
-            return false;
+            return char.IsAsciiLetterOrDigit(c) || c == '_';
         }
         int SkipUntilNot(char c)
         {
@@ -153,9 +148,11 @@ namespace Epsilon
                 {
                     buffer.Append(Consume());
                     // if it is a letter we will consume until it is not IsAsciiLetterOrDigit
-                    while (Peek().HasValue && IsPartOfName())
+                    char? c = Peek();
+                    while (c.HasValue && IsPartOfName(c.Value))
                     {
                         buffer.Append(Consume());
+                        c = Peek();
                     }
                     string word = buffer.ToString();
                     if (macro.TryGetValue(word, out Macro value))
@@ -212,9 +209,11 @@ namespace Epsilon
                 {
                     ConsumeMany(8);
                     SkipUntilNot(' ');
-                    while (Peek().HasValue && IsPartOfName())
+                    char? c = Peek();
+                    while (c.HasValue && IsPartOfName(c.Value))
                     {
                         buffer.Append(Consume());
+                        c = Peek();
                     }
                     string macroname = buffer.ToString();
                     buffer.Clear();

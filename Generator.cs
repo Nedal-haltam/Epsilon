@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Text;
 namespace Epsilon
 {
     static class Generator
@@ -56,12 +58,6 @@ namespace Epsilon
             LoadStoreBasedOnSize("load", reg, "sp", "0", size);
             m_output.AppendLine($"    ADDI sp, sp, {size}");
             m_StackSize -= size;
-        }
-        static void GenPop(uint size, bool Change_m_stacksize)
-        {
-            if (size == 0) return;
-            m_output.AppendLine($"    ADDI sp, sp, {size}");
-            if (Change_m_stacksize) m_StackSize -= size;
         }
         static void GenPushMany(List<string> regs, uint RegisterSize)
         {
@@ -168,19 +164,21 @@ namespace Epsilon
                     break;
             }
         }
-        static Var GenVariableDeclare(NodeStmtDeclare declare, bool PushExpressions, bool IsGlobal = false)
+        static Var GenVariableDeclare(NodeStmtDeclare declare, bool IsGlobal = false)
         {
             switch (declare.type)
             {
                 case NodeStmtIdentifierType.SingleVar:
+                    if (IsGlobal && declare.singlevar.expr.type != NodeExpr.NodeExprType.None)
+                        Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{declare.ident.Line}:1: Generator: global variable declaration cannot be initialized", 1);
                     switch (declare.datatype)
                     {
                         case NodeStmtDataType.Auto:
-                            if (PushExpressions)
+                            if (!IsGlobal)
                                 GenExpr(declare.singlevar.expr, null);
                             return new(declare.ident.Value, 8, 8, [], false, false, false, IsGlobal);
                         case NodeStmtDataType.Char:
-                            if (PushExpressions)
+                            if (!IsGlobal)
                                 GenExpr(declare.singlevar.expr, null, 1);
                             return new(declare.ident.Value, 1, 1, [], false, false, false, IsGlobal);
                         default:
@@ -204,7 +202,7 @@ namespace Epsilon
                         default:
                             break;
                     }
-                    if (PushExpressions)
+                    if (!IsGlobal)
                         GenPush(SizePerVar * count);
                     return new(declare.ident.Value, SizePerVar * count, SizePerVar, dims, true, false, false, IsGlobal);
                 default:
@@ -212,12 +210,12 @@ namespace Epsilon
             }
             return new();
         }
-        static Var GenStmtDeclare(NodeStmtDeclare declare, bool PushExpressions)
+        static Var GenStmtDeclare(NodeStmtDeclare declare)
         {
             Token ident = declare.ident;
             if (m_Variables.IsVariableDeclared(ident.Value))
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{ident.Line}:1: Generator: variable `{ident.Value}` is alread declared", 1);
-            return GenVariableDeclare(declare, PushExpressions);
+            return GenVariableDeclare(declare);
         }
         static void GenArrayIndex(List<NodeExpr> indexes, List<uint> dims, Var var, string reg)
         {
@@ -284,6 +282,8 @@ namespace Epsilon
                             case NodeTermUnaryExpr.NodeTermUnaryExprType.addressof:
                                 {
                                     NodeTermIdent ident = term.unary.term.ident;
+                                    if (term.unary.term.type != NodeTerm.NodeTermType.Ident)
+                                        Shartilities.Log(Shartilities.LogType.ERROR, $"address of operator is only on identifiers with no offsets\n", 1);
                                     if (ident.indexes.Count == 0)
                                     {
                                         Var var = m_Variables.GetVariable(ident.ident.Value, m_inputFilePath, ident.ident.Line);
@@ -647,18 +647,6 @@ namespace Epsilon
                 }
             }
         }
-        static List<Var> GetGlobalVariables(bool GenExpressions)
-        {
-            List<Var> Globals = [];
-            for (int i = 0; i < m_program.GlobalScope.stmts.Count; i++)
-            {
-                NodeStmt stmt = m_program.GlobalScope.stmts[i];
-                if (stmt.type != NodeStmt.NodeStmtType.Declare)
-                    Shartilities.Logln(Shartilities.LogType.ERROR, $"global statements should be Variable declarations", 1);
-                Globals.Add(GenVariableDeclare(stmt.declare, GenExpressions, true));
-            }
-            return Globals;
-        }
         static void GenFunctionPrologue(NodeStmtFunction function)
         {
             m_Variables.Reset();
@@ -681,15 +669,13 @@ namespace Epsilon
                 m_output.AppendLine($"    call write");
             }
         }
-        static void GenFunctionBody()
+        static void GenFunctionBody(NodeStmtScope FunctionBody)
         {
-            NodeStmtScope FunctionBody = m_program.UserDefinedFunctions[m_CurrentFunctionName].FunctionBody;
             foreach (NodeStmt stmt in FunctionBody.stmts)
                 GenStmt(stmt);
         }
-        static void GenFunctionEpilogue()
+        static void GenFunctionEpilogue(NodeStmtScope FunctionBody)
         {
-            NodeStmtScope FunctionBody = m_program.UserDefinedFunctions[m_CurrentFunctionName].FunctionBody;
             if (FunctionBody.stmts.Count == 0 || FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
             {
                 m_output.AppendLine($"    mv s0, zero");
@@ -700,22 +686,24 @@ namespace Epsilon
         {
             uint AllocatedStackSize = m_Variables.GetAllocatedStackSize();
             Shartilities.Assert(AllocatedStackSize == m_StackSize, $"stack sizes are not equal");
+
+            if (m_StackSize != 0)
+                m_output.AppendLine($"    ADDI sp, sp, {m_StackSize}");
+
             if (m_CurrentFunctionName == "main")
             {
-                GenPop(m_StackSize, false);
                 m_output.AppendLine($"    mv a0, s0");
                 m_output.AppendLine($"    call exit");
                 return;
             }
-            GenPop(AllocatedStackSize, false);
             m_output.AppendLine($"    LD ra, -8(sp)");
             m_output.AppendLine($"    ret");
         }
         static void GenFunction(NodeStmtFunction function)
         {
             GenFunctionPrologue(function);
-            GenFunctionBody();
-            GenFunctionEpilogue();
+            GenFunctionBody(function.FunctionBody);
+            GenFunctionEpilogue(function.FunctionBody);
         }
         static void GenBinExpr(NodeBinExpr binExpr, string? DestReg, uint size)
         {
@@ -836,7 +824,7 @@ namespace Epsilon
                 switch (forr.pred.init.Value.type)
                 {
                     case NodeForInit.NodeForInitType.Declare:
-                        m_Variables.AddVariable(GenStmtDeclare(forr.pred.init.Value.declare, true));
+                        m_Variables.AddVariable(GenStmtDeclare(forr.pred.init.Value.declare));
                         break;
                     case NodeForInit.NodeForInitType.Assign:
                         GenStmtAssign(forr.pred.init.Value.assign);
@@ -962,7 +950,7 @@ namespace Epsilon
             switch (stmt.type)
             {
                 case NodeStmt.NodeStmtType.Declare:
-                    m_Variables.AddVariable(GenStmtDeclare(stmt.declare, true));
+                    m_Variables.AddVariable(GenStmtDeclare(stmt.declare));
                     break;
                 case NodeStmt.NodeStmtType.Assign:
                     GenStmtAssign(stmt.assign);
@@ -1012,7 +1000,14 @@ namespace Epsilon
             {
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined", 1);
             }
-            m_Variables.m_globals = [.. GetGlobalVariables(false)];
+            m_Variables.m_globals.Clear();
+            for (int i = 0; i < m_program.GlobalScope.stmts.Count; i++)
+            {
+                NodeStmt stmt = m_program.GlobalScope.stmts[i];
+                if (stmt.type != NodeStmt.NodeStmtType.Declare)
+                    Shartilities.Logln(Shartilities.LogType.ERROR, $"global statements supports only Variable declarations", 1);
+                m_Variables.m_globals.Add(GenVariableDeclare(stmt.declare, true));
+            }
         }
         static void GenProgramEpilogue()
         {
@@ -1038,13 +1033,9 @@ namespace Epsilon
             m_output.AppendLine($"    .string \"-9223372036854775808\"");
             m_output.AppendLine($"hyphen_str:");
             m_output.AppendLine($"    .string \"-\"");
-            //if ((!m_program.UserDefinedFunctions.ContainsKey("stoa") && m_CalledFunctions.Contains("stoa"))
-            //|| (!m_program.UserDefinedFunctions.ContainsKey("unstoa") && m_CalledFunctions.Contains("unstoa")))
-            {
-                m_output.AppendLine($".section .bss");
-                m_output.AppendLine($"itoaTempBuffer:     ");
-                m_output.AppendLine($"    .space 32");
-            }
+            m_output.AppendLine($".section .bss");
+            m_output.AppendLine($"itoaTempBuffer:     ");
+            m_output.AppendLine($"    .space 32");
         }
         static void GenProgramFunctions()
         {
