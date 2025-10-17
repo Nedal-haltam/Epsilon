@@ -659,20 +659,20 @@ namespace Epsilon
                 Globals.Add(GenVariableDeclare(stmt.declare, GenExpressions, true));
             }
         }
-        static void GenFunctionPrologue(string FunctionName)
+        static void GenFunctionPrologue(NodeStmtFunction function)
         {
             m_Variables.Reset();
             m_StackSize = new();
             m_scopes = new();
             m_scopestart = new();
             m_scopeend = new();
-            m_CurrentFunctionName = FunctionName;
-            m_output.AppendLine($"{FunctionName}:");
+            m_CurrentFunctionName = function.FunctionName.Value;
+            m_output.AppendLine($"{function.FunctionName.Value}:");
 
             GenPush("ra");
             m_Variables.AddVariable(new("", 8, 8, [], false, false, false));
-            GenPushFunctionParametersInDefinition(m_program.UserDefinedFunctions[FunctionName].parameters);
-            if (FunctionName == "main")
+            GenPushFunctionParametersInDefinition(function.parameters);
+            if (function.FunctionName.Value == "main")
             {
                 // write(1, 0, 0);
                 m_output.AppendLine($"    li a0, 1");
@@ -711,9 +711,9 @@ namespace Epsilon
             m_output.AppendLine($"    LD ra, -8(sp)");
             m_output.AppendLine($"    ret");
         }
-        static void GenFunction(string FunctionName)
+        static void GenFunction(NodeStmtFunction function)
         {
-            GenFunctionPrologue(FunctionName);
+            GenFunctionPrologue(function);
             GenFunctionBody();
             GenFunctionEpilogue();
         }
@@ -1049,12 +1049,12 @@ namespace Epsilon
         }
         static void GenProgramFunctions()
         {
-            GenFunction("main");
+            GenFunction(m_program.UserDefinedFunctions["main"]);
             for (int i = 0; i < m_CalledFunctions.Count; i++)
             {
-                if (m_program.UserDefinedFunctions.ContainsKey(m_CalledFunctions[i]))
+                if (m_program.UserDefinedFunctions.TryGetValue(m_CalledFunctions[i], out NodeStmtFunction function))
                 {
-                    GenFunction(m_CalledFunctions[i]);
+                    GenFunction(function);
                 }
             }
             GenStdFunctions();
