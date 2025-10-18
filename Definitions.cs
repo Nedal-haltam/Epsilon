@@ -618,6 +618,14 @@ namespace Epsilon
 
         PlusEqual,
         MinusEqual,
+        MulEqual,
+        DivEqual,
+        ModEqual,
+        AndEqual,
+        OrEqual,
+        XorEqual,
+        SllEqual,
+        SraEqual,
 
         EqualEqual,
         NotEqual,

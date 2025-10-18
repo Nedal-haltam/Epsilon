@@ -57,7 +57,15 @@ namespace Epsilon
                 Peek(TokenType.OpenSquare, 1).HasValue || 
                 Peek(TokenType.Equal, 1).HasValue      ||
                 Peek(TokenType.PlusEqual, 1).HasValue  ||
-                Peek(TokenType.MinusEqual, 1).HasValue
+                Peek(TokenType.MinusEqual, 1).HasValue ||
+                Peek(TokenType.MulEqual, 1).HasValue   ||
+                Peek(TokenType.DivEqual, 1).HasValue   ||
+                Peek(TokenType.ModEqual, 1).HasValue   ||
+                Peek(TokenType.AndEqual, 1).HasValue   ||
+                Peek(TokenType.OrEqual, 1).HasValue    ||
+                Peek(TokenType.XorEqual, 1).HasValue   ||
+                Peek(TokenType.SllEqual, 1).HasValue   ||
+                Peek(TokenType.SraEqual, 1).HasValue
             );
         readonly bool IsBinExpr()      => Peek(TokenType.Plus).HasValue       ||
                                  Peek(TokenType.Mul).HasValue        ||
@@ -570,17 +578,21 @@ namespace Epsilon
         {
             if (!t.HasValue) return null;
 #pragma warning disable ENUM0001 // Populate switch
-            switch (t.Value.Type)
+            return t.Value.Type switch
             {
-                case TokenType.PlusEqual:
-                    return NodeBinExpr.NodeBinExprType.Add;
-                case TokenType.MinusEqual:
-                    return NodeBinExpr.NodeBinExprType.Sub;
-                default:
-                    return null;
-            }
+                TokenType.PlusEqual => NodeBinExpr.NodeBinExprType.Add,
+                TokenType.MinusEqual => NodeBinExpr.NodeBinExprType.Sub,
+                TokenType.MulEqual => NodeBinExpr.NodeBinExprType.Mul,
+                TokenType.DivEqual => NodeBinExpr.NodeBinExprType.Div,
+                TokenType.ModEqual => NodeBinExpr.NodeBinExprType.Rem,
+                TokenType.AndEqual => NodeBinExpr.NodeBinExprType.And,
+                TokenType.OrEqual => NodeBinExpr.NodeBinExprType.Or,
+                TokenType.XorEqual => NodeBinExpr.NodeBinExprType.Xor,
+                TokenType.SllEqual => NodeBinExpr.NodeBinExprType.Sll,
+                TokenType.SraEqual => NodeBinExpr.NodeBinExprType.Sra,
+                _ => null,
+            };
 #pragma warning restore ENUM0001 // Populate switch
-
         }
         NodeExpr GetExprFromAssignStmt(Token Ident, List<NodeExpr> indexes)
         {

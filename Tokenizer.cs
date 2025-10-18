@@ -230,6 +230,20 @@ namespace Epsilon
                 {
                     ConsumeComment(ref line);
                 }
+                else if (Peek("<<="))
+                {
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.SllEqual, Line = line });
+                }
+                else if (Peek(">>="))
+                {
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.SraEqual, Line = line });
+                }
                 else if (Peek("<<"))
                 {
                     buffer.Append(Consume());
@@ -265,6 +279,42 @@ namespace Epsilon
                     buffer.Append(Consume());
                     buffer.Append(Consume());
                     m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.MinusEqual, Line = line });
+                }
+                else if (Peek("*="))
+                {
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.MulEqual, Line = line });
+                }
+                else if (Peek("/="))
+                {
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.DivEqual, Line = line });
+                }
+                else if (Peek("%="))
+                {
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.ModEqual, Line = line });
+                }
+                else if (Peek("&="))
+                {
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.AndEqual, Line = line });
+                }
+                else if (Peek("|="))
+                {
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.OrEqual, Line = line });
+                }
+                else if (Peek("^="))
+                {
+                    buffer.Append(Consume());
+                    buffer.Append(Consume());
+                    m_tokens.Add(new() { Value = buffer.ToString(), Type = TokenType.XorEqual, Line = line });
                 }
                 else if (Peek('\"').HasValue)
                 {
