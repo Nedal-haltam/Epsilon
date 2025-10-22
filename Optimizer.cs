@@ -260,6 +260,7 @@ namespace Epsilon
                         break;
                     case NodeStmt.NodeStmtType.Asm:
                         // TODO: should we analyze the inline assembly to optimize it out??
+                        // an assembly analyzer is required to truly optimize it
                         NewStmts.Add(stmt);
                         break;
                     case NodeStmt.NodeStmtType.Scope:
@@ -288,18 +289,19 @@ namespace Epsilon
         }
         static void DeadCodeElimination(ref NodeProg prog)
         {
-            Shartilities.UNUSED(prog);
             // TODO: nested scopes
-            // TODO: other functions, not only `main()`
-            List<NodeStmt> stmts = [.. prog.UserDefinedFunctions["main"].FunctionBody.stmts];
-            int Runs = 1;
-            for (int i = 0; i < Runs; i++)
+            foreach (var func in prog.UserDefinedFunctions)
             {
-                stmts = [.. EliminateStmts([.. stmts])];
+                List<NodeStmt> stmts = [.. prog.UserDefinedFunctions[func.Key].FunctionBody.stmts];
+                int Runs = 1;
+                for (int i = 0; i < Runs; i++)
+                {
+                    stmts = [.. EliminateStmts([.. stmts])];
+                }
+                var temp = prog.UserDefinedFunctions[func.Key];
+                temp.FunctionBody.stmts = [.. stmts];
+                prog.UserDefinedFunctions[func.Key] = temp;
             }
-            var temp = prog.UserDefinedFunctions["main"];
-            temp.FunctionBody.stmts = [.. stmts];
-            prog.UserDefinedFunctions["main"] = temp;
         }
         public static bool IsExprIntLit(NodeExpr expr) => expr.type == NodeExpr.NodeExprType.Term && expr.term.type == NodeTerm.NodeTermType.IntLit;
         static string GetImmedOperation(string imm1, string imm2, NodeBinExpr.NodeBinExprType op)
@@ -503,8 +505,6 @@ namespace Epsilon
         }
         static void ConstantFolding(ref NodeProg prog)
         {
-            Shartilities.UNUSED(prog);
-            // TODO: other functions, not only `main()`
             foreach (var func in prog.UserDefinedFunctions)
             {
                 var temp = prog.UserDefinedFunctions[func.Key];
@@ -515,7 +515,7 @@ namespace Epsilon
         }
         public static void OptimizeProgram(ref NodeProg prog)
         {
-            //DeadCodeElimination(ref prog);
+            DeadCodeElimination(ref prog);
             ConstantFolding(ref prog);
         }
     }
