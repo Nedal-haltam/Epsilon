@@ -570,7 +570,7 @@ namespace Epsilon
                         GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
                         GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
                         break;
-                    case ConstDefs.STD_FUNCTIONS.atoi:
+                    case ConstDefs.STD_FUNCTIONS.atouns:
                         Shartilities.Assert(CalledFunction.parameters.Count == 1, $"{std.ToString()} arity is 1");
                         GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
                         break;

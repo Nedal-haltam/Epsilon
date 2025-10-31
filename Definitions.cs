@@ -674,7 +674,7 @@ namespace Epsilon
             unstoa,
             write,
             print,
-            atoi,
+            atouns,
         }
         static public Dictionary<string, STD_FUNCTIONS> STD_FUNCTIONS_MAP = new()
         {
@@ -683,7 +683,7 @@ namespace Epsilon
             { "unstoa", STD_FUNCTIONS.unstoa},
             { "write" , STD_FUNCTIONS.write},
             { "print" , STD_FUNCTIONS.print},
-            { "atoi" , STD_FUNCTIONS.atoi},
+            { "atouns"  , STD_FUNCTIONS.atouns},
         };
     }
 
