@@ -1310,7 +1310,7 @@ write:
     ADDI a7, zero, 64
     ecall
     ret
-atoi:
+atouns:
     mv t0, a0
     ADDI s0, zero, 0
     ADDI t1, zero, 0
