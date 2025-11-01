@@ -51,9 +51,12 @@ namespace Epsilon
                     File.Delete(TempAssembly);
             }
         }
-        static void RunOnQemu(string FilePath)
+        static void RunOnQemu(string FilePath, List<string> ClArgs)
         {
-            Shartilities.Command cmd = new Shartilities.Command(["qemu-riscv64", FilePath]);
+            StringBuilder clargs = new();
+            foreach (string arg in ClArgs) clargs.Append(arg + ' ');
+
+            Shartilities.Command cmd = new(["qemu-riscv64", FilePath, clargs.ToString()]);
             Process? p = null;
             cmd.RunSyncRealTime(ref p, out string stdout, out string stderr);
             Environment.Exit(p!.ExitCode);
@@ -109,11 +112,11 @@ namespace Epsilon
             }
             return p;
         }
-        static void SimOnCAS(LibUtils.Program p)
+        static void SimOnCAS(LibUtils.Program p, List<string> ClArgs)
         {
             List<string> MC = LibUtils.GetIM(p.MachineCodes);
             List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
-            LibCPU.SingleCycle.Run(MC, DM, 16384, 16384, null);
+            LibCPU.SingleCycle.Run(MC, DM, 16384, 16384, ClArgs, null);
         }
         static void Usage()
         {
@@ -138,14 +141,13 @@ namespace Epsilon
             //    - deal with multiple files
             //        - if you start with .e file you interpret the rest as epsilon files and you start from the compile step
             //        - if you start with .S file you interpret the rest as assembly files and you start from the assemble step
-            //Compile("../../../main.e");
 
             string? OutputFilePath = null;
-            List<string> InputFilePaths = [];
+            List<string> ClArgs = [];
             bool Optimize = false;
             bool CompileOnly = false;
             bool Run = false; // Run using qemu
-            bool Sim = false; // simulate using my cycle accurate simulator
+            bool Sim = false; // simulate using my cycle accurate simulator (CAS)
             bool Dump = false;
             while (Shartilities.ShiftArgs(ref args, out string arg))
             {
@@ -162,10 +164,14 @@ namespace Epsilon
                 else if (arg == "-run")
                 {
                     Run = true;
+                    while (Shartilities.ShiftArgs(ref args, out string clarg))
+                        ClArgs.Add(clarg);
                 }
                 else if (arg == "-sim")
                 {
                     Sim = true;
+                    while (Shartilities.ShiftArgs(ref args, out string clarg))
+                        ClArgs.Add(clarg);
                 }
                 else if (arg == "-S")
                 {
@@ -182,13 +188,14 @@ namespace Epsilon
                 }
                 else
                 {
-                    InputFilePaths.Add(arg);
+                    Shartilities.UNREACHABLE($"what to do with: {arg}");
                 }
             }
 
-            if (InputFilePaths.Count == 0)
+            if (ClArgs.Count == 0)
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"no input files was provided", 1);
-            string SourceFilePath = InputFilePaths[0];
+            string SourceFilePath = ClArgs[0];
+            ClArgs.RemoveAt(0);
 
             bool log = false;
             if (Run)
@@ -196,14 +203,15 @@ namespace Epsilon
                 if (log) Console.WriteLine("running");
                 OutputFilePath ??= "./a";
                 CompileAssembleLinkForQemu(SourceFilePath, OutputFilePath, Optimize, Dump);
-                RunOnQemu(OutputFilePath);
+                RunOnQemu(OutputFilePath, ClArgs);
             }
             else if (Sim)
             {
                 if (log) Console.WriteLine("simulating");
                 OutputFilePath ??= "./a";
                 LibUtils.Program p = CompileAssembleLinkForCAS(SourceFilePath, OutputFilePath, Optimize, Dump);
-                SimOnCAS(p);
+                ClArgs.Insert(0, OutputFilePath);
+                SimOnCAS(p, ClArgs);
             }
             else if (CompileOnly)
             {

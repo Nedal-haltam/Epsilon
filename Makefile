@@ -69,25 +69,29 @@ run-all:
 		for ex in $(EXAMPLES); do \
 			if [ "$(LOG)" = "1" ]; then \
 				rm -rf $(EXAMPLES_BUILD_FOLDER)/run_$$ex.txt; \
-				dotnet ./bin/Debug/net8.0/Epsilon.dll -run $(EXAMPLES_SRC_PATH)/$$ex.e \
+				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump \
+					-run $(EXAMPLES_SRC_PATH)/$$ex.e \
 					| col -b | sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" \
 					>> $(EXAMPLES_BUILD_FOLDER)/run_$$ex.txt 2>&1 || exit 1; \
 			else \
-				dotnet ./bin/Debug/net8.0/Epsilon.dll -run $(EXAMPLES_SRC_PATH)/$$ex.e \
+				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump || exit 1; \
+					-run $(EXAMPLES_SRC_PATH)/$$ex.e \
 			fi & \
 		done; \
 		for ex in $(TESTS); do \
 			if [ "$(LOG)" = "1" ]; then \
 				rm -rf $(TESTS_BUILD_FOLDER)/run_$$ex.txt; \
-				dotnet ./bin/Debug/net8.0/Epsilon.dll -run $(TESTS_SRC_PATH)/$$ex.e \
+				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(TESTS_BUILD_FOLDER)/$$ex -dump \
+					-run $(TESTS_SRC_PATH)/$$ex.e \
 					| col -b | sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" \
 					>> $(TESTS_BUILD_FOLDER)/run_$$ex.txt 2>&1 || exit 1; \
 			else \
-				dotnet ./bin/Debug/net8.0/Epsilon.dll -run $(TESTS_SRC_PATH)/$$ex.e \
+				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(TESTS_BUILD_FOLDER)/$$ex -dump || exit 1; \
+					-run $(TESTS_SRC_PATH)/$$ex.e \
 			fi & \
 		done; \
 		wait; \
@@ -113,25 +117,29 @@ sim-all:
 			fi; \
 			if [ "$(LOG)" = "1" ]; then \
 				rm -rf $(EXAMPLES_BUILD_FOLDER)/sim_$$ex.txt; \
-				dotnet ./bin/Debug/net8.0/Epsilon.dll -sim $(EXAMPLES_SRC_PATH)/$$ex.e \
+				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump \
+					-sim $(EXAMPLES_SRC_PATH)/$$ex.e \
 					| col -b | sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" \
 					>> $(EXAMPLES_BUILD_FOLDER)/sim_$$ex.txt 2>&1 || exit 1; \
 			else \
-				dotnet ./bin/Debug/net8.0/Epsilon.dll -sim $(EXAMPLES_SRC_PATH)/$$ex.e \
+				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump || exit 1; \
+					-sim $(EXAMPLES_SRC_PATH)/$$ex.e \
 			fi & \
 		done; \
 		for ex in $(TESTS); do \
 			if [ "$(LOG)" = "1" ]; then \
 				rm -rf $(TESTS_BUILD_FOLDER)/sim_$$ex.txt; \
-				dotnet ./bin/Debug/net8.0/Epsilon.dll -sim $(TESTS_SRC_PATH)/$$ex.e \
+				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(TESTS_BUILD_FOLDER)/$$ex -dump \
+					-sim $(TESTS_SRC_PATH)/$$ex.e \
 					| col -b | sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" \
 					>> $(TESTS_BUILD_FOLDER)/sim_$$ex.txt 2>&1 || exit 1; \
 			else \
-				dotnet ./bin/Debug/net8.0/Epsilon.dll -sim $(TESTS_SRC_PATH)/$$ex.e \
+				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(TESTS_BUILD_FOLDER)/$$ex -dump || exit 1; \
+					-sim $(TESTS_SRC_PATH)/$$ex.e \
 			fi & \
 		done; \
 		wait; \
