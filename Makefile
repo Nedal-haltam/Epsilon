@@ -11,7 +11,7 @@ QEMU_SAVED_OUTPUT_PATH := ./QemuRecordedOutput.txt
 SIMU_SAVED_OUTPUT_PATH := ./SimuRecordedOutput.txt
 
 EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 mandelbrot fizzbuzz donut seq
-TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc PrintNumbers Globals ForLoops ReturnFromFuncs InlineAsm print variadics ClArgs
+TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc PrintNumbers Globals ForLoops ReturnFromFuncs InlineAsm print variadics ClArgs deref
 
 CommonClArgs := 143
 

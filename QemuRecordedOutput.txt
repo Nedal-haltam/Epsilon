@@ -277,6 +277,18 @@ cl args count = 2
 Printing cl args:
 1- ./tests/risc-v/ClArgs
 2- 143
+in main:
+&px = 46912504506120
+px  = 46912504506128
+&x   = 46912504506128
+*px = 123
+x   = 123
+passed throug function:
+&px = 46912504506096
+px  = 46912504506128
+&x   = 46912504506104
+*px = 123
+x   = 123
 ..........
 ..#.......
 ...#......
