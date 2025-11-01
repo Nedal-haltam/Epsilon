@@ -273,6 +273,9 @@ varaidic(3) = 40
 varaidic(4) = 50
 varaidic(5) = 60
 ----------------------
+cl args count = 1
+Printing cl args:
+1- ./tests/risc-v/ClArgs
 ..........
 ..#.......
 ...#......
