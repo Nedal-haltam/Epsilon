@@ -76,8 +76,8 @@ run-all:
 					>> $(EXAMPLES_BUILD_FOLDER)/run_$$ex.txt 2>&1 || exit 1; \
 			else \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
-					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump || exit 1; \
-					-run $(EXAMPLES_SRC_PATH)/$$ex.e \
+					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump \
+					-run $(EXAMPLES_SRC_PATH)/$$ex.e || exit 1; \
 			fi & \
 		done; \
 		for ex in $(TESTS); do \
@@ -90,8 +90,8 @@ run-all:
 					>> $(TESTS_BUILD_FOLDER)/run_$$ex.txt 2>&1 || exit 1; \
 			else \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
-					-o $(TESTS_BUILD_FOLDER)/$$ex -dump || exit 1; \
-					-run $(TESTS_SRC_PATH)/$$ex.e \
+					-o $(TESTS_BUILD_FOLDER)/$$ex -dump \
+					-run $(TESTS_SRC_PATH)/$$ex.e || exit 1; \
 			fi & \
 		done; \
 		wait; \
@@ -124,8 +124,8 @@ sim-all:
 					>> $(EXAMPLES_BUILD_FOLDER)/sim_$$ex.txt 2>&1 || exit 1; \
 			else \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
-					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump || exit 1; \
-					-sim $(EXAMPLES_SRC_PATH)/$$ex.e \
+					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump \
+					-sim $(EXAMPLES_SRC_PATH)/$$ex.e || exit 1; \
 			fi & \
 		done; \
 		for ex in $(TESTS); do \
@@ -138,8 +138,8 @@ sim-all:
 					>> $(TESTS_BUILD_FOLDER)/sim_$$ex.txt 2>&1 || exit 1; \
 			else \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
-					-o $(TESTS_BUILD_FOLDER)/$$ex -dump || exit 1; \
-					-sim $(TESTS_SRC_PATH)/$$ex.e \
+					-o $(TESTS_BUILD_FOLDER)/$$ex -dump \
+					-sim $(TESTS_SRC_PATH)/$$ex.e || exit 1; \
 			fi & \
 		done; \
 		wait; \
