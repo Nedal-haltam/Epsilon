@@ -10,8 +10,10 @@ TESTS_BUILD_FOLDER := ./tests/risc-v
 QEMU_SAVED_OUTPUT_PATH := ./QemuRecordedOutput.txt
 SIMU_SAVED_OUTPUT_PATH := ./SimuRecordedOutput.txt
 
-EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 mandelbrot fizzbuzz donut
+EXAMPLES := GOL rule110 Fib ProjectEuler_001 ProjectEuler_002 ProjectEuler_003 mandelbrot fizzbuzz donut seq
 TESTS := HelloWorld Print10sMultipleAndLengths ManipulateArrays CharacterArrays misc PrintNumbers Globals ForLoops ReturnFromFuncs InlineAsm print variadics ClArgs
+
+CommonClArgs := 143
 
 .PHONY: all clean clean-examples clean-tests run-all sim-all main record-log diff-diff
 
@@ -71,13 +73,13 @@ run-all:
 				rm -rf $(EXAMPLES_BUILD_FOLDER)/run_$$ex.txt; \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump \
-					-run $(EXAMPLES_SRC_PATH)/$$ex.e \
+					-run $(EXAMPLES_SRC_PATH)/$$ex.e $(CommonClArgs) \
 					| col -b | sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" \
 					>> $(EXAMPLES_BUILD_FOLDER)/run_$$ex.txt 2>&1 || exit 1; \
 			else \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump \
-					-run $(EXAMPLES_SRC_PATH)/$$ex.e || exit 1; \
+					-run $(EXAMPLES_SRC_PATH)/$$ex.e $(CommonClArgs) || exit 1; \
 			fi & \
 		done; \
 		for ex in $(TESTS); do \
@@ -85,13 +87,13 @@ run-all:
 				rm -rf $(TESTS_BUILD_FOLDER)/run_$$ex.txt; \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(TESTS_BUILD_FOLDER)/$$ex -dump \
-					-run $(TESTS_SRC_PATH)/$$ex.e \
+					-run $(TESTS_SRC_PATH)/$$ex.e $(CommonClArgs) \
 					| col -b | sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" \
 					>> $(TESTS_BUILD_FOLDER)/run_$$ex.txt 2>&1 || exit 1; \
 			else \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(TESTS_BUILD_FOLDER)/$$ex -dump \
-					-run $(TESTS_SRC_PATH)/$$ex.e || exit 1; \
+					-run $(TESTS_SRC_PATH)/$$ex.e $(CommonClArgs) || exit 1; \
 			fi & \
 		done; \
 		wait; \
@@ -119,13 +121,13 @@ sim-all:
 				rm -rf $(EXAMPLES_BUILD_FOLDER)/sim_$$ex.txt; \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump \
-					-sim $(EXAMPLES_SRC_PATH)/$$ex.e \
+					-sim $(EXAMPLES_SRC_PATH)/$$ex.e $(CommonClArgs) \
 					| col -b | sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" \
 					>> $(EXAMPLES_BUILD_FOLDER)/sim_$$ex.txt 2>&1 || exit 1; \
 			else \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(EXAMPLES_BUILD_FOLDER)/$$ex -dump \
-					-sim $(EXAMPLES_SRC_PATH)/$$ex.e || exit 1; \
+					-sim $(EXAMPLES_SRC_PATH)/$$ex.e $(CommonClArgs) || exit 1; \
 			fi & \
 		done; \
 		for ex in $(TESTS); do \
@@ -133,13 +135,13 @@ sim-all:
 				rm -rf $(TESTS_BUILD_FOLDER)/sim_$$ex.txt; \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(TESTS_BUILD_FOLDER)/$$ex -dump \
-					-sim $(TESTS_SRC_PATH)/$$ex.e \
+					-sim $(TESTS_SRC_PATH)/$$ex.e $(CommonClArgs) \
 					| col -b | sed -r "s/\x1B\[[0-9;?]*[a-zA-Z]//g" \
 					>> $(TESTS_BUILD_FOLDER)/sim_$$ex.txt 2>&1 || exit 1; \
 			else \
 				dotnet ./bin/Debug/net8.0/Epsilon.dll \
 					-o $(TESTS_BUILD_FOLDER)/$$ex -dump \
-					-sim $(TESTS_SRC_PATH)/$$ex.e || exit 1; \
+					-sim $(TESTS_SRC_PATH)/$$ex.e $(CommonClArgs) || exit 1; \
 			fi & \
 		done; \
 		wait; \
