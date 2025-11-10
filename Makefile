@@ -21,7 +21,7 @@ all: clean run-all sim-all
 	@echo "✅ All tasks completed successfully."
 
 main:
-	dotnet ./bin/Debug/net8.0/Epsilon.dll -run ./main/main.e -o ./main/build/main -dump
+	dotnet ./bin/Debug/net8.0/Epsilon.dll -o ./main/build/main -dump -run ./main/main.e
 	@echo "✅ Built main successfully."
 
 
