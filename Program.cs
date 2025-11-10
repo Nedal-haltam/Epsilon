@@ -146,9 +146,10 @@ namespace Epsilon
             List<string> ClArgs = [];
             bool Optimize = false;
             bool CompileOnly = false;
-            bool Run = false; // Run using qemu
-            bool Sim = false; // simulate using my cycle accurate simulator (CAS)
+            bool Run = false; // Run on qemu
+            bool Sim = false; // simulate on my cycle accurate simulator (CAS)
             bool Dump = false;
+            bool verbose = false;
             while (Shartilities.ShiftArgs(ref args, out string arg))
             {
                 if (arg == "-o")
@@ -181,6 +182,10 @@ namespace Epsilon
                 {
                     Dump = true;
                 }
+                else if (arg == "-v")
+                {
+                    verbose = true;
+                }
                 else if (arg == "-h" || arg == "--h" || arg == "-help" || arg == "--help")
                 {
                     Usage();
@@ -197,17 +202,16 @@ namespace Epsilon
             string SourceFilePath = ClArgs[0];
             ClArgs.RemoveAt(0);
 
-            bool log = false;
             if (Run)
             {
-                if (log) Console.WriteLine("running");
+                if (verbose) Console.WriteLine("running");
                 OutputFilePath ??= "./a";
                 CompileAssembleLinkForQemu(SourceFilePath, OutputFilePath, Optimize, Dump);
                 RunOnQemu(OutputFilePath, ClArgs);
             }
             else if (Sim)
             {
-                if (log) Console.WriteLine("simulating");
+                if (verbose) Console.WriteLine("simulating");
                 OutputFilePath ??= "./a";
                 LibUtils.Program p = CompileAssembleLinkForCAS(SourceFilePath, OutputFilePath, Optimize, Dump);
                 ClArgs.Insert(0, OutputFilePath);
@@ -215,14 +219,14 @@ namespace Epsilon
             }
             else if (CompileOnly)
             {
-                if (log) Console.WriteLine("compile only");
+                if (verbose) Console.WriteLine("compile only");
                 OutputFilePath ??= "./a.S";
                 StringBuilder Assembly = Compile(SourceFilePath, Optimize);
                 Shartilities.WriteFile(OutputFilePath, Assembly.ToString(), false);
             }
             else
             {
-                if (log) Console.WriteLine("compiling and assembling");
+                if (verbose) Console.WriteLine("compiling and assembling");
                 OutputFilePath ??= "./a";
                 CompileAssembleLinkForQemu(SourceFilePath, OutputFilePath, Optimize, Dump);
                 LibUtils.Program p = CompileAssembleLinkForCAS(SourceFilePath, OutputFilePath, Optimize, true);
