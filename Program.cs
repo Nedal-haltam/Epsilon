@@ -193,7 +193,7 @@ namespace Epsilon
                 }
                 else
                 {
-                    Shartilities.UNREACHABLE($"what to do with: {arg}");
+                    ClArgs.Add(arg);
                 }
             }
 
