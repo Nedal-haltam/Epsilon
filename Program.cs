@@ -7,6 +7,8 @@ namespace Epsilon
 {
     internal sealed class Program
     {
+        const uint IM_SIZE = 1 << 13;
+        const uint DM_SIZE = 1 << 14;
         static StringBuilder Compile(string InputFilePath, bool Optimize)
         {
             string InputCode = Shartilities.ReadFile(InputFilePath);
@@ -85,9 +87,9 @@ namespace Epsilon
                 List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
                 File.WriteAllLines(DM_filepath, DM);
 
-                Shartilities.WriteFile(IM_MIF_filepath, LibUtils.GetIMMIF(p.MachineCodes).ToString(), false, 1);
+                Shartilities.WriteFile(IM_MIF_filepath, LibUtils.GetIMMIF(p.MachineCodes, IM_SIZE).ToString(), false, 1);
 
-                Shartilities.WriteFile(DM_MIF_filepath, LibUtils.GetDMMIF(p.DataMemoryValues).ToString(), false, 1);
+                Shartilities.WriteFile(DM_MIF_filepath, LibUtils.GetDMMIF(p.DataMemoryValues, DM_SIZE).ToString(), false, 1);
             }
             return p;
         }
@@ -116,7 +118,7 @@ namespace Epsilon
         {
             List<string> MC = LibUtils.GetIM(p.MachineCodes);
             List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
-            LibCPU.SingleCycle.Run(MC, DM, 16384, 16384, ClArgs, null);
+            LibCPU.SingleCycle.Run(MC, DM, IM_SIZE, DM_SIZE, ClArgs, null);
         }
         static void Usage()
         {
