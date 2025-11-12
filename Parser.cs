@@ -52,21 +52,27 @@ namespace Epsilon
             Peek(TokenType.Char).HasValue
             ) && 
             Peek(TokenType.Ident, 1).HasValue;
-        readonly bool IsStmtAssign()   => Peek(TokenType.Ident).HasValue && 
+        readonly bool IsStmtAssign()
+        {
+            int p = 0;
+            if (Peek(TokenType.Mul).HasValue) p = 1;
+
+            return Peek(TokenType.Ident, p).HasValue &&
             (
-                Peek(TokenType.OpenSquare, 1).HasValue || 
-                Peek(TokenType.Equal, 1).HasValue      ||
-                Peek(TokenType.PlusEqual, 1).HasValue  ||
-                Peek(TokenType.MinusEqual, 1).HasValue ||
-                Peek(TokenType.MulEqual, 1).HasValue   ||
-                Peek(TokenType.DivEqual, 1).HasValue   ||
-                Peek(TokenType.ModEqual, 1).HasValue   ||
-                Peek(TokenType.AndEqual, 1).HasValue   ||
-                Peek(TokenType.OrEqual, 1).HasValue    ||
-                Peek(TokenType.XorEqual, 1).HasValue   ||
-                Peek(TokenType.SllEqual, 1).HasValue   ||
-                Peek(TokenType.SraEqual, 1).HasValue
+                Peek(TokenType.OpenSquare, p + 1).HasValue ||
+                Peek(TokenType.Equal     , p + 1).HasValue ||
+                Peek(TokenType.PlusEqual , p + 1).HasValue ||
+                Peek(TokenType.MinusEqual, p + 1).HasValue ||
+                Peek(TokenType.MulEqual  , p + 1).HasValue ||
+                Peek(TokenType.DivEqual  , p + 1).HasValue ||
+                Peek(TokenType.ModEqual  , p + 1).HasValue ||
+                Peek(TokenType.AndEqual  , p + 1).HasValue ||
+                Peek(TokenType.OrEqual   , p + 1).HasValue ||
+                Peek(TokenType.XorEqual  , p + 1).HasValue ||
+                Peek(TokenType.SllEqual  , p + 1).HasValue ||
+                Peek(TokenType.SraEqual  , p + 1).HasValue
             );
+        }
         readonly bool IsBinExpr()      => Peek(TokenType.Plus).HasValue       ||
                                  Peek(TokenType.Mul).HasValue        ||
                                  Peek(TokenType.Rem).HasValue        ||
@@ -616,6 +622,8 @@ namespace Epsilon
         }
         NodeStmt ParseAssign()
         {
+            bool IsPointerDeref = PeekAndConsume(TokenType.Mul).HasValue;
+
             Token Ident = Consume();
             NodeStmt stmt = new()
             {
@@ -647,6 +655,7 @@ namespace Epsilon
                 };
             }
             stmt.assign.type = IdentifierType;
+            stmt.assign.IsPointerDeref = IsPointerDeref;
             return stmt;
         }
         List<Var> ParseFunctionParameters()

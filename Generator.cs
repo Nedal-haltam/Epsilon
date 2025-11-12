@@ -27,7 +27,7 @@ namespace Epsilon
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         ////////////////////////////////////////////////////////
         static string GetLabel() => $"LABEL{m_LabelsCount++}";
-        static void LoadStoreBasedOnSize(string inst, string DestinationRegister, string SourceRegister, string Offset, uint ElementSize)
+        static void LoadStoreBasedOnSize(string inst, string DataRegister, string AddressRegister, string Offset, uint ElementSize)
         {
             string Mnem = "";
             if (inst == "store") Mnem = "S";
@@ -35,9 +35,9 @@ namespace Epsilon
             else Shartilities.Logln(Shartilities.LogType.ERROR, $"invalid argument {inst}, expected: <load|store>", 1);
 
             if (ElementSize == 1)
-                m_output.AppendLine($"    {Mnem}B {DestinationRegister}, {Offset}({SourceRegister})");
+                m_output.AppendLine($"    {Mnem}B {DataRegister}, {Offset}({AddressRegister})");
             else if (ElementSize == 8)
-                m_output.AppendLine($"    {Mnem}D {DestinationRegister}, {Offset}({SourceRegister})");
+                m_output.AppendLine($"    {Mnem}D {DataRegister}, {Offset}({AddressRegister})");
             else
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"invalid ElementSize {ElementSize}", 1);
         }
@@ -453,7 +453,21 @@ namespace Epsilon
                             m_output.AppendLine($"    LA {BaseReg}, {var.Value}");
                         else
                             RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
-                        LoadStoreBasedOnSize("store", RegData, BaseReg, RelativeLocation.ToString(), var.ElementSize);
+                        
+                        if (assign.IsPointerDeref)
+                        {
+                            if (!var.IsGlobal)
+                            {
+                                BaseReg = GetOthertempRegisgter(RegData);
+                                m_output.AppendLine($"    ADDI {BaseReg}, sp, 0");
+                            }
+                            LoadStoreBasedOnSize("load", BaseReg, BaseReg, RelativeLocation.ToString(), 8);
+                            LoadStoreBasedOnSize("store", RegData, BaseReg, "0", 8);
+                        }
+                        else
+                        {
+                            LoadStoreBasedOnSize("store", RegData, BaseReg, RelativeLocation.ToString(), var.ElementSize);
+                        }
                     }
                     return;
                 case NodeStmtIdentifierType.Array:
@@ -484,7 +498,16 @@ namespace Epsilon
                         }
                         GenExpr(assign.array.expr, RegData, var.ElementSize);
                         GenPop(RegAddr);
-                        LoadStoreBasedOnSize("store", RegData, RegAddr, "0", var.ElementSize);
+
+                        if (assign.IsPointerDeref)
+                        {
+                            LoadStoreBasedOnSize("load", RegAddr, RegAddr, "0", 8);
+                            LoadStoreBasedOnSize("store", RegData, RegAddr, "0", 8);
+                        }
+                        else
+                        {
+                            LoadStoreBasedOnSize("store", RegData, RegAddr, "0", var.ElementSize);
+                        }
                     }
                     return;
                 default:

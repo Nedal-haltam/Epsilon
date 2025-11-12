@@ -92,15 +92,18 @@ namespace Epsilon
         public NodeStmtIdentifierType type;
         public NodeStmtAssignSingleVar singlevar;
         public NodeStmtAssignArray array;
+        public bool IsPointerDeref;
         public NodeStmtAssign()
         {
             this.type = new();
             this.singlevar = new();
             this.array = new();
+            this.IsPointerDeref = false;
         }
         public NodeStmtAssign(NodeStmtIdentifierType type, dynamic thing)
         {
             this.type = type;
+            this.IsPointerDeref = false;
             switch (type)
             {
                 case NodeStmtIdentifierType.SingleVar:
