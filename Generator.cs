@@ -281,24 +281,68 @@ namespace Epsilon
                                 break;
                             case NodeTermUnaryExpr.NodeTermUnaryExprType.addressof:
                                 {
-                                    NodeTermIdent ident = term.unary.term.ident;
                                     if (term.unary.term.type != NodeTerm.NodeTermType.Ident)
                                         Shartilities.Log(Shartilities.LogType.ERROR, $"address of operator is only on identifiers with no offsets\n", 1);
-                                    if (ident.indexes.Count == 0)
+                                    NodeTermIdent ident_ = term.unary.term.ident;
+                                    Var var_ = m_Variables.GetVariable(ident_.ident.Value, m_inputFilePath, ident_.ident.Line);
+                                    if (ident_.indexes.Count == 0)
                                     {
-                                        Var var = m_Variables.GetVariable(ident.ident.Value, m_inputFilePath, ident.ident.Line);
-                                        if (var.IsGlobal)
+                                        if (var_.IsArray)
                                         {
-                                            m_output.AppendLine($"    LA {RegData}, {var.Value}");
+                                            if (var_.IsParameter)
+                                            {
+                                                if (var_.IsGlobal)
+                                                    Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot put global variable as a parameter", 1);
+                                                uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var_, m_StackSize);
+                                                m_output.AppendLine($"    ADDI {RegData}, sp, {RelativeLocation}");
+                                            }
+                                            else
+                                            {
+                                                if (var_.IsGlobal)
+                                                    m_output.AppendLine($"    LA {RegData}, {var_.Value}");
+                                                else
+                                                {
+                                                    uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var_, m_StackSize);
+                                                    m_output.AppendLine($"    ADDI {RegData}, sp, {RelativeLocation - (var_.TypeSize * (var_.Count - 1))}");
+                                                }
+                                            }
                                         }
                                         else
                                         {
-                                            uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
-                                            if (var.IsParameter)
-                                                m_output.AppendLine($"    ADDI {RegData}, sp, {RelativeLocation}");
+                                            uint RelativeLocation = 0;
+                                            string BaseReg = var_.IsGlobal ? GetOthertempRegisgter(RegData) : "sp";
+                                            if (var_.IsGlobal)
+                                                m_output.AppendLine($"    LA {BaseReg}, {var_.Value}");
                                             else
-                                                m_output.AppendLine($"    ADDI {RegData}, sp, {RelativeLocation - (var.TypeSize * (var.Count - 1))}");
+                                                RelativeLocation = m_Variables.GetVariableRelativeLocation(var_, m_StackSize);
+                                            m_output.AppendLine($"    ADDI {RegData}, {BaseReg}, {RelativeLocation}");
                                         }
+                                    }
+                                    else
+                                    {
+                                        string RegAddr = GetOthertempRegisgter(RegData);
+                                        if (var_.IsParameter)
+                                        {
+                                            if (var_.IsGlobal)
+                                                Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot put global variable as a parameter", 1);
+                                            uint RelativeLocationOfBaseAddress = m_Variables.GetVariableRelativeLocation(var_, m_StackSize);
+                                            GenArrayAddr(ident_.indexes, var_, RelativeLocationOfBaseAddress);
+                                        }
+                                        else
+                                        {
+                                            if (var_.IsGlobal)
+                                            {
+                                                GenArrayIndex(ident_.indexes, var_.Dimensions, var_, RegData);
+                                                m_output.AppendLine($"    LA {RegAddr}, {var_.Value}");
+                                                m_output.AppendLine($"    ADD {RegAddr}, {RegAddr}, {RegData}");
+                                                GenPush(RegAddr);
+                                            }
+                                            else
+                                            {
+                                                GenArrayAddr(ident_.indexes, var_);
+                                            }
+                                        }
+                                        GenPop(RegData);
                                     }
                                     if (DestReg == null)
                                         GenPush(RegData, size);
