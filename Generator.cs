@@ -346,7 +346,7 @@ namespace Epsilon
         static void GenTerm(NodeTerm term, string? DestReg, uint size)
         {
             bool WillPush = DestReg == null;
-            DestReg = DestReg ?? m_FirstTempReg;
+            DestReg ??= m_FirstTempReg;
             switch (term.type)
             {
                 case NodeTerm.NodeTermType.Unary:
