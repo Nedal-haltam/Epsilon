@@ -278,15 +278,15 @@ Printing cl args:
 1- ./tests/risc-v/ClArgs
 2- 143
 in main:
-&px = 16360
-px  = 16368
-&x   = 16368
+&px = 15336
+px  = 15344
+&x   = 15344
 *px = 123
 x   = 123
 passed throug function:
-&px = 16336
-px  = 16368
-&x   = 16344
+&px = 15312
+px  = 15344
+&x   = 15320
 *px = 123
 x   = 123
 ..........
