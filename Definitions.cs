@@ -451,6 +451,7 @@ namespace Epsilon
     {
         public Token ident;
         public List<NodeExpr> indexes;
+        public bool IsIndexedAsArray => indexes.Count == 0;
         public NodeTermIdent()
         {
             indexes = [];
