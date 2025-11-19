@@ -257,11 +257,10 @@ namespace Epsilon
             AddressOnly,
             LoadValue,
         }
-        // TODO: refactor GenVariableAddress more into smaller functions
         static void GenVariable(NodeTermIdent Ident, Var Variable, string DestReg, bool WillPush, uint size, AddressMode mode)
         {
             bool LoadValue = mode == AddressMode.LoadValue;
-            if (Ident.IsIndexedAsArray)
+            if (!Ident.IsIndexedAsArray)
             {
                 if (Variable.IsArray)
                 {
