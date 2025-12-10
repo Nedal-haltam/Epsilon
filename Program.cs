@@ -139,6 +139,7 @@ namespace Epsilon
         }
         static void Main(string[] args)
         {
+            //Compile("../../../main/main.e", false);
             // TODO:
             //    - deal with multiple files
             //        - if you start with .e file you interpret the rest as epsilon files and you start from the compile step
