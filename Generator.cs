@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Security.Cryptography;
 using System.Text;
 namespace Epsilon
 {
@@ -12,6 +13,7 @@ namespace Epsilon
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         static string m_inputFilePath;
         static Stack<int> m_scopes;
+        static Stack<int> m_scopesBreakContinue;
         static uint m_StackSize;
         static Stack<string?> m_scopestart;
         static Stack<string?> m_scopeend;
@@ -682,6 +684,7 @@ namespace Epsilon
             m_Variables.Reset();
             m_StackSize = new();
             m_scopes = new();
+            m_scopesBreakContinue = new();
             m_scopestart = new();
             m_scopeend = new();
             m_CurrentFunctionName = function.FunctionName.Value;
@@ -875,6 +878,7 @@ namespace Epsilon
                 m_output.AppendLine($"    BEQZ {RegData}, {label_end}");
                 m_scopestart.Push(label_update);
                 m_scopeend.Push(label_end);
+                m_scopesBreakContinue.Push(m_Variables.VariablesCount());
                 GenScope(forr.pred.scope);
                 m_scopestart.Pop();
                 m_scopeend.Pop();
@@ -898,6 +902,7 @@ namespace Epsilon
                 m_output.AppendLine($"{label_start}:");
                 m_scopestart.Push(label_update);
                 m_scopeend.Push(label_end);
+                m_scopesBreakContinue.Push(m_Variables.VariablesCount());
                 GenScope(forr.pred.scope);
                 m_scopestart.Pop();
                 m_scopeend.Pop();
@@ -917,6 +922,7 @@ namespace Epsilon
                 m_output.AppendLine($"{label_start}:");
                 m_scopestart.Push(label_start);
                 m_scopeend.Push(label_end);
+                m_scopesBreakContinue.Push(m_Variables.VariablesCount());
                 GenScope(forr.pred.scope);
                 m_scopestart.Pop();
                 m_scopeend.Pop();
@@ -927,7 +933,6 @@ namespace Epsilon
         }
         static void GenStmtWhile(NodeStmtWhile whilee)
         {
-            BeginScope();
             string label_start = GetLabel() + "_START";
             string label_end = GetLabel() + "_END";
 
@@ -937,12 +942,12 @@ namespace Epsilon
             m_output.AppendLine($"    BEQZ {RegData}, {label_end}");
             m_scopestart.Push(label_start);
             m_scopeend.Push(label_end);
+            m_scopesBreakContinue.Push(m_Variables.VariablesCount());
             GenScope(whilee.scope);
             m_scopestart.Pop();
             m_scopeend.Pop();
             m_output.AppendLine($"    J {label_start}");
             m_output.AppendLine($"{label_end}:");
-            EndScope();
         }
         static void GenStmtAsm(NodeStmtAsm asm)
         {
@@ -954,6 +959,20 @@ namespace Epsilon
             {
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{breakk.breakk.Line}:1: Generator: no enclosing loop out of which to break from", 1);
             }
+
+
+            int Vars_topop = m_Variables.VariablesCount() - m_scopesBreakContinue.Pop();
+            int i = m_Variables.VariablesCount() - 1;
+            int iterations = Vars_topop;
+            uint popcount = 0;
+            while (iterations-- > 0)
+            {
+                popcount += m_Variables[i--].Size;
+            }
+            StackPopEndScope(popcount);
+            m_StackSize += popcount;
+
+
             m_output.AppendLine($"    J {m_scopeend.Peek()}");
         }
         static void GenStmtContinue(NodeStmtContinuee continuee)
@@ -962,6 +981,20 @@ namespace Epsilon
             {
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{continuee.continuee.Line}:1: Generator: no enclosing loop out of which to continue", 1);
             }
+
+
+            int Vars_topop = m_Variables.VariablesCount() - m_scopesBreakContinue.Pop();
+            int i = m_Variables.VariablesCount() - 1;
+            int iterations = Vars_topop;
+            uint popcount = 0;
+            while (iterations-- > 0)
+            {
+                popcount += m_Variables[i--].Size;
+            }
+            StackPopEndScope(popcount);
+            m_StackSize += popcount;
+
+
             m_output.AppendLine($"    J {m_scopestart.Peek()}");
         }
         static void GenStmtExit(NodeStmtExit exit)
@@ -1086,6 +1119,7 @@ namespace Epsilon
 
             m_Variables = new();
             m_scopes = [];
+            m_scopesBreakContinue = [];
             m_StackSize = 0;
             m_scopestart = new();
             m_scopeend = new();

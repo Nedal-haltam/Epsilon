@@ -24,8 +24,8 @@ namespace Epsilon
             { "__VARIADIC_COUNT__" , TokenType.VariadicCount},
             { "__VARIADIC_ARGS__"  , TokenType.VariadicArgs},
             { "in"                 , TokenType.In},
-            //{ "continue"           , TokenType.Continue},
-            //{ "break"              , TokenType.Break},
+            { "continue"           , TokenType.Continue},
+            { "break"              , TokenType.Break},
             { "return"             , TokenType.Return},
             { "exit"               , TokenType.Exit},
         };
