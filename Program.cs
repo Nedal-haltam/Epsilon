@@ -7,8 +7,6 @@ namespace Epsilon
 {
     internal sealed class Program
     {
-        const uint IM_SIZE = 1 << 13;
-        const uint DM_SIZE = 1 << 14;
         static StringBuilder Compile(string InputFilePath, bool Optimize)
         {
             string InputCode = Shartilities.ReadFile(InputFilePath);
@@ -63,7 +61,7 @@ namespace Epsilon
             cmd.RunSyncRealTime(ref p, out string stdout, out string stderr);
             Environment.Exit(p!.ExitCode);
         }
-        static LibUtils.Program AssembleAndLinkForCAS(string SourceFilePath, string OutputFilePath, bool Generate)
+        static LibUtils.Program AssembleAndLinkForCAS(string SourceFilePath, string OutputFilePath, uint IM_SIZE, uint DM_SIZE, bool Generate)
         {
             LibUtils.Program p = Assembler.Assembler.AssembleProgram(SourceFilePath, false);
             if (Generate)
@@ -93,13 +91,13 @@ namespace Epsilon
             }
             return p;
         }
-        static LibUtils.Program CompileAssembleLinkForCAS(string SourceFilePath, string OutputFilePath, bool Optimize, bool Dump)
+        static LibUtils.Program CompileAssembleLinkForCAS(string SourceFilePath, string OutputFilePath, bool Optimize, uint IM_SIZE, uint DM_SIZE, bool Dump)
         {
             LibUtils.Program p = new();
             bool IsAssemblyFile = SourceFilePath.EndsWith(".S");
             if (IsAssemblyFile)
             {
-                p = AssembleAndLinkForCAS(SourceFilePath, OutputFilePath, Dump);
+                p = AssembleAndLinkForCAS(SourceFilePath, OutputFilePath, IM_SIZE, DM_SIZE, Dump);
             }
             else
             {
@@ -108,13 +106,13 @@ namespace Epsilon
                     StringBuilder Assembly = Compile(SourceFilePath, Optimize);
                     Shartilities.WriteFile(TempAssembly, Assembly.ToString(), false);
                 }
-                p = AssembleAndLinkForCAS(TempAssembly, OutputFilePath, Dump);
+                p = AssembleAndLinkForCAS(TempAssembly, OutputFilePath, IM_SIZE, DM_SIZE, Dump);
                 if (!Dump && File.Exists(TempAssembly))
                     File.Delete(TempAssembly);
             }
             return p;
         }
-        static void SimOnCAS(LibUtils.Program p, List<string> ClArgs)
+        static void SimOnCAS(LibUtils.Program p, List<string> ClArgs, uint IM_SIZE, uint DM_SIZE)
         {
             List<string> MC = LibUtils.GetIM(p.MachineCodes);
             List<string> DM = LibUtils.ParseDataMemoryValues(p.DataMemoryValues);
@@ -146,6 +144,8 @@ namespace Epsilon
             //        - if you start with .S file you interpret the rest as assembly files and you start from the assemble step
 
             string? OutputFilePath = null;
+            uint IM_SIZE = 1 << 14;
+            uint DM_SIZE = 1 << 14;
             List<string> ClArgs = [];
             bool Optimize = false;
             bool CompileOnly = false;
@@ -185,6 +185,34 @@ namespace Epsilon
                 {
                     Dump = true;
                 }
+                else if (arg == "-imsize")
+                {
+                    if (!Shartilities.ShiftArgs(ref args, out string temp_IM_SIZE))
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Missing argument \n", 1);
+                    if (uint.TryParse(temp_IM_SIZE, out uint temp_size))
+                    {
+                        IM_SIZE = temp_size;
+                    }
+                    else
+                    {
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"could not parse instruction memory size {temp_IM_SIZE}\n", 1);
+                        return;
+                    }
+                }
+                else if (arg == "-dmsize")
+                {
+                    if (!Shartilities.ShiftArgs(ref args, out string temp_DM_SIZE))
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"Missing argument \n", 1);
+                    if (uint.TryParse(temp_DM_SIZE, out uint temp_size))
+                    {
+                        DM_SIZE = temp_size;
+                    }
+                    else
+                    {
+                        Shartilities.Log(Shartilities.LogType.ERROR, $"could not parse instruction memory size {temp_DM_SIZE}\n", 1);
+                        return;
+                    }
+                }
                 else if (arg == "-v")
                 {
                     verbose = true;
@@ -216,9 +244,9 @@ namespace Epsilon
             {
                 if (verbose) Console.WriteLine("simulating");
                 OutputFilePath ??= "./a";
-                LibUtils.Program p = CompileAssembleLinkForCAS(SourceFilePath, OutputFilePath, Optimize, Dump);
+                LibUtils.Program p = CompileAssembleLinkForCAS(SourceFilePath, OutputFilePath, Optimize, IM_SIZE, DM_SIZE, Dump);
                 ClArgs.Insert(0, OutputFilePath);
-                SimOnCAS(p, ClArgs);
+                SimOnCAS(p, ClArgs, IM_SIZE, DM_SIZE);
             }
             else if (CompileOnly)
             {
@@ -232,7 +260,7 @@ namespace Epsilon
                 if (verbose) Console.WriteLine("compiling and assembling");
                 OutputFilePath ??= "./a";
                 CompileAssembleLinkForQemu(SourceFilePath, OutputFilePath, Optimize, Dump);
-                LibUtils.Program p = CompileAssembleLinkForCAS(SourceFilePath, OutputFilePath, Optimize, true);
+                LibUtils.Program p = CompileAssembleLinkForCAS(SourceFilePath, OutputFilePath, Optimize, IM_SIZE, DM_SIZE, true);
             }
         }
     }
