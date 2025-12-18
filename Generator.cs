@@ -26,6 +26,7 @@ namespace Epsilon
 
         static string m_FirstTempReg;
         static string m_SecondTempReg;
+        static string UnBookedReg;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         ////////////////////////////////////////////////////////
         static string GetLabel() => $"LABEL{m_LabelsCount++}";
@@ -45,26 +46,30 @@ namespace Epsilon
         }
         static void GenPush(string reg, uint size = 8)
         {
-            m_output.AppendLine($"    ADDI sp, sp, -{size}");
+            m_output.AppendLine($"    LI {UnBookedReg}, -{size}");
+            m_output.AppendLine($"    ADD sp, sp, {UnBookedReg}");
             LoadStoreBasedOnSize("store", reg, "sp", "0", size);
             m_StackSize += size;
         }
         static void GenPush(uint size)
         {
             if (size == 0) return;
-            m_output.AppendLine($"    ADDI sp, sp, -{size}");
+            m_output.AppendLine($"    LI {UnBookedReg}, -{size}");
+            m_output.AppendLine($"    ADD sp, sp, {UnBookedReg}");
             m_StackSize += size;
         }
         static void GenPop(string reg, uint size = 8)
         {
             LoadStoreBasedOnSize("load", reg, "sp", "0", size);
-            m_output.AppendLine($"    ADDI sp, sp, {size}");
+            m_output.AppendLine($"    LI {UnBookedReg}, {size}");
+            m_output.AppendLine($"    ADD sp, sp, {UnBookedReg}");
             m_StackSize -= size;
         }
         static void GenPushMany(List<string> regs, uint RegisterSize)
         {
             if (regs.Count == 0) return;
-            m_output.AppendLine($"    ADDI sp, sp, -{regs.Count * RegisterSize}");
+            m_output.AppendLine($"    LI {UnBookedReg}, -{regs.Count * RegisterSize}");
+            m_output.AppendLine($"    ADD sp, sp, {UnBookedReg}");
             for (int i = 0; i < regs.Count; i++)
             {
                 m_output.AppendLine($"    SD {regs[i]}, {RegisterSize * i}(sp)");
@@ -78,7 +83,8 @@ namespace Epsilon
             {
                 m_output.AppendLine($"    LD {regs[regs.Count - i - 1]}, {RegisterSize * (regs.Count - i - 1)}(sp)");
             }
-            m_output.AppendLine($"    ADDI sp, sp, {regs.Count * RegisterSize}");
+            m_output.AppendLine($"    LI {UnBookedReg}, {regs.Count * RegisterSize}");
+            m_output.AppendLine($"    ADD sp, sp, {UnBookedReg}");
             m_StackSize -= (uint)(RegisterSize * regs.Count);
         }
         static void StackPopEndScope(uint popcount)
@@ -247,7 +253,8 @@ namespace Epsilon
             else
             {
                 uint RelativeLocation = m_Variables.GetVariableRelativeLocation(var, m_StackSize) - (var.Size - var.ElementSize);
-                m_output.AppendLine($"    ADDI {Address}, {Address}, {RelativeLocation}");
+                m_output.AppendLine($"    LI {UnBookedReg}, {RelativeLocation}");
+                m_output.AppendLine($"    ADD {Address}, {Address}, {UnBookedReg}");
                 m_output.AppendLine($"    ADD {Address}, sp, {Address}");
                 // sp + index + (base address realtive address on the stack)
             }
@@ -277,7 +284,8 @@ namespace Epsilon
                         }
                         else
                         {
-                            m_output.AppendLine($"    ADDI {DestReg}, sp, {RelativeLocation}");
+                            m_output.AppendLine($"    LI {UnBookedReg}, {RelativeLocation}");
+                            m_output.AppendLine($"    ADD {DestReg}, sp, {UnBookedReg}");
                         }
                     }
                     else
@@ -287,7 +295,8 @@ namespace Epsilon
                         else
                         {
                             uint RelativeLocation = m_Variables.GetVariableRelativeLocation(Variable, m_StackSize);
-                            m_output.AppendLine($"    ADDI {DestReg}, sp, {RelativeLocation - (Variable.TypeSize * (Variable.Count - 1))}");
+                            m_output.AppendLine($"    LI {UnBookedReg}, {RelativeLocation - (Variable.TypeSize * (Variable.Count - 1))}");
+                            m_output.AppendLine($"    ADD {DestReg}, sp, {UnBookedReg}");
                         }
                     }
                 }
@@ -721,7 +730,10 @@ namespace Epsilon
             Shartilities.Assert(AllocatedStackSize == m_StackSize, $"stack sizes are not equal");
 
             if (m_StackSize != 0)
-                m_output.AppendLine($"    ADDI sp, sp, {m_StackSize}");
+            {
+                m_output.AppendLine($"    LI {UnBookedReg}, {m_StackSize}");
+                m_output.AppendLine($"    ADD sp, sp, {UnBookedReg}");
+            }
 
             if (m_CurrentFunctionName == "main")
             {
@@ -1132,6 +1144,7 @@ namespace Epsilon
 
             m_FirstTempReg = "t0";
             m_SecondTempReg = "t1";
+            UnBookedReg = "t6";
         }
         public static StringBuilder GenProgram(NodeProg prog, string InputFilePath)
         {
