@@ -142,7 +142,22 @@ namespace Epsilon
             //    - deal with multiple files
             //        - if you start with .e file you interpret the rest as epsilon files and you start from the compile step
             //        - if you start with .S file you interpret the rest as assembly files and you start from the assemble step
+            //  dotnet ../Epsilon/bin/Debug/net8.0/Epsilon.dll -o ./hw/singlecycle/test/Generated/test -dump -sim ./hw/singlecycle/test/Generated/test.S
+            //string? OutputFilePath = null;
+#if false
+            string? OutputFilePath = "../../../../risc-v-CPUs/hw/singlecycle/test/Generated/test";
+            List<string> ClArgs = ["../../../../risc-v-CPUs/hw/singlecycle/test/Generated/test.S"];
+            bool Sim = true; // simulate on my cycle accurate simulator (CAS)
 
+            uint IM_SIZE = 1 << 14;
+            uint DM_SIZE = 1 << 14;
+            bool Optimize = false;
+
+            bool CompileOnly = false;
+            bool Run = false; // Run on qemu
+            bool Dump = true;
+            bool verbose = false;
+#else
             string? OutputFilePath = null;
             uint IM_SIZE = 1 << 14;
             uint DM_SIZE = 1 << 14;
@@ -227,7 +242,7 @@ namespace Epsilon
                     ClArgs.Add(arg);
                 }
             }
-
+#endif
             if (ClArgs.Count == 0)
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"no input files was provided", 1);
             string SourceFilePath = ClArgs[0];
