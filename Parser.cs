@@ -10,7 +10,6 @@ namespace Epsilon
         readonly string m_inputFilePath = InputFilePath;
         NodeProg prog = new();
         int m_curr_index = 0;
-        bool IsInGlobal = false;
         readonly Token? Peek(int offset = 0) => 0 <= m_curr_index + offset && m_curr_index + offset < m_tokens.Count ? m_tokens[m_curr_index + offset] : null;
         readonly Token? Peek(TokenType type, int offset = 0)
         {
@@ -161,6 +160,8 @@ namespace Epsilon
                     type = NodeTermUnaryExpr.NodeTermUnaryExprType.addressof,
                     term = termunary.Value,
                 };
+                if (term.unary.term.type != NodeTerm.NodeTermType.Ident)
+                    Shartilities.Log(Shartilities.LogType.ERROR, $"operator `&` is only applied on identifiers\n", 1);
                 return term;
             }
             else if (Peek(TokenType.Mul).HasValue)
@@ -658,7 +659,7 @@ namespace Epsilon
             stmt.assign.IsPointerDeref = IsPointerDeref;
             return stmt;
         }
-        List<Var> ParseFunctionParameters()
+        List<Var> ParseFunctionParameters(string FunctionName)
         {
             ExpectAndConsume(TokenType.OpenParen);
             List<Var> parameters = [];
@@ -683,8 +684,12 @@ namespace Epsilon
                     uint TotalSize = 1;
                     List<uint> dims = [];
                     bool IsArray = false;
-                    if (parameters.FindIndex(x => x.Value == ident.Value) != -1 || prog.GlobalScope.stmts.FindIndex(x => x.declare.ident.Value == ident.Value) != -1)
-                        Shartilities.Logln(Shartilities.LogType.ERROR, $"variable `{ident.Value}` is already declared", 1);
+
+                    if (parameters.FindIndex(x => x.Value == ident.Value) != -1)
+                        Shartilities.Logln(Shartilities.LogType.ERROR, $"in function {FunctionName} parameter with the name `{ident.Value}` is already declared", 1);
+                    if (prog.GlobalScope.stmts.FindIndex(x => x.declare.ident.Value == ident.Value) != -1)
+                        Shartilities.Logln(Shartilities.LogType.ERROR, $"in function {FunctionName} variable `{ident.Value}` is already declared in global scope", 1);
+
                     if (Peek(TokenType.OpenSquare).HasValue)
                     {
                         IsArray = true;
@@ -719,7 +724,6 @@ namespace Epsilon
         }
         void ParseFunctionPrologue(Token FunctionName)
         {
-            IsInGlobal = false;
             if (ConstDefs.STD_FUNCTIONS_MAP.ContainsKey(FunctionName.Value) || prog.UserDefinedFunctions.ContainsKey(FunctionName.Value))
             {
                 Token? peeked = Peek(-1);
@@ -729,7 +733,7 @@ namespace Epsilon
         }
         void ParseFunctionEpilogue()
         {
-            IsInGlobal = true;
+
         }
         NodeStmtScope ParseFunctionBody()
         {
@@ -740,7 +744,7 @@ namespace Epsilon
         {
             Token FunctionName = Consume();
             ParseFunctionPrologue(FunctionName);
-            List<Var> parameters = ParseFunctionParameters();
+            List<Var> parameters = ParseFunctionParameters(FunctionName.Value);
             NodeStmtScope FunctionBody = ParseFunctionBody();
             ParseFunctionEpilogue();
 
@@ -786,11 +790,6 @@ namespace Epsilon
             if (IsStmtDeclare())
             {
                 List<NodeStmt> stmts = ParseDeclare();
-                if (IsInGlobal)
-                {
-                    prog.GlobalScope.stmts.AddRange(stmts);
-                    return [];
-                }
                 return stmts;
             }
             else if (IsStmtAssign())
@@ -948,15 +947,32 @@ namespace Epsilon
                 return [];
             }
         }
+        bool IsValidGlobalStmts(List<NodeStmt> stmts)
+        {
+            foreach (NodeStmt stmt in stmts)
+            {
+                if (stmt.type == NodeStmt.NodeStmtType.Declare && 
+                    ((stmt.declare.type == NodeStmtIdentifierType.SingleVar && stmt.declare.singlevar.expr.type == NodeExpr.NodeExprType.None) ||
+                    (stmt.declare.type == NodeStmtIdentifierType.Array)))
+                    continue;
+                else
+                {
+                    int line = stmt.declare.ident.Line;
+                    Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: invalid global statement", 1);
+                }
+            }
+            return true;
+        }
         public NodeProg ParseProg()
         {
             prog = new();
             m_curr_index = 0;
-            IsInGlobal = true;
 
             while (Peek().HasValue)
             {
-                ParseStmt();
+                List<NodeStmt> stmts = ParseStmt();
+                if (IsValidGlobalStmts(stmts))
+                    prog.GlobalScope.stmts.AddRange(stmts);
             }
             return prog;
         }

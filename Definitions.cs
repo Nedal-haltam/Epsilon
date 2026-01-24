@@ -680,14 +680,65 @@ namespace Epsilon
             print,
             atouns,
         }
-        static public Dictionary<string, STD_FUNCTIONS> STD_FUNCTIONS_MAP = new()
+        static public Dictionary<string, NodeStmtFunction> STD_FUNCTIONS_MAP = new()
         {
-            { "strlen", STD_FUNCTIONS.strlen},
-            { "stoa"  , STD_FUNCTIONS.stoa},
-            { "unstoa", STD_FUNCTIONS.unstoa},
-            { "write" , STD_FUNCTIONS.write},
-            { "print" , STD_FUNCTIONS.print},
-            { "atouns"  , STD_FUNCTIONS.atouns},
+            { "strlen", new()
+            {
+                FunctionName = new(){ Value = "strlen", Line = 0, Type = TokenType.Ident },
+                parameters = 
+                [
+                    new("strlen_input_1", 8, 8, [], false, true, false, false),
+                ],
+                FunctionBody = new()
+            }},
+            { "stoa", new()
+            {
+                FunctionName = new(){ Value = "stoa", Line = 0, Type = TokenType.Ident },
+                parameters =
+                [
+                    new("stoa_input_1", 8, 8, [], false, true, false, false),
+                ],
+                FunctionBody = new()
+            }},
+            { "unstoa", new()
+            {
+                FunctionName = new(){ Value = "unstoa", Line = 0, Type = TokenType.Ident },
+                parameters =
+                [
+                    new("unstoa_input_1", 8, 8, [], false, true, false, false),
+                ],
+                FunctionBody = new()
+            }},
+            { "write", new()
+            {
+                FunctionName = new(){ Value = "write", Line = 0, Type = TokenType.Ident },
+                parameters =
+                [
+                    new("write_input_1", 8, 8, [], false, true, false, false),
+                    new("write_input_2", 8, 8, [], false, true, false, false),
+                    new("write_input_3", 8, 8, [], false, true, false, false),
+                ],
+                FunctionBody = new()
+            }},
+            { "atouns", new()
+            {
+                FunctionName = new(){ Value = "atouns", Line = 0, Type = TokenType.Ident },
+                parameters =
+                [
+                    new("atouns_input_1", 8, 8, [], false, true, false, false),
+                ],
+                FunctionBody = new()
+            }},
+            { "print", new()
+            {
+                FunctionName = new(){ Value = "print", Line = 0, Type = TokenType.Ident },
+                parameters =
+                [
+                    new("print_input_1", 8, 8, [], false, true, false, false),
+                    new("print_input_2", 8, 8, [], false, true, true, false),
+                ],
+                FunctionBody = new()
+            }},
         };
     }
 

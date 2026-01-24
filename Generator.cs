@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-using System.Security.Cryptography;
-using System.Text;
+﻿using System.Text;
 namespace Epsilon
 {
     static class Generator
@@ -177,8 +174,6 @@ namespace Epsilon
             switch (declare.type)
             {
                 case NodeStmtIdentifierType.SingleVar:
-                    if (IsGlobal && declare.singlevar.expr.type != NodeExpr.NodeExprType.None)
-                        Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{declare.ident.Line}:1: Generator: global variable declaration cannot be initialized", 1);
                     switch (declare.datatype)
                     {
                         case NodeStmtDataType.Auto:
@@ -275,8 +270,6 @@ namespace Epsilon
                 {
                     if (Variable.IsParameter)
                     {
-                        if (Variable.IsGlobal)
-                            Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot put global variable as a parameter", 1);
                         uint RelativeLocation = m_Variables.GetVariableRelativeLocation(Variable, m_StackSize);
                         if (LoadValue)
                         {
@@ -323,8 +316,6 @@ namespace Epsilon
                 string RegAddr = GetOthertempRegisgter(DestReg);
                 if (Variable.IsParameter)
                 {
-                    if (Variable.IsGlobal)
-                        Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot put global variable as a parameter", 1);
                     uint RelativeLocationOfBaseAddress = m_Variables.GetVariableRelativeLocation(Variable, m_StackSize);
                     GenArrayAddr(Ident.indexes, Variable, RelativeLocationOfBaseAddress);
                 }
@@ -381,8 +372,6 @@ namespace Epsilon
                                 break;
                             case NodeTermUnaryExpr.NodeTermUnaryExprType.addressof:
                                 {
-                                    if (term.unary.term.type != NodeTerm.NodeTermType.Ident)
-                                        Shartilities.Log(Shartilities.LogType.ERROR, $"address of operator is only on identifiers with no offsets\n", 1);
                                     NodeTermIdent Ident = term.unary.term.ident;
                                     Var Variable = m_Variables.GetVariable(Ident.ident.Value, m_inputFilePath, Ident.ident.Line);
                                     GenVariable(Ident, Variable, DestReg, WillPush, size, AddressMode.AddressOnly);
@@ -495,8 +484,6 @@ namespace Epsilon
                         string RegAddr = m_SecondTempReg;
                         if (var.IsParameter)
                         {
-                            if (var.IsGlobal)
-                                Shartilities.Logln(Shartilities.LogType.ERROR, $"cannot put global variable as a parameter", 1);
                             uint RelativeLocationOfBaseAddress = m_Variables.GetVariableRelativeLocation(var, m_StackSize);
                             GenArrayAddr(assign.array.indexes, var, RelativeLocationOfBaseAddress);
                         }
@@ -534,101 +521,56 @@ namespace Epsilon
         }
         static NodeStmtFunction CheckFunctionCallCorrectness(NodeStmtFunctionCall CalledFunction)
         {
-            if (m_program.UserDefinedFunctions.TryGetValue(CalledFunction.FunctionName.Value, out NodeStmtFunction CalledFunctionDefinition))
-            {
-                int MaxParamsCount = 7;
-                int ProvidedParamsCount = CalledFunction.parameters.Count;
-                if (ProvidedParamsCount > MaxParamsCount)
-                    Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{CalledFunction.FunctionName.Line}:1: Generator: Function call to `{CalledFunctionDefinition.FunctionName.Value}` provided too much parameters to function (bigger than {MaxParamsCount})", 1);
-                if (CalledFunctionDefinition.parameters.Count > 0 && CalledFunctionDefinition.parameters[^1].IsVariadic)
-                {
-                    if (ProvidedParamsCount < CalledFunctionDefinition.parameters.Count - 1)
-                        Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{CalledFunction.FunctionName.Line}:1: Generator: Function call to `{CalledFunctionDefinition.FunctionName.Value}` is not valid, check function arity", 1);
-                }
-                else
-                {
-                    if (ProvidedParamsCount != CalledFunctionDefinition.parameters.Count)
-                        Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{CalledFunction.FunctionName.Line}:1: Generator: Function call to `{CalledFunctionDefinition.FunctionName.Value}` is not valid, check function arity", 1);
-                }
-                return CalledFunctionDefinition;
-            }
-            else if (ConstDefs.STD_FUNCTIONS_MAP.ContainsKey(CalledFunction.FunctionName.Value))
-            {
-            }
+            NodeStmtFunction CalledFunctionDefinition;
+            if (m_program.UserDefinedFunctions.TryGetValue(CalledFunction.FunctionName.Value, out NodeStmtFunction user_CalledFunctionDefinition))
+                CalledFunctionDefinition = user_CalledFunctionDefinition;
+            else if (ConstDefs.STD_FUNCTIONS_MAP.TryGetValue(CalledFunction.FunctionName.Value, out NodeStmtFunction std_CalledFunctionDefinition))
+                CalledFunctionDefinition = std_CalledFunctionDefinition;
             else
             {
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{CalledFunction.FunctionName.Line}:1: Generator: function {CalledFunction.FunctionName.Value} is undeclared", 1);
+                return new();
             }
-            return new();
+
+            int MaxParamsCount = 7;
+            int ProvidedParamsCount = CalledFunction.parameters.Count;
+            if (ProvidedParamsCount > MaxParamsCount)
+                Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{CalledFunction.FunctionName.Line}:1: Generator: Function call to `{CalledFunctionDefinition.FunctionName.Value}` provided too much parameters to function (bigger than {MaxParamsCount})", 1);
+            if (CalledFunctionDefinition.parameters.Count > 0 && CalledFunctionDefinition.parameters[^1].IsVariadic)
+            {
+                if (ProvidedParamsCount < CalledFunctionDefinition.parameters.Count - 1)
+                    Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{CalledFunction.FunctionName.Line}:1: Generator: Function call to `{CalledFunctionDefinition.FunctionName.Value}` is not valid, check function arity", 1);
+            }
+            else
+            {
+                if (ProvidedParamsCount != CalledFunctionDefinition.parameters.Count)
+                    Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{CalledFunction.FunctionName.Line}:1: Generator: Function call to `{CalledFunctionDefinition.FunctionName.Value}` is not valid, check function arity", 1);
+            }
+            return CalledFunctionDefinition;
         }
         static void FunctionCallFillParameters(NodeStmtFunctionCall CalledFunction, NodeStmtFunction CalledFunctionDefinition)
         {
-            if (m_program.UserDefinedFunctions.ContainsKey(CalledFunction.FunctionName.Value)) // user defined
+            bool filled = false;
+            for (int i = 0; i < CalledFunction.parameters.Count; i++)
             {
-                bool filled = false;
-                for (int i = 0; i < CalledFunction.parameters.Count; i++)
+                if (CalledFunctionDefinition.parameters[i].IsVariadic)
                 {
-                    if (CalledFunctionDefinition.parameters[i].IsVariadic)
+                    filled = true;
+                    Shartilities.Assert(i == CalledFunctionDefinition.parameters.Count - 1, $"variadic should be the last argument\n");
+                    GenExpr(NodeExpr.Number((CalledFunction.parameters.Count - i).ToString(), -1), $"a{i}");
+                    for (int j = i; j < CalledFunction.parameters.Count; j++)
                     {
-                        filled = true;
-                        Shartilities.Assert(i == CalledFunctionDefinition.parameters.Count - 1, $"variadic should be the last argument\n");
-                        GenExpr(NodeExpr.Number((CalledFunction.parameters.Count - i).ToString(), -1), $"a{i}");
-                        for (int j = i; j < CalledFunction.parameters.Count; j++)
-                        {
-                            GenExpr(CalledFunction.parameters[j], $"a{j + 1}");
-                        }
-                        break;
+                        GenExpr(CalledFunction.parameters[j], $"a{j + 1}");
                     }
-                    else
-                    {
-                        GenExpr(CalledFunction.parameters[i], $"a{i}", CalledFunctionDefinition.parameters[i].ElementSize);
-                    }
+                    break;
                 }
-                if (!filled && CalledFunctionDefinition.parameters.Count > 0 && CalledFunctionDefinition.parameters[^1].IsVariadic)
-                    GenExpr(NodeExpr.Number("0", -1), $"a{CalledFunction.parameters.Count}");
-            }
-            else // std function
-            {
-                if (!ConstDefs.STD_FUNCTIONS_MAP.TryGetValue(CalledFunction.FunctionName.Value, out ConstDefs.STD_FUNCTIONS std)) Shartilities.UNREACHABLE("FunctionCallFillParameters");
-                int i = 0;
-                switch (std)
+                else
                 {
-                    case ConstDefs.STD_FUNCTIONS.strlen:
-                        Shartilities.Assert(CalledFunction.parameters.Count == 1, $"{std.ToString()} arity is 1");
-                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
-                        break;
-                    case ConstDefs.STD_FUNCTIONS.stoa:
-                        Shartilities.Assert(CalledFunction.parameters.Count == 1, $"{std.ToString()} arity is 1");
-                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
-                        break;
-                    case ConstDefs.STD_FUNCTIONS.unstoa:
-                        Shartilities.Assert(CalledFunction.parameters.Count == 1, $"{std.ToString()} arity is 1");
-                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
-                        break;
-                    case ConstDefs.STD_FUNCTIONS.write:
-                        Shartilities.Assert(CalledFunction.parameters.Count == 3, $"{std.ToString()} arity is 3");
-                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
-                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
-                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
-                        break;
-                    case ConstDefs.STD_FUNCTIONS.atouns:
-                        Shartilities.Assert(CalledFunction.parameters.Count == 1, $"{std.ToString()} arity is 1");
-                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
-                        break;
-                    case ConstDefs.STD_FUNCTIONS.print:
-                        if (CalledFunction.parameters.Count < 1)
-                            Shartilities.Logln(Shartilities.LogType.ERROR, $"minimum number parameters for {std.ToString()} is 1");
-                        GenExpr(CalledFunction.parameters[i], $"a{i}"); i++;
-                        GenExpr(NodeExpr.Number((CalledFunction.parameters.Count - i).ToString(), -1), $"a{i}");
-                        for (int j = i; j < CalledFunction.parameters.Count; j++)
-                        {
-                            GenExpr(CalledFunction.parameters[j], $"a{j + 1}");
-                        }
-                        break;
-                    default:
-                        break;
+                    GenExpr(CalledFunction.parameters[i], $"a{i}", CalledFunctionDefinition.parameters[i].ElementSize);
                 }
             }
+            if (!filled && CalledFunctionDefinition.parameters.Count > 0 && CalledFunctionDefinition.parameters[^1].IsVariadic)
+                GenExpr(NodeExpr.Number("0", -1), $"a{CalledFunction.parameters.Count}");
         }
         static void FunctionCallPrologue(NodeStmtFunctionCall CalledFunction, ref List<string> ParametersRegisters, bool WillPushParams)
         {
