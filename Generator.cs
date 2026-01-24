@@ -911,7 +911,7 @@ namespace Epsilon
         {
             if (m_scopeend.Count == 0)
             {
-                Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{breakk.breakk.Line}:1: Generator: no enclosing loop out of which to break from", 1);
+                Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{breakk.breakk.Line}:1: Generator: no enclosing loop to break from", 1);
             }
 
 
@@ -933,7 +933,7 @@ namespace Epsilon
         {
             if (m_scopestart.Count == 0)
             {
-                Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{continuee.continuee.Line}:1: Generator: no enclosing loop out of which to continue", 1);
+                Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{continuee.continuee.Line}:1: Generator: no enclosing loop to continue to", 1);
             }
 
 
@@ -1013,18 +1013,13 @@ namespace Epsilon
         {
             m_output.AppendLine($".section .text");
             m_output.AppendLine($".globl main");
+
             if (!m_program.UserDefinedFunctions.ContainsKey("main"))
-            {
                 Shartilities.Logln(Shartilities.LogType.ERROR, $"Generator: no entry point `main` is defined", 1);
-            }
+
             m_Variables.m_globals.Clear();
             for (int i = 0; i < m_program.GlobalScope.stmts.Count; i++)
-            {
-                NodeStmt stmt = m_program.GlobalScope.stmts[i];
-                if (stmt.type != NodeStmt.NodeStmtType.Declare)
-                    Shartilities.Logln(Shartilities.LogType.ERROR, $"global statements supports only Variable declarations", 1);
-                m_Variables.m_globals.Add(GenVariableDeclare(stmt.declare, true));
-            }
+                m_Variables.m_globals.Add(GenVariableDeclare(m_program.GlobalScope.stmts[i].declare, true));
         }
         static void GenProgramEpilogue()
         {

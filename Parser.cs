@@ -957,8 +957,7 @@ namespace Epsilon
                     continue;
                 else
                 {
-                    int line = stmt.declare.ident.Line;
-                    Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{line}:{1}: Parser: invalid global statement", 1);
+                    Shartilities.Logln(Shartilities.LogType.ERROR, $"{m_inputFilePath}:{0}:{1}: Parser: invalid global statement", 1);
                 }
             }
             return true;
