@@ -1,7 +1,8 @@
 .section .text
 .globl main
 main:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     li a0, 1
     li a1, 0
@@ -9,11 +10,13 @@ main:
     call write
     call Returnchar256
     MV t0, s0
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
     call Returnchar256
     MV t0, s0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA a0, StringLits0
     LI a1, 0
@@ -28,11 +31,13 @@ main:
     call print
     call Returnchar255
     MV t0, s0
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
     call Returnchar255
     MV t0, s0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA a0, StringLits3
     LI a1, 0
@@ -47,11 +52,13 @@ main:
     call print
     call Returnchar128
     MV t0, s0
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
     call Returnchar128
     MV t0, s0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA a0, StringLits4
     LI a1, 0
@@ -66,11 +73,13 @@ main:
     call print
     call Returnchar127
     MV t0, s0
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
     call Returnchar127
     MV t0, s0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA a0, StringLits5
     LI a1, 0
@@ -84,47 +93,60 @@ main:
     LD a2, 0(sp)
     call print
     mv s0, zero
-    ADDI sp, sp, 44
+    LI t6, 44
+    ADD sp, sp, t6
     mv a0, s0
     call exit
 Returnchar256:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     LI t0, 256
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
     LB s0, 0(sp)
-    ADDI sp, sp, 9
+    LI t6, 9
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 Returnchar255:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     LI t0, 255
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
     LB s0, 0(sp)
-    ADDI sp, sp, 9
+    LI t6, 9
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 Returnchar128:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     LI t0, 128
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
     LB s0, 0(sp)
-    ADDI sp, sp, 9
+    LI t6, 9
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 Returnchar127:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     LI t0, 127
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
     LB s0, 0(sp)
-    ADDI sp, sp, 9
+    LI t6, 9
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 print:

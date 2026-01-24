@@ -1,17 +1,20 @@
 .section .text
 .globl main
 main:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     li a0, 1
     li a1, 0
     li a2, 0
     call write
     LI t0, 123
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     ADDI t0, sp, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA a0, StringLits0
     LI a1, 0
@@ -44,15 +47,19 @@ main:
     LD a1, 0(sp)
     call foo
     LI s0, 0
-    ADDI sp, sp, 24
+    LI t6, 24
+    ADD sp, sp, t6
     mv a0, s0
     call exit
 foo:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a1, 0(sp)
     LA a0, StringLits1
     LI a1, 1
@@ -76,7 +83,8 @@ foo:
     LD a2, 8(sp)
     call print
     mv s0, zero
-    ADDI sp, sp, 24
+    LI t6, 24
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 print:

@@ -1,7 +1,8 @@
 .section .text
 .globl main
 main:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     li a0, 1
     li a1, 0
@@ -11,7 +12,8 @@ main:
     LI a1, 0
     call print
     LI s0, 0
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     mv a0, s0
     call exit
 print:

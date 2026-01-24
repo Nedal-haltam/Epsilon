@@ -1,14 +1,16 @@
 .section .text
 .globl main
 main:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     li a0, 1
     li a1, 0
     li a2, 0
     call write
     LA t0, StringLits0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
 
     li a0, 1
@@ -20,7 +22,8 @@ main:
     li a7, 93
     ecall
     LI s0, 123
-    ADDI sp, sp, 16
+    LI t6, 16
+    ADD sp, sp, t6
     mv a0, s0
     call exit
 print:

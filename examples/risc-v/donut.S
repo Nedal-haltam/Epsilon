@@ -1,192 +1,254 @@
 .section .text
 .globl main
 main:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     li a0, 1
     li a1, 0
     li a2, 0
     call write
-    ADDI sp, sp, -12
+    LI t6, -12
+    ADD sp, sp, t6
     LI t0, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 46
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 44
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 2
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 45
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 3
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 126
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 4
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 58
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 5
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 59
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 6
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 61
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 7
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 33
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 8
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 42
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 9
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 35
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 36
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 11
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 0
+    LI t6, 0
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 64
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 1024
     LA t1, A
@@ -201,17 +263,20 @@ main:
     LA t1, D
     SD t0, 0(t1)
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
 LABEL1_START:
     LD t0, 0(sp)
     BEQZ t0, LABEL2_END
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     SD t0, 0(sp)
     LI t0, 0
@@ -219,65 +284,81 @@ LABEL1_START:
     SD t0, 0(t1)
 LABEL3_START:
     LI t0, 2000
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, E
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL4_END
     LA t1, E
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LA t1, b
     ADD t1, t1, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t1, 0(sp)
     LI t0, 32
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LA t1, E
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LA t1, z
     ADD t1, t1, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t1, 0(sp)
     LI t0, 127
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, E
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, E
     SD t0, 0(t1)
@@ -294,27 +375,33 @@ LABEL4_END:
     SD t0, 0(t1)
 LABEL5_START:
     LI t0, 90
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, G
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL6_END
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, G
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, G
     SD t0, 0(t1)
@@ -329,584 +416,741 @@ LABEL5_START:
     SD t0, 0(t1)
 LABEL7_START:
     LI t0, 324
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, I
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL8_END
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, I
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, I
     SD t0, 0(t1)
     LI t0, 2048
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, F
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, M
     SD t0, 0(t1)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, M
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, J
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
     LA t1, Z
     SD t0, 0(t1)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, E
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, B
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
     LA t1, P
     SD t0, 0(t1)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, M
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, H
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
     LA t1, Q
     SD t0, 0(t1)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, Q
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, A
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, P
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LA t1, R
     SD t0, 0(t1)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, E
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, A
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
     LA t1, S
     SD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LA t1, Q
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, B
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, S
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1024
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 5242880
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, T
     SD t0, 0(t1)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, H
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, F
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
     LA t1, U
     SD t0, 0(t1)
     LA t1, T
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LA t1, R
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, C
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LA t1, Z
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, D
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 30
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     div t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 40
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, X
     SD t0, 0(t1)
     LA t1, T
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LA t1, Z
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, C
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LA t1, R
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, D
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 15
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     div t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 12
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, Y
     SD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 7
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, S
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, C
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, F
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, J
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, P
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LA t1, U
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, A
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     NEG t0, t0
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, D
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, U
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, B
     LD a0, 0(t0)
     NEG a0, a0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LA t1, N
     SD t0, 0(t1)
     LA t1, Y
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 80
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, X
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, O
     SD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 15
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 5242880
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, T
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LA t1, V
     SD t0, 0(t1)
 LABEL9_START:
     LI t0, 80
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, X
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, X
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 0
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, Y
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 0
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 22
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, Y
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     AND t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     AND t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     AND t0, t0, t1
     BEQZ t0, LABEL11_elifs
 LABEL12_START:
     LA t1, O
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LA t1, z
     ADD t1, t1, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t1, 0(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     LB t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, V
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL14_elifs
     LA t1, O
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LA t1, z
     ADD t1, t1, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t1, 0(sp)
     LA t1, V
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
 LABEL15_START:
     LA t1, N
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 0
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL17_elifs
     LA t1, N
@@ -916,32 +1160,41 @@ LABEL17_elifs:
 LABEL16_END:
     LA t1, O
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LA t1, b
     ADD t1, t1, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t1, 0(sp)
     LD t0, 8(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 24
+    LI t6, 24
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     LB t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 8
     ADD sp, sp, t0
@@ -954,131 +1207,165 @@ LABEL10_END:
     LA t1, L
     SD t0, 0(t1)
     LI t0, 8
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, H
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 5
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, J
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LA t1, J
     SD t0, 0(t1)
     LI t0, 8
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 5
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, H
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, H
     SD t0, 0(t1)
     LI t0, 11
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, H
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, H
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, J
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, J
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 3145728
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
     LA t1, L
     SD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, J
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LA t1, J
     SD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, H
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LA t1, H
     SD t0, 0(t1)
@@ -1089,131 +1376,165 @@ LABEL8_END:
     LA t1, L
     SD t0, 0(t1)
     LI t0, 7
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, E
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 9
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, F
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LA t1, F
     SD t0, 0(t1)
     LI t0, 7
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 9
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, E
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, E
     SD t0, 0(t1)
     LI t0, 11
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, E
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, E
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, F
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, F
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 3145728
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
     LA t1, L
     SD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, F
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LA t1, F
     SD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, E
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LA t1, E
     SD t0, 0(t1)
@@ -1224,72 +1545,91 @@ LABEL6_END:
     SD t0, 0(t1)
 LABEL18_START:
     LI t0, 22
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 80
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, K
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL19_END
     LI t0, 10
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
 LABEL20_START:
     LI t0, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 80
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 2
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, K
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     rem t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     XOR t0, t0, t1
     SNEZ t0, t0
     BEQZ t0, LABEL22_elifs
     LA t1, K
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LA t1, b
     ADD t1, t1, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t1, 0(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     LB t0, 0(t1)
     SB t0, 0(sp)
 LABEL22_elifs:
@@ -1299,12 +1639,14 @@ LABEL21_END:
     LB a2, 0(sp)
     call print
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, K
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, K
     SD t0, 0(t1)
@@ -1317,131 +1659,165 @@ LABEL19_END:
     LA t1, L
     SD t0, 0(t1)
     LI t0, 7
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, A
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 5
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, B
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LA t1, B
     SD t0, 0(t1)
     LI t0, 7
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 5
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, A
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, A
     SD t0, 0(t1)
     LI t0, 11
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, A
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, A
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, B
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, B
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 3145728
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
     LA t1, L
     SD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, B
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LA t1, B
     SD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, A
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LA t1, A
     SD t0, 0(t1)
@@ -1450,131 +1826,165 @@ LABEL19_END:
     LA t1, L
     SD t0, 0(t1)
     LI t0, 8
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, C
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 5
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, D
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LA t1, D
     SD t0, 0(t1)
     LI t0, 8
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 5
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, C
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     LA t1, C
     SD t0, 0(t1)
     LI t0, 11
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, C
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, C
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, D
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, D
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 3145728
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA t0, t0, t1
     LA t1, L
     SD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, D
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LA t1, D
     SD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t1, L
     LD t0, 0(t1)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA t0, C
     LD a0, 0(t0)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a0, a0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA a0, a0, t0
     call sx64
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
     LA t1, C
     SD t0, 0(t1)
@@ -1585,11 +1995,13 @@ LABEL23_START:
     LI a1, 2
     LI a2, 27
     LI t0, 22
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI a3, 2
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL a3, a3, t0
     call print
 LABEL25_elifs:
@@ -1597,28 +2009,36 @@ LABEL24_END:
     J LABEL1_START
 LABEL2_END:
     LI s0, 0
-    ADDI sp, sp, 28
+    LI t6, 28
+    ADD sp, sp, t6
     mv a0, s0
     call exit
 sx64:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 13
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 6434
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD s0, 16(sp)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL s0, s0, t0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SRA s0, s0, t0
-    ADDI sp, sp, 16
+    LI t6, 16
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 print:

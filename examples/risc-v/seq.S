@@ -1,11 +1,14 @@
 .section .text
 .globl main
 main:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a1, 0(sp)
     li a0, 1
     li a1, 0
@@ -13,11 +16,13 @@ main:
     call write
 LABEL1_START:
     LI t0, 2
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 16(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL3_elifs
     LA a0, StringLits0
@@ -27,55 +32,67 @@ LABEL1_START:
     call exit
 LABEL3_elifs:
 LABEL2_END:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 8
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD a0, 16(sp)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD a0, a0, t0
     LD a0, 0(a0)
     call atouns
     LD a0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MV t0, s0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA a0, StringLits1
     LI a1, 1
     LD a2, 0(sp)
     call print
     LI t0, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
 LABEL4_START:
     LD t0, 8(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL5_END
     LA a0, StringLits2
     LI a1, 1
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD a2, 8(sp)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD a2, a2, t0
     call print
 LABEL6_START:
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     SD t0, 0(sp)
     J LABEL4_START
@@ -86,7 +103,8 @@ LABEL5_END:
     LI a1, 0
     call print
     LI s0, 0
-    ADDI sp, sp, 32
+    LI t6, 32
+    ADD sp, sp, t6
     mv a0, s0
     call exit
 print:

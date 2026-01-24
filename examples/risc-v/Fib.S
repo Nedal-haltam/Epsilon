@@ -1,61 +1,76 @@
 .section .text
 .globl main
 main:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     li a0, 1
     li a1, 0
     li a2, 0
     call write
     LI t0, 30
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     call FibRecursive
     LD a0, 0(sp)
     call FibIterative
     LI s0, 0
-    ADDI sp, sp, 16
+    LI t6, 16
+    ADD sp, sp, t6
     mv a0, s0
     call exit
 FibRecursive:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
-    ADDI sp, sp, -240
+    LI t6, -240
+    ADD sp, sp, t6
     LI t0, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
 LABEL1_START:
     LI t0, 30
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL2_END
     LD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 8
+    LI t6, 8
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     NEG t0, t0
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SD t0, 0(t1)
 LABEL3_START:
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     SD t0, 0(sp)
     J LABEL1_START
@@ -63,65 +78,83 @@ LABEL2_END:
     LI t0, 8
     ADD sp, sp, t0
     LI t0, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
 LABEL4_START:
     LI t0, 30
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL5_END
     LD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 8
+    LI t6, 8
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
-    ADDI sp, sp, -16
+    LI t6, -16
+    ADD sp, sp, t6
     SD a0, 0(sp)
     SD a1, 8(sp)
-    ADDI a0, sp, 32
+    LI t6, 32
+    ADD a0, sp, t6
     LD a1, 24(sp)
     call _FibRecursive
     LD a1, 8(sp)
     LD a0, 0(sp)
-    ADDI sp, sp, 16
+    LI t6, 16
+    ADD sp, sp, t6
     MV t0, s0
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SD t0, 0(t1)
     LA a0, StringLits0
     LI a1, 1
     LD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 8
+    LI t6, 8
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     LD a2, 0(t0)
     call print
 LABEL6_START:
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     SD t0, 0(sp)
     J LABEL4_START
@@ -132,31 +165,40 @@ LABEL5_END:
     LI a1, 0
     call print
     mv s0, zero
-    ADDI sp, sp, 248
+    LI t6, 248
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 FibIterative:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     LI t0, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
 LABEL7_START:
     LD t0, 32(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL8_END
     LA a0, StringLits0
@@ -164,11 +206,13 @@ LABEL7_START:
     LD a2, 24(sp)
     call print
     LD t0, 16(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 32(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     SD t0, 8(sp)
     LD t0, 16(sp)
@@ -177,11 +221,13 @@ LABEL7_START:
     SD t0, 16(sp)
 LABEL9_START:
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     SD t0, 0(sp)
     J LABEL7_START
@@ -192,126 +238,159 @@ LABEL8_END:
     LI a1, 0
     call print
     mv s0, zero
-    ADDI sp, sp, 40
+    LI t6, 40
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 _FibRecursive:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a1, 0(sp)
 LABEL10_START:
     LI t0, 1
     NEG t0, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 16(sp)
     ADD t0, t1, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     LD t0, 0(t1)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     XOR t0, t0, t1
     SNEZ t0, t0
     BEQZ t0, LABEL12_elifs
     LD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 8
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 8(sp)
     ADD t0, t1, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     LD s0, 0(t0)
-    ADDI sp, sp, 24
+    LI t6, 24
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 LABEL12_elifs:
 LABEL11_END:
 LABEL13_START:
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     XOR t0, t0, t1
     SEQZ t0, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 16(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     XOR t0, t0, t1
     SEQZ t0, t0
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     OR t0, t0, t1
     BEQZ t0, LABEL15_elifs
     LD s0, 0(sp)
-    ADDI sp, sp, 24
+    LI t6, 24
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 LABEL15_elifs:
 LABEL14_END:
-    ADDI sp, sp, -16
+    LI t6, -16
+    ADD sp, sp, t6
     SD a0, 0(sp)
     SD a1, 8(sp)
     LD a0, 24(sp)
     LI t0, 2
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD a1, 24(sp)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB a1, a1, t0
     call _FibRecursive
     LD a1, 8(sp)
     LD a0, 0(sp)
-    ADDI sp, sp, 16
+    LI t6, 16
+    ADD sp, sp, t6
     MV t0, s0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
-    ADDI sp, sp, -16
+    LI t6, -16
+    ADD sp, sp, t6
     SD a0, 0(sp)
     SD a1, 8(sp)
     LD a0, 32(sp)
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD a1, 32(sp)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB a1, a1, t0
     call _FibRecursive
     LD a1, 8(sp)
     LD a0, 0(sp)
-    ADDI sp, sp, 16
+    LI t6, 16
+    ADD sp, sp, t6
     MV s0, s0
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD s0, s0, t0
-    ADDI sp, sp, 24
+    LI t6, 24
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 print:

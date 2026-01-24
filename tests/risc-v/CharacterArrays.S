@@ -1,7 +1,8 @@
 .section .text
 .globl main
 main:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     li a0, 1
     li a1, 0
@@ -22,51 +23,65 @@ main:
     call print
     call PointerTest
     LI s0, 0
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     mv a0, s0
     call exit
 CharArrayTest:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
-    ADDI sp, sp, -27
-    ADDI a0, sp, 0
+    LI t6, -27
+    ADD sp, sp, t6
+    LI t6, 0
+    ADD a0, sp, t6
     call foo
     LI t0, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
 LABEL1_START:
     LI t0, 27
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL2_END
     LA a0, StringLits3
     LI a1, 1
     LD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
-    ADDI t0, t0, 8
+    LI t6, 8
+    ADD t0, t0, t6
     ADD t0, sp, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     LB a2, 0(t0)
     call print
 LABEL3_START:
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     SD t0, 0(sp)
     J LABEL1_START
@@ -78,17 +93,21 @@ LABEL2_END:
     call print
     LA a0, StringLits5
     LI a1, 1
-    ADDI a2, sp, 0
+    LI t6, 0
+    ADD a2, sp, t6
     call print
     mv s0, zero
-    ADDI sp, sp, 35
+    LI t6, 35
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 PointerTest:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     LA t0, StringLits6
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA a0, StringLits7
     LI a1, 1
@@ -101,60 +120,76 @@ PointerTest:
     LI a1, 0
     call print
     mv s0, zero
-    ADDI sp, sp, 16
+    LI t6, 16
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 foo:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD a0, 0(sp)
     LI t0, 97
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
 LABEL4_START:
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 122
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LB t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL5_END
     LI t0, 97
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LB t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 1(sp)
     ADD t0, t1, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LB t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
 LABEL6_START:
     LI t0, 1
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
     LB t0, 1(sp)
     LB t1, 0(sp)
-    ADDI sp, sp, 1
+    LI t6, 1
+    ADD sp, sp, t6
     ADD t0, t0, t1
     SB t0, 0(sp)
     J LABEL4_START
@@ -162,62 +197,77 @@ LABEL5_END:
     LI t0, 1
     ADD sp, sp, t0
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 27
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SUB t0, t0, t1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 0(sp)
     ADD t0, t1, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 0
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SB t0, 0(t1)
     LI t0, 0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
 LABEL7_START:
     LI t0, 27
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     SLT t0, t0, t1
     BEQZ t0, LABEL8_END
     LA a0, StringLits3
     LI a1, 1
     LD t0, 0(sp)
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 1
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     MUL t0, t0, t1
     LD t1, 8(sp)
     ADD t0, t1, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     LB a2, 0(t0)
     call print
 LABEL9_START:
     LI t0, 1
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LD t0, 8(sp)
     LD t1, 0(sp)
-    ADDI sp, sp, 8
+    LI t6, 8
+    ADD sp, sp, t6
     ADD t0, t0, t1
     SD t0, 0(sp)
     J LABEL7_START
@@ -232,7 +282,8 @@ LABEL8_END:
     LD a2, 0(sp)
     call print
     mv s0, zero
-    ADDI sp, sp, 16
+    LI t6, 16
+    ADD sp, sp, t6
     LD ra, -8(sp)
     ret
 print:

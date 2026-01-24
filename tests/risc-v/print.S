@@ -1,18 +1,21 @@
 .section .text
 .globl main
 main:
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD ra, 0(sp)
     li a0, 1
     li a1, 0
     li a2, 0
     call write
     LI t0, 123
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 123
     NEG t0, t0
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LA a0, StringLits0
     LI a1, 0
@@ -49,16 +52,20 @@ main:
     LI a1, 0
     call print
     LA t0, StringLits10
-    ADDI sp, sp, -8
+    LI t6, -8
+    ADD sp, sp, t6
     SD t0, 0(sp)
     LI t0, 35
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
     LI t0, 34
     LB t1, 0(sp)
-    ADDI sp, sp, 1
+    LI t6, 1
+    ADD sp, sp, t6
     ADD t0, t0, t1
-    ADDI sp, sp, -1
+    LI t6, -1
+    ADD sp, sp, t6
     SB t0, 0(sp)
     LD a0, 1(sp)
     LI a1, 3
@@ -74,7 +81,8 @@ main:
     LD a2, 1(sp)
     call print
     LI s0, 0
-    ADDI sp, sp, 33
+    LI t6, 33
+    ADD sp, sp, t6
     mv a0, s0
     call exit
 print:
