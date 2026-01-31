@@ -608,25 +608,17 @@ namespace Epsilon
             {
                 if (parameters[i].IsVariadic)
                 {
-                    Shartilities.Assert(i == parameters.Count - 1, $"variadic should be the last argument\n");
-                    // up until a7
-                    for (int j = i; j <= 7; j++)
+                    for (int j = i; j <= 7; j++) // push up until a7
                     {
                         GenPush($"a{j}");
                         m_Variables.AddVariable(new($"variadic({j - i})", 8, 8, [], false, true, true));
                     }
-                    break;
                 }
                 else
                 {
-                    uint TypeSize = parameters[i].ElementSize;
-                    uint Size = parameters[i].Size;
-                    bool IsArray = parameters[i].IsArray;
-                    if (IsArray)
-                        GenPush($"a{i}");
-                    else
-                        GenPush($"a{i}", TypeSize);
-                    m_Variables.AddVariable(new(parameters[i].Value, Size, TypeSize, parameters[i].Dimensions, IsArray, true, false));
+                    if (parameters[i].IsArray) GenPush($"a{i}");
+                    else                       GenPush($"a{i}", parameters[i].TypeSize);
+                    m_Variables.AddVariable(parameters[i]);
                 }
             }
         }
@@ -1031,7 +1023,7 @@ namespace Epsilon
             for (int i = 0; i < m_Variables.m_globals.Count; i++)
             {
                 m_output.AppendLine($"{m_Variables.m_globals[i].Value}:");
-                uint count = m_Variables.m_globals[i].IsArray ? m_Variables.m_globals[i].Size : m_Variables.m_globals[i].ElementSize;
+                uint count = m_Variables.m_globals[i].ElementSize * m_Variables.m_globals[i].Count;
                 m_output.AppendLine($"    .space {count}");
             }
             for (int i = 0; i < m_StringLits.Count; i++)
