@@ -52,6 +52,11 @@ foo:
     ADD sp, sp, t6
     LD ra, -8(sp)
     ret
+    mv s0, zero
+    LI t6, 24
+    ADD sp, sp, t6
+    LD ra, -8(sp)
+    ret
 Print10sMultipleAndLengths:
     LI t6, -8
     ADD sp, sp, t6

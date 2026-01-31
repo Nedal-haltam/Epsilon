@@ -572,7 +572,7 @@ namespace Epsilon
             if (!filled && CalledFunctionDefinition.parameters.Count > 0 && CalledFunctionDefinition.parameters[^1].IsVariadic)
                 GenExpr(NodeExpr.Number("0", -1), $"a{CalledFunction.parameters.Count}");
         }
-        static void FunctionCallPrologue(NodeStmtFunctionCall CalledFunction, ref List<string> ParametersRegisters, bool WillPushParams)
+        static void FunctionCallPrologue(NodeStmtFunctionCall CalledFunction, NodeStmtFunction CalledFunctionDefinition, ref List<string> ParametersRegisters, bool WillPushParams)
         {
             if (WillPushParams)
             {
@@ -581,6 +581,7 @@ namespace Epsilon
                     ParametersRegisters.Add($"a{i}");
                 GenPushMany(ParametersRegisters, 8);
             }
+            FunctionCallFillParameters(CalledFunction, CalledFunctionDefinition);
         }
         static void FunctionCallEpilogue(NodeStmtFunctionCall CalledFunction, List<string> ParametersRegisters, bool WillPushParams)
         {
@@ -597,8 +598,7 @@ namespace Epsilon
                 m_CalledFunctions.Add(CalledFunction.FunctionName.Value);
 
             List<string> ParametersRegisters = [];
-            FunctionCallPrologue(CalledFunction, ref ParametersRegisters, WillPushParams);
-            FunctionCallFillParameters(CalledFunction, CalledFunctionDefinition);
+            FunctionCallPrologue(CalledFunction, CalledFunctionDefinition, ref ParametersRegisters, WillPushParams);
             m_output.AppendLine($"    call {CalledFunction.FunctionName.Value}");
             FunctionCallEpilogue(CalledFunction, ParametersRegisters, WillPushParams);
         }
@@ -652,11 +652,8 @@ namespace Epsilon
         }
         static void GenFunctionEpilogue(NodeStmtScope FunctionBody)
         {
-            if (FunctionBody.stmts.Count == 0 || FunctionBody.stmts[^1].type != NodeStmt.NodeStmtType.Return)
-            {
-                m_output.AppendLine($"    mv s0, zero");
-                GenReturnFromFunction();
-            }
+            m_output.AppendLine($"    mv s0, zero");
+            GenReturnFromFunction();
         }
         static void GenReturnFromFunction()
         {

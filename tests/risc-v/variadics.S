@@ -186,6 +186,11 @@ LABEL2_END:
     ADD sp, sp, t6
     LD ra, -8(sp)
     ret
+    mv s0, zero
+    LI t6, 80
+    ADD sp, sp, t6
+    LD ra, -8(sp)
+    ret
 bar:
     LI t6, -8
     ADD sp, sp, t6

@@ -319,6 +319,11 @@ LABEL5_END:
     ADD sp, sp, t6
     mv a0, s0
     call exit
+    mv s0, zero
+    LI t6, 1153
+    ADD sp, sp, t6
+    mv a0, s0
+    call exit
 foo:
     LI t6, -8
     ADD sp, sp, t6
@@ -775,6 +780,11 @@ LABEL23_END:
     LI a1, 0
     call print
     LI s0, 0
+    LI t6, 40
+    ADD sp, sp, t6
+    LD ra, -8(sp)
+    ret
+    mv s0, zero
     LI t6, 40
     ADD sp, sp, t6
     LD ra, -8(sp)

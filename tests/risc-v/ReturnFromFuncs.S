@@ -110,6 +110,11 @@ Returnchar256:
     ADD sp, sp, t6
     LD ra, -8(sp)
     ret
+    mv s0, zero
+    LI t6, 9
+    ADD sp, sp, t6
+    LD ra, -8(sp)
+    ret
 Returnchar255:
     LI t6, -8
     ADD sp, sp, t6
@@ -119,6 +124,11 @@ Returnchar255:
     ADD sp, sp, t6
     SB t0, 0(sp)
     LB s0, 0(sp)
+    LI t6, 9
+    ADD sp, sp, t6
+    LD ra, -8(sp)
+    ret
+    mv s0, zero
     LI t6, 9
     ADD sp, sp, t6
     LD ra, -8(sp)
@@ -136,6 +146,11 @@ Returnchar128:
     ADD sp, sp, t6
     LD ra, -8(sp)
     ret
+    mv s0, zero
+    LI t6, 9
+    ADD sp, sp, t6
+    LD ra, -8(sp)
+    ret
 Returnchar127:
     LI t6, -8
     ADD sp, sp, t6
@@ -145,6 +160,11 @@ Returnchar127:
     ADD sp, sp, t6
     SB t0, 0(sp)
     LB s0, 0(sp)
+    LI t6, 9
+    ADD sp, sp, t6
+    LD ra, -8(sp)
+    ret
+    mv s0, zero
     LI t6, 9
     ADD sp, sp, t6
     LD ra, -8(sp)

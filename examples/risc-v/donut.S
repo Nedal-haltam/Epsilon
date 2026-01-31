@@ -2013,6 +2013,11 @@ LABEL2_END:
     ADD sp, sp, t6
     mv a0, s0
     call exit
+    mv s0, zero
+    LI t6, 28
+    ADD sp, sp, t6
+    mv a0, s0
+    call exit
 sx64:
     LI t6, -8
     ADD sp, sp, t6
@@ -2037,6 +2042,11 @@ sx64:
     LI t6, 8
     ADD sp, sp, t6
     SRA s0, s0, t0
+    LI t6, 16
+    ADD sp, sp, t6
+    LD ra, -8(sp)
+    ret
+    mv s0, zero
     LI t6, 16
     ADD sp, sp, t6
     LD ra, -8(sp)

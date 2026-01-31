@@ -154,6 +154,11 @@ LABEL4_END:
     ADD sp, sp, t6
     mv a0, s0
     call exit
+    mv s0, zero
+    LI t6, 32
+    ADD sp, sp, t6
+    mv a0, s0
+    call exit
 print:
     ADDI sp, sp, -8
     SD ra, 0(sp)

@@ -454,6 +454,11 @@ LABEL6_END:
     ADD sp, sp, t6
     LD ra, -8(sp)
     ret
+    mv s0, zero
+    LI t6, 56
+    ADD sp, sp, t6
+    LD ra, -8(sp)
+    ret
 print:
     ADDI sp, sp, -8
     SD ra, 0(sp)

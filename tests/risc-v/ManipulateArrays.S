@@ -61,6 +61,11 @@ main:
     ADD sp, sp, t6
     mv a0, s0
     call exit
+    mv s0, zero
+    LI t6, 176
+    ADD sp, sp, t6
+    mv a0, s0
+    call exit
 InitArray:
     LI t6, -8
     ADD sp, sp, t6
