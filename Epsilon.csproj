@@ -9,23 +9,26 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Roslyn.Analyzers" Version="1.0.3.4" PrivateAssets="All" />
     <Reference Include="Assembler">
-      <HintPath>..\risc-v-utils\Assembler\bin\Debug\net8.0\Assembler.dll</HintPath>
+      <HintPath>.\references\Assembler.dll</HintPath>
     </Reference>
     <Reference Include="LibCPU">
-      <HintPath>..\risc-v-utils\LibCPU\bin\Debug\net8.0\LibCPU.dll</HintPath>
+      <HintPath>.\references\LibCPU.dll</HintPath>
     </Reference>
     <Reference Include="LibUtils">
-      <HintPath>..\risc-v-utils\LibUtil\bin\Debug\net8.0\LibUtils.dll</HintPath>
+      <HintPath>.\references\LibUtils.dll</HintPath>
     </Reference>
     <Reference Include="Shartilities">
-      <HintPath>..\Shartilities\bin\Debug\net8.0\Shartilities.dll</HintPath>
+      <HintPath>.\references\Shartilities.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CliWrap" Version="3.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Roslyn.Analyzers" Version="1.0.3.4" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
