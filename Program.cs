@@ -131,6 +131,9 @@ namespace Epsilon
             Console.WriteLine($"  -h            Display this usage information");
             Console.WriteLine($"  -dump         don't erase any generated files during compilation in general");
             Console.WriteLine($"  -O            enable optimization");
+            Console.WriteLine($"  -imsize <size> set instruction memory size for CAS (default: {1 << 14})");
+            Console.WriteLine($"  -dmsize <size> set data memory size for CAS (default: {1 << 14})");
+            Console.WriteLine($"  -v            enable verbose logging");
             Console.WriteLine();
             Console.WriteLine($"Notes:");
             Console.WriteLine($"  - Default behavior (no -S/-run/-sim) compiles, assembles, links, and generates the executable, and files needed by the CAS.");
